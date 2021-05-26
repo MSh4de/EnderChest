@@ -1,8 +1,8 @@
-package eu.mshadeproduction.enderchest.protocol;
+package eu.mshade.enderchest.protocol;
 
-import eu.mshadeproduction.enderframe.protocol.ProtocolFrame;
-import eu.mshadeproduction.enderframe.protocol.ProtocolVersion;
-import eu.mshadeproduction.mwork.MOptional;
+import eu.mshade.enderframe.protocol.ProtocolFrame;
+import eu.mshade.enderframe.protocol.ProtocolVersion;
+import eu.mshade.mwork.MOptional;
 
 import java.util.HashMap;
 import java.util.Map;

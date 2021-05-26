@@ -27,7 +27,6 @@ public class EnderChest {
         eventDispatcherDriver.register(ServerPingEvent.class, new ServerPingListener());
         eventDispatcherDriver.register(ServerStatusEvent.class, new ServerStatusListener());
 
-
         new ServerBootstrap()
                 .group(eventExecutors)
                 .childHandler(new EnderChestChannelInitializer())
