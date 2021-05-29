@@ -12,10 +12,12 @@ import io.netty.channel.EventLoopGroup;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class DedicatedEnderChest {
 
-    private final List<EnderFrameSession> enderFrameSessions = new ArrayList<>();
+    private final Queue<EnderFrameSession> enderFrameSessions = new ConcurrentLinkedQueue<>();
     private final MinecraftEncryption minecraftEncryption = new MinecraftEncryption();
     private final ProtocolRepository protocolRepository = new ProtocolRepository();
     private final WorldManager worldManager;
@@ -41,7 +43,7 @@ public class DedicatedEnderChest {
         this.enderFrameSessions.remove(enderFrameSession);
     }
 
-    public List<EnderFrameSession> getEnderFrameSessions() {
+    public Queue<EnderFrameSession> getEnderFrameSessions() {
         return enderFrameSessions;
     }
 
