@@ -3,7 +3,6 @@ package eu.mshade.enderchest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import eu.mshade.enderchest.protocol.listener.*;
-import eu.mshade.enderchest.world.WorldBufferIO;
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.event.PacketEvent;
 import eu.mshade.enderframe.event.entity.*;
@@ -11,7 +10,7 @@ import eu.mshade.enderframe.event.server.ServerPingEvent;
 import eu.mshade.enderframe.event.server.ServerStatusEvent;
 import eu.mshade.enderframe.mojang.chat.*;
 import eu.mshade.mwork.MWork;
-import eu.mshade.mwork.dispatcher.DispatcherDriver;
+import eu.mshade.mwork.event.EventBus;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -21,8 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.net.Inet6Address;
-import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
 public class EnderChest {
@@ -54,19 +51,19 @@ public class EnderChest {
         objectMapper.registerModule(simpleModule);
 
         EnderFrame enderFrame = EnderFrame.get();
-        DispatcherDriver<PacketEvent> eventDispatcherDriver = enderFrame.getPacketEventDriver();
+        EventBus<PacketEvent> packetEventBus = enderFrame.getPacketEventBus();
 
-        eventDispatcherDriver.register(PacketHandshakeEvent.class, new PacketHandshakeListener(dedicatedEnderChest));
-        eventDispatcherDriver.register(ServerPingEvent.class, new ServerPingListener());
-        eventDispatcherDriver.register(ServerStatusEvent.class, new ServerStatusListener());
-        eventDispatcherDriver.register(PacketLoginEvent.class, new PacketLoginHandler(dedicatedEnderChest));
-        eventDispatcherDriver.register(PacketEncryptionEvent.class, new PacketEncryptionHandler(dedicatedEnderChest));
-        eventDispatcherDriver.register(PacketKeepAliveEvent.class, new PacketKeepAliveHandler(dedicatedEnderChest));
-        eventDispatcherDriver.register(PacketClientSettingsEvent.class, new PacketClientSettingsHandler());
-        eventDispatcherDriver.register(PacketChatMessageEvent.class, new PacketChatMessageHandler(dedicatedEnderChest));
-        eventDispatcherDriver.register(PacketFinallyJoinEvent.class, new PacketFinallyJoinHandler(dedicatedEnderChest));
-        eventDispatcherDriver.register(PacketMoveEvent.class, new PacketMoveHandler(dedicatedEnderChest));
-        eventDispatcherDriver.register(PacketQuitEvent.class, new PacketQuitHandler(dedicatedEnderChest));
+        packetEventBus.subscribe(PacketHandshakeEvent.class, new PacketHandshakeListener(dedicatedEnderChest));
+        packetEventBus.subscribe(ServerPingEvent.class, new ServerPingListener());
+        packetEventBus.subscribe(ServerStatusEvent.class, new ServerStatusListener());
+        packetEventBus.subscribe(PacketLoginEvent.class, new PacketLoginHandler(dedicatedEnderChest));
+        packetEventBus.subscribe(PacketEncryptionEvent.class, new PacketEncryptionHandler(dedicatedEnderChest));
+        packetEventBus.subscribe(PacketKeepAliveEvent.class, new PacketKeepAliveHandler(dedicatedEnderChest));
+        packetEventBus.subscribe(PacketClientSettingsEvent.class, new PacketClientSettingsHandler());
+        packetEventBus.subscribe(PacketChatMessageEvent.class, new PacketChatMessageHandler(dedicatedEnderChest));
+        packetEventBus.subscribe(PacketFinallyJoinEvent.class, new PacketFinallyJoinHandler(dedicatedEnderChest));
+        packetEventBus.subscribe(PacketMoveEvent.class, new PacketMoveHandler(dedicatedEnderChest));
+        packetEventBus.subscribe(PacketQuitEvent.class, new PacketQuitHandler(dedicatedEnderChest));
 
         eventLoopGroup.scheduleAtFixedRate(() -> {
             dedicatedEnderChest.getEnderFrameSessions().forEach(enderFrameSession -> {
@@ -84,8 +81,8 @@ public class EnderChest {
 
         new ServerBootstrap()
                 .group(eventLoopGroup)
-                .childHandler(new EnderChestChannelInitializer())
                 .channel(NioServerSocketChannel.class)
+                .childHandler(new EnderChestChannelInitializer())
                 .localAddress("0.0.0.0", 25565)
                 .childOption(ChannelOption.TCP_NODELAY, true)
                 .bind();
