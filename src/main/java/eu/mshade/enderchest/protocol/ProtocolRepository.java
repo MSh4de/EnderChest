@@ -1,21 +1,26 @@
 package eu.mshade.enderchest.protocol;
 
-import eu.mshade.enderframe.protocol.ProtocolFrame;
+import eu.mshade.enderframe.EnderFrameProtocol;
 import eu.mshade.enderframe.protocol.ProtocolVersion;
 import eu.mshade.mwork.MOptional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class ProtocolManager {
+public class ProtocolRepository {
 
-    private final Map<ProtocolVersion, ProtocolFrame> versionProtocolFrame = new HashMap<>();
+    private Logger logger = LoggerFactory.getLogger(ProtocolRepository.class);
 
-    public void register(ProtocolVersion version, ProtocolFrame protocolFrame){
-        versionProtocolFrame.put(version, protocolFrame);
+    private final Map<ProtocolVersion, EnderFrameProtocol> versionProtocolFrame = new HashMap<>();
+
+    public void register(EnderFrameProtocol enderFrameProtocol){
+        logger.info(String.format("Register protocol %s", enderFrameProtocol.getProtocolVersion()));
+        versionProtocolFrame.put(enderFrameProtocol.getProtocolVersion(), enderFrameProtocol);
     }
 
-    public MOptional<ProtocolFrame> getProtocolFrameByVersion(ProtocolVersion version){
+    public MOptional<EnderFrameProtocol> getProtocolFrameByVersion(ProtocolVersion version){
         return MOptional.ofNullable(versionProtocolFrame.get(version));
     }
 
