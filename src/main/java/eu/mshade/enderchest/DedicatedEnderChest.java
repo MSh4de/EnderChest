@@ -9,6 +9,7 @@ import eu.mshade.enderframe.world.*;
 import eu.mshade.enderman.EndermanProtocol;
 import io.netty.channel.EventLoopGroup;
 
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -29,6 +30,8 @@ public class DedicatedEnderChest {
 
         WorldBuffer world = this.worldManager.createWorld(worldLevel);
         world.setChunkGenerator(new DefaultChunkGenerator(world));
+
+        //eventLoopGroup.scheduleAtFixedRate(chunkBucket, 0, 100000, TimeUnit.NANOSECONDS);
 
     }
 
@@ -60,4 +63,16 @@ public class DedicatedEnderChest {
         return worldManager;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DedicatedEnderChest that = (DedicatedEnderChest) o;
+        return Objects.equals(enderFrameSessions, that.enderFrameSessions) && Objects.equals(minecraftEncryption, that.minecraftEncryption) && Objects.equals(protocolRepository, that.protocolRepository) && Objects.equals(worldManager, that.worldManager) && Objects.equals(eventLoopGroup, that.eventLoopGroup);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(enderFrameSessions, minecraftEncryption, protocolRepository, worldManager, eventLoopGroup);
+    }
 }
