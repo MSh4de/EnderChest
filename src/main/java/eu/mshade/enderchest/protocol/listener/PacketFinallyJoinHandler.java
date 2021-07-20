@@ -5,6 +5,7 @@ import eu.mshade.enderframe.*;
 import eu.mshade.enderframe.event.entity.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.WorldBuffer;
+import eu.mshade.enderman.packet.play.PacketOutSpawnMob;
 import eu.mshade.mwork.event.EventContainer;
 import eu.mshade.mwork.event.EventListener;
 import org.slf4j.Logger;
@@ -38,6 +39,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         enderFrameSession.sendPosition(location);
         enderFrameSession.sendAbilities(false, false, true, false, 0.5F, 0.2F);
 
+        enderFrameSessionHandler.sendPacket(new PacketOutSpawnMob());
 
         dedicatedEnderChest.addPlayer(enderFrameSession);
 
