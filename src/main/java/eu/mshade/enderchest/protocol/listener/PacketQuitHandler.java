@@ -24,13 +24,12 @@ public class PacketQuitHandler implements EventListener<PacketQuitEvent> {
     public void onEvent(PacketQuitEvent event, EventContainer eventContainer) {
         EnderFrameSession enderFrameSession = event.getEnderFrameSession();
         logger.info(String.format("%s left server", enderFrameSession.getGameProfile().getName()));
-        enderFrameSession.getChunkBuffers().forEach(chunkBuffer -> {
-            enderFrameSession.sendUnloadChunk(chunkBuffer);
-        });
+        enderFrameSession.getChunkBuffers().forEach(enderFrameSession::sendUnloadChunk);
 
         dedicatedEnderChest.removePlayer(enderFrameSession);
         dedicatedEnderChest.getEnderFrameSessions().forEach(target -> {
             target.sendPlayerInfo(PlayerInfoBuilder.of(PlayerInfoType.REMOVE_PLAYER).withPlayer(enderFrameSession));
+            target.sendMessage(String.format("%s left server", enderFrameSession.getGameProfile().getName()));
         });
     }
 
