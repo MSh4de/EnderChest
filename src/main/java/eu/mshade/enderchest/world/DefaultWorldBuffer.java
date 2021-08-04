@@ -1,18 +1,21 @@
 package eu.mshade.enderchest.world;
 
-import eu.mshade.enderframe.world.ChunkBuffer;
-import eu.mshade.enderframe.world.ChunkGenerator;
-import eu.mshade.enderframe.world.WorldBuffer;
-import eu.mshade.enderframe.world.WorldLevel;
+import eu.mshade.enderchest.entity.DefaultPlayer;
+import eu.mshade.enderchest.entity.EntityFactory;
+import eu.mshade.enderframe.EnderFrameSessionHandler;
+import eu.mshade.enderframe.entity.Entity;
+import eu.mshade.enderframe.entity.EntityIdManager;
+import eu.mshade.enderframe.entity.EntityType;
+import eu.mshade.enderframe.entity.Player;
+import eu.mshade.enderframe.world.*;
+import eu.mshade.mwork.ParameterContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.lang.ref.PhantomReference;
-import java.lang.ref.ReferenceQueue;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class DefaultWorldBuffer implements WorldBuffer {
 
@@ -25,6 +28,7 @@ public class DefaultWorldBuffer implements WorldBuffer {
     private final Map<UUID, ChunkBuffer> chunks = new ConcurrentHashMap<>();
     private final Map<UUID, File> chunkFiles = new ConcurrentHashMap<>();
     private final WorldManager worldManager;
+    private final Queue<Entity> entities = new ConcurrentLinkedQueue<>();
 
     public DefaultWorldBuffer(WorldManager worldManager, WorldLevel worldLevel, File worldFolder) {
         this.worldManager = worldManager;
@@ -139,6 +143,60 @@ public class DefaultWorldBuffer implements WorldBuffer {
     @Override
     public File getWorldFolder() {
         return worldFolder;
+    }
+
+    @Override
+    public Queue<Entity> getEntities() {
+       return this.entities;
+    }
+
+    @Override
+    public void addEntity(Entity entity) {
+        this.entities.add(entity);
+    }
+
+    @Override
+    public Entity spawnEntity(EntityType entityType, Location location) {
+        if(location == null)
+            throw new NullPointerException("Location cannot be null when trying to spawn an entity.");
+
+        EntityFactory entityFactory = EntityFactory.get();
+        EntityIdManager entityIdManager = EntityIdManager.get();
+        try {
+            Entity entity = entityFactory.factoryEntity(entityType, ParameterContainer.of()
+                    .putContainer(entityIdManager.getFreeId())
+                    .putContainer(location));
+
+            location.getChunkBuffer().addEntity(entity);
+
+            worldManager.getDedicatedEnderChest().getEnderFrameSessions()
+                    .forEach(session -> session.spawnMob(entity));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    public Player spawnPlayer(EnderFrameSessionHandler sessionHandler, Location location) {
+        if(location == null)
+            throw new NullPointerException("Location cannot be null when trying to spawn an entity.");
+
+        try {
+            Player player = new DefaultPlayer(EntityIdManager.get().getFreeId(), location, sessionHandler);
+            location.getChunkBuffer().addEntity(player);
+
+            worldManager.getDedicatedEnderChest().getEnderFrameSessions()
+                    .stream().filter(session -> !session.getEnderFrameSessionHandler().equals(player.getEnderFrameSessionHandler()))
+                    .forEach(session -> session.spawnPlayer(player));
+
+            return player;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     @Override

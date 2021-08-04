@@ -1,6 +1,7 @@
 package eu.mshade.enderchest.world;
 
 import eu.mshade.enderframe.EnderFrameSession;
+import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.world.ChunkBuffer;
 import eu.mshade.enderframe.world.SectionBuffer;
 import eu.mshade.enderframe.world.WorldBuffer;
@@ -8,10 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 public  class DefaultChunkBuffer implements ChunkBuffer {
 
@@ -28,6 +31,7 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
     private Collection<EnderFrameSession> enderFrameSessions = new ConcurrentLinkedQueue<>();
     private WorldBuffer worldBuffer;
     private SectionBuffer[] sectionBuffers = new SectionBuffer[16];
+    private final Queue<Entity> entities = new ConcurrentLinkedQueue<>();
     //private final AtomicReference<ChunkBufferStatus> chunkBufferStatus
     private byte[] biomes =  new byte[256];
 
@@ -180,6 +184,16 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
     @Override
     public boolean hasChange() {
         return hasChange;
+    }
+
+    @Override
+    public Queue<Entity> getEntities() {
+        return this.entities;
+    }
+
+    @Override
+    public void addEntity(Entity entity) {
+        this.entities.add(entity);
     }
 
     public void setBiomes(byte[] biomes) {
