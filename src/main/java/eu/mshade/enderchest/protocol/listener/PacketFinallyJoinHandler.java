@@ -2,7 +2,9 @@ package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderchest.DedicatedEnderChest;
 import eu.mshade.enderframe.*;
+import eu.mshade.enderframe.entity.EntityIdManager;
 import eu.mshade.enderframe.entity.EntityType;
+import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.event.entity.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.metadata.attribute.AttributeProperty;
 import eu.mshade.enderframe.metadata.attribute.AttributeType;
@@ -59,20 +61,14 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
             target.sendMessage(String.format("%s join server", enderFrameSession.getGameProfile().getName()));
         });
 
-
-        dedicatedEnderChest.getEnderFrameSessions().forEach(target -> {
-           if (target != enderFrameSession) target.getEnderFrameSessionHandler().sendPacket(new PacketOutSpawnPlayer(8, enderFrameSession.getGameProfile().getId(), new Position(0, highest+1, 0, false)));
-
-        });
-
-
+        Player player = location.getWorld().spawnPlayer(enderFrameSessionHandler, location);
         logger.info(String.format("%s join server", enderFrameSession.getGameProfile().getName()));
 
         enderFrameSession.sendMessage("Welcome to project MShade");
         enderFrameSession.sendPlayerList("Hey this is test", "and this is test");
-        enderFrameSessionHandler.sendPacket(new PacketOutSpawnEntity(2));
-        PacketOutSpawnMob packetOutSpawnMob = new PacketOutSpawnMob(2,54, 7, 52, 7);
-        enderFrameSessionHandler.sendPacket(packetOutSpawnMob);
+        //enderFrameSessionHandler.sendPacket(new PacketOutSpawnEntity(2));
+        //PacketOutSpawnMob packetOutSpawnMob = new PacketOutSpawnMob(2,54, 7, 52, 7);
+        //enderFrameSessionHandler.sendPacket(packetOutSpawnMob);
         /*enderFrameSessionHandler.sendPacket(new PacketOutEntityHeadLook(2,0));
         enderFrameSessionHandler.sendPacket(new PacketOutEntityMetadata(2, EntityType.ZOMBIE, packetOutSpawnMob.get()));
         enderFrameSessionHandler.sendPacket(new PacketOutEntityTeleport(2,7*32,53*32,7*32,(byte) 0,(byte) 0,false));

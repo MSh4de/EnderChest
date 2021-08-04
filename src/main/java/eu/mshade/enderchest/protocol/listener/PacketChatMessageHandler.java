@@ -1,20 +1,21 @@
 package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderchest.DedicatedEnderChest;
-import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
+import eu.mshade.enderframe.entity.EntityType;
+import eu.mshade.enderframe.entity.Zombie;
 import eu.mshade.enderframe.event.entity.PacketChatMessageEvent;
+import eu.mshade.enderframe.metadata.MetadataMeaning;
 import eu.mshade.enderframe.mojang.chat.ChatColor;
-import eu.mshade.enderframe.mojang.chat.TextComponent;
-import eu.mshade.enderframe.mojang.chat.TextPosition;
-import eu.mshade.enderman.packet.play.PacketOutChatMessage;
-import eu.mshade.enderman.packet.play.PacketOutSpawnMob;
+import eu.mshade.enderframe.world.ChunkBuffer;
+import eu.mshade.enderframe.world.Location;
+import eu.mshade.enderframe.world.WorldBuffer;
 import eu.mshade.mwork.event.EventContainer;
 import eu.mshade.mwork.event.EventListener;
 
 public class PacketChatMessageHandler implements EventListener<PacketChatMessageEvent> {
 
-    private DedicatedEnderChest dedicatedEnderChest;
+    private final DedicatedEnderChest dedicatedEnderChest;
 
     public PacketChatMessageHandler(DedicatedEnderChest dedicatedEnderChest) {
         this.dedicatedEnderChest = dedicatedEnderChest;
@@ -30,8 +31,31 @@ public class PacketChatMessageHandler implements EventListener<PacketChatMessage
 
         if(args[0].equalsIgnoreCase("!spawn")){
             System.out.println("SPAWN ENTITY");
-            enderFrameSessionHandler.sendPacket(new PacketOutSpawnMob(Integer.parseInt(args[1]), Integer.parseInt(args[2]), (int)enderFrameSessionHandler.getEnderFrameSession().getLocation().getX()+2, (int) enderFrameSessionHandler.getEnderFrameSession().getLocation().getY(), (int) enderFrameSessionHandler.getEnderFrameSession().getLocation().getZ()+2));
+
+            Location location = enderFrameSessionHandler.getEnderFrameSession().getLocation();
+            WorldBuffer world = location.getWorld();
+
+            world.spawnEntity(EntityType.ZOMBIE, location);
+            System.out.println(location.getChunkBuffer().getEntities().size());
+        }else if(args[0].equalsIgnoreCase("!change")){
+            if(args[1].equalsIgnoreCase("byte")) {
+                Location location = enderFrameSessionHandler.getEnderFrameSession().getLocation();
+                ChunkBuffer chunkBuffer = location.getChunkBuffer();
+                System.out.println(location.getChunkBuffer().getEntities().size());
+
+                chunkBuffer.getEntities().stream()
+                        .findFirst()
+                        .map(entity -> ((Zombie) entity))
+                        .ifPresent(e -> {
+                            System.out.println("Entity id: " + e.getEntityId());
+                            e.setChild(true);
+                            e.setVillager(true);
+                            enderFrameSessionHandler.getEnderFrameSession().sendMetadata(e, MetadataMeaning.IS_CHILD,
+                                    MetadataMeaning.IS_VILLAGER);
+                        });
+            }
         }
+
         dedicatedEnderChest.getEnderFrameSessions().forEach(each -> each.sendMessage(displayName+" : "+ChatColor.translateAlternateColorCodes('&',event.getMessage())));
         System.out.println(displayName+" : "+event.getMessage());
     }
