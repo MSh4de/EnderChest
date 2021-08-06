@@ -1,7 +1,5 @@
 package eu.mshade.enderchest.redstone.protocol;
 
-import eu.mshade.enderchest.redstone.protocol.packet.RedstonePacketInMotd;
-import eu.mshade.enderframe.protocol.PacketOut;
 import eu.mshade.mwork.MWork;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
