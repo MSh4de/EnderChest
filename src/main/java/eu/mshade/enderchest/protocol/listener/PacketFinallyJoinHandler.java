@@ -5,6 +5,7 @@ import eu.mshade.enderframe.*;
 import eu.mshade.enderframe.event.entity.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.WorldBuffer;
+import eu.mshade.enderman.packet.play.PacketOutSetSlot;
 import eu.mshade.mwork.event.EventContainer;
 import eu.mshade.mwork.event.EventListener;
 import org.slf4j.Logger;
@@ -45,13 +46,8 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         dedicatedEnderChest.getEnderFrameSessions().forEach(playerInfoBuilder::withPlayer);
         dedicatedEnderChest.getEnderFrameSessions().forEach(target -> target.sendPlayerInfo(playerInfoBuilder));
 
-        /*
-        dedicatedEnderChest.getEnderFrameSessions().forEach(target -> {
-            if (target != enderFrameSession)
-            target.getEnderFrameSessionHandler().sendPacket(new PacketOutSpawnPlayer(1, enderFrameSession.getGameProfile().getId(), new Position(0, 112, 0, false)));
-        });
+        enderFrameSessionHandler.sendPacket(new PacketOutSetSlot());
 
-         */
         logger.info(String.format("%s join server", enderFrameSession.getGameProfile().getName()));
 
         enderFrameSession.sendMessage("Welcome to project MShade");
