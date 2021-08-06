@@ -25,8 +25,9 @@ public class PacketQuitHandler implements EventListener<PacketQuitEvent> {
         EnderFrameSession enderFrameSession = event.getEnderFrameSession();
         logger.info(String.format("%s left server", enderFrameSession.getGameProfile().getName()));
         enderFrameSession.getChunkBuffers().forEach(chunkBuffer -> {
-            enderFrameSession.sendUnloadChunk(chunkBuffer);
+            chunkBuffer.getViewers().remove(enderFrameSession);
         });
+        enderFrameSession.getChunkBuffers().clear();
 
         dedicatedEnderChest.removePlayer(enderFrameSession);
         dedicatedEnderChest.getEnderFrameSessions().forEach(target -> {
