@@ -20,6 +20,6 @@ public class ServerPingListener implements EventListener<ServerPingEvent> {
     @Override
     public void onEvent(ServerPingEvent event, EventContainer eventContainer) {
         EnderFrameSessionHandler bridge = eventContainer.getContainer(EnderFrameSessionHandler.class);
-        bridge.sendPacketAndClose(new PacketOutPong(event.getPayload()));
+        bridge.sendPacket(new PacketOutPong(event.getPayload()));
     }
 }
