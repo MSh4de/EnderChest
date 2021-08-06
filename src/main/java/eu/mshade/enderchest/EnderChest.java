@@ -3,6 +3,9 @@ package eu.mshade.enderchest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import eu.mshade.enderchest.protocol.listener.*;
+import eu.mshade.enderchest.redstone.Redstone;
+import eu.mshade.enderchest.redstone.protocol.RedstonePacketIn;
+import eu.mshade.enderchest.redstone.protocol.RedstonePacketInDeserializer;
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.event.PacketEvent;
 import eu.mshade.enderframe.event.entity.*;
@@ -25,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 public class EnderChest {
 
     private final EventLoopGroup eventLoopGroup;
+    private Redstone redstone;
     private final DedicatedEnderChest dedicatedEnderChest;
     private final Logger logger = LoggerFactory.getLogger(EnderChest.class);
 
@@ -44,18 +48,21 @@ public class EnderChest {
         ObjectMapper objectMapper = MWork.get().getObjectMapper();
 
         SimpleModule simpleModule = new SimpleModule();
+        simpleModule.addDeserializer(RedstonePacketIn.class, new RedstonePacketInDeserializer());
         simpleModule.addSerializer(TextComponentEntry.class, textComponentSerializer);
         simpleModule.addSerializer(TextComponent.class, textComponentSerializer);
         simpleModule.addSerializer(TextClickEvent.class, new TextClickEventSerializer());
 
         objectMapper.registerModule(simpleModule);
 
+        this.redstone = new Redstone(this);
+
         EnderFrame enderFrame = EnderFrame.get();
         EventBus<PacketEvent> packetEventBus = enderFrame.getPacketEventBus();
 
         packetEventBus.subscribe(PacketHandshakeEvent.class, new PacketHandshakeListener(dedicatedEnderChest));
         packetEventBus.subscribe(ServerPingEvent.class, new ServerPingListener());
-        packetEventBus.subscribe(ServerStatusEvent.class, new ServerStatusListener());
+        packetEventBus.subscribe(ServerStatusEvent.class, new ServerStatusListener(redstone));
         packetEventBus.subscribe(PacketLoginEvent.class, new PacketLoginHandler(dedicatedEnderChest));
         packetEventBus.subscribe(PacketEncryptionEvent.class, new PacketEncryptionHandler(dedicatedEnderChest));
         packetEventBus.subscribe(PacketKeepAliveEvent.class, new PacketKeepAliveHandler(dedicatedEnderChest));
@@ -93,4 +100,11 @@ public class EnderChest {
         new EnderChest();
     }
 
+    public EventLoopGroup getEventLoopGroup() {
+        return eventLoopGroup;
+    }
+
+    public DedicatedEnderChest getDedicatedEnderChest() {
+        return dedicatedEnderChest;
+    }
 }
