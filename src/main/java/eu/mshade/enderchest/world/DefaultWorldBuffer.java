@@ -2,6 +2,7 @@ package eu.mshade.enderchest.world;
 
 import eu.mshade.enderchest.entity.DefaultPlayer;
 import eu.mshade.enderchest.entity.EntityFactory;
+import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.EntityIdManager;
@@ -17,6 +18,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static org.json.XMLTokener.entity;
+
 public class DefaultWorldBuffer implements WorldBuffer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultWorldBuffer.class);
@@ -29,6 +32,7 @@ public class DefaultWorldBuffer implements WorldBuffer {
     private final Map<UUID, File> chunkFiles = new ConcurrentHashMap<>();
     private final WorldManager worldManager;
     private final Queue<Entity> entities = new ConcurrentLinkedQueue<>();
+    private final HashMap<EnderFrameSession, Player> entityPlayer = new HashMap<>();
 
     public DefaultWorldBuffer(WorldManager worldManager, WorldLevel worldLevel, File worldFolder) {
         this.worldManager = worldManager;
@@ -151,8 +155,18 @@ public class DefaultWorldBuffer implements WorldBuffer {
     }
 
     @Override
+    public Player getPlayer(EnderFrameSessionHandler sessionHandler) {
+        return entityPlayer.get(sessionHandler.getEnderFrameSession());
+    }
+
+    @Override
     public void addEntity(Entity entity) {
         this.entities.add(entity);
+    }
+
+    @Override
+    public void removeEntity(Entity entity) {
+        this.entities.remove(entity);
     }
 
     @Override
@@ -163,10 +177,10 @@ public class DefaultWorldBuffer implements WorldBuffer {
         EntityFactory entityFactory = EntityFactory.get();
         EntityIdManager entityIdManager = EntityIdManager.get();
         try {
+            int id = entityIdManager.getFreeId();
             Entity entity = entityFactory.factoryEntity(entityType, ParameterContainer.of()
-                    .putContainer(entityIdManager.getFreeId())
+                    .putContainer(id)
                     .putContainer(location));
-
             location.getChunkBuffer().addEntity(entity);
 
             worldManager.getDedicatedEnderChest().getEnderFrameSessions()
@@ -184,12 +198,13 @@ public class DefaultWorldBuffer implements WorldBuffer {
             throw new NullPointerException("Location cannot be null when trying to spawn an entity.");
 
         try {
-            Player player = new DefaultPlayer(EntityIdManager.get().getFreeId(), location, sessionHandler);
+            int id = EntityIdManager.get().getFreeId();
+            Player player = new DefaultPlayer( id, location, sessionHandler);
             location.getChunkBuffer().addEntity(player);
-
-            worldManager.getDedicatedEnderChest().getEnderFrameSessions()
+            entityPlayer.put(sessionHandler.getEnderFrameSession(), player);
+            /*worldManager.getDedicatedEnderChest().getEnderFrameSessions()
                     .stream().filter(session -> !session.getEnderFrameSessionHandler().equals(player.getEnderFrameSessionHandler()))
-                    .forEach(session -> session.spawnPlayer(player));
+                    .forEach(session -> session.spawnPlayer(player));*/
 
             return player;
         } catch (Exception e) {
@@ -211,4 +226,6 @@ public class DefaultWorldBuffer implements WorldBuffer {
     public int hashCode() {
         return Objects.hash(worldLevel, chunksFolder, worldFolder, worldManager);
     }
+
+
 }
