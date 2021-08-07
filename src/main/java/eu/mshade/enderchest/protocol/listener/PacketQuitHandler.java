@@ -5,10 +5,13 @@ import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
 import eu.mshade.enderframe.event.entity.PacketQuitEvent;
+import eu.mshade.enderman.packet.play.PacketOutDestroyEntities;
 import eu.mshade.mwork.event.EventContainer;
 import eu.mshade.mwork.event.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
 
 public class PacketQuitHandler implements EventListener<PacketQuitEvent> {
 
@@ -26,10 +29,16 @@ public class PacketQuitHandler implements EventListener<PacketQuitEvent> {
         logger.info(String.format("%s left server", enderFrameSession.getGameProfile().getName()));
         enderFrameSession.getChunkBuffers().forEach(enderFrameSession::sendUnloadChunk);
 
+
         dedicatedEnderChest.removePlayer(enderFrameSession);
         dedicatedEnderChest.getEnderFrameSessions().forEach(target -> {
             target.sendPlayerInfo(PlayerInfoBuilder.of(PlayerInfoType.REMOVE_PLAYER).withPlayer(enderFrameSession));
             target.sendMessage(String.format("%s left server", enderFrameSession.getGameProfile().getName()));
+            target.removeEntities(enderFrameSession.getLocation().getWorld().getPlayer(enderFrameSession.getEnderFrameSessionHandler()));
+        });
+        enderFrameSession.getChunkBuffers().forEach(chunkBuffer -> {
+            chunkBuffer.getViewers().remove(enderFrameSession);
+            chunkBuffer.removeEntity(chunkBuffer.getWorldBuffer().getPlayer(enderFrameSession.getEnderFrameSessionHandler()));
         });
     }
 
