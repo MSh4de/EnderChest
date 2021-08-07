@@ -12,6 +12,7 @@ import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Position;
 import eu.mshade.enderframe.world.WorldBuffer;
 import eu.mshade.enderman.packet.play.*;
+import eu.mshade.mwork.MOptional;
 import eu.mshade.mwork.event.EventContainer;
 import eu.mshade.mwork.event.EventListener;
 import org.slf4j.Logger;
@@ -43,14 +44,10 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         location.setY(highest+1);
         enderFrameSession.setLocation(location);
 
+
+
         enderFrameSession.sendJoinGame(GameMode.CREATIVE, world.getWorldLevel().getDimension(), world.getWorldLevel().getDifficulty(), 20, world.getWorldLevel().getLevelType(), false);
-        enderFrameSession.sendSquareChunk(10, location.getChunkX(), location.getChunkZ(), world);
-        enderFrameSession.sendPosition(location);
-        enderFrameSession.sendAbilities(false, false, true, false, 0.5F, 0.2F);
-        List<AttributeProperty> attributeProperties = new ArrayList<>();
-        for (AttributeType value : AttributeType.values()) {
-            attributeProperties.add(new AttributeProperty(value, value.getMax()));
-        }
+        enderFrameSession.sendAbilities(false, false, true, false, 0.2F, 0.2F);
 
         dedicatedEnderChest.addPlayer(enderFrameSession);
 
@@ -61,7 +58,11 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
             target.sendMessage(String.format("%s join server", enderFrameSession.getGameProfile().getName()));
         });
 
-        Player player = location.getWorld().spawnPlayer(enderFrameSessionHandler, location);
+        world.spawnPlayer(enderFrameSessionHandler,location);
+
+        enderFrameSession.sendSquareChunk(10, location.getChunkX(), location.getChunkZ(), world);
+        enderFrameSession.sendPosition(location);
+
         logger.info(String.format("%s join server", enderFrameSession.getGameProfile().getName()));
 
         enderFrameSession.sendMessage("Welcome to project MShade");
