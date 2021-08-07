@@ -7,11 +7,12 @@ import eu.mshade.enderframe.mojang.SkinParts;
 import eu.mshade.enderframe.protocol.ProtocolVersion;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Vector;
+import eu.mshade.enderman.packet.play.PacketOutDestroyEntities;
+import eu.mshade.enderman.packet.play.PacketOutSpawnPlayer;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.Queue;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class DefaultPlayer implements Player {
@@ -205,11 +206,13 @@ public class DefaultPlayer implements Player {
 
     @Override
     public void addViewer(Player player) {
+        enderFrameSessionHandler.getEnderFrameSession().spawnPlayer(player);
         viewers.add(player);
     }
 
     @Override
     public void removeViewer(Player player) {
+        enderFrameSessionHandler.getEnderFrameSession().removeEntities(player);
         viewers.remove(player);
     }
 
@@ -306,5 +309,18 @@ public class DefaultPlayer implements Player {
     @Override
     public int getScore() {
         return this.score;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DefaultPlayer that = (DefaultPlayer) o;
+        return Objects.equals(enderFrameSessionHandler, that.enderFrameSessionHandler);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(enderFrameSessionHandler);
     }
 }
