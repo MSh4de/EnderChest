@@ -4,11 +4,13 @@ import eu.mshade.enderchest.protocol.ProtocolRepository;
 import eu.mshade.enderchest.world.DefaultChunkGenerator;
 import eu.mshade.enderchest.world.WorldManager;
 import eu.mshade.enderframe.EnderFrameSession;
+import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.protocol.MinecraftEncryption;
 import eu.mshade.enderframe.world.*;
 import eu.mshade.enderman.EndermanProtocol;
 import io.netty.channel.EventLoopGroup;
 
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
