@@ -178,6 +178,7 @@ public class DefaultWorldBuffer implements WorldBuffer {
         EntityIdManager entityIdManager = EntityIdManager.get();
         try {
             int id = entityIdManager.getFreeId();
+            System.out.println("id : "+id);
             Entity entity = entityFactory.factoryEntity(entityType, ParameterContainer.of()
                     .putContainer(id)
                     .putContainer(location));
