@@ -16,7 +16,7 @@ public class DefaultZombie extends Zombie {
     private Vector velocity;
     private int entityId;
     private boolean isFire;
-    private boolean isCrounched;
+    private boolean isSneaking;
     private boolean isSprinting;
     private boolean isEating;
     private boolean isInvisible;
@@ -42,12 +42,12 @@ public class DefaultZombie extends Zombie {
         this.entityId = entityId;
     }
 
-    public DefaultZombie(Location location, Vector velocity, int entityId, boolean isFire, boolean isCrounched, boolean isSprinting, boolean isEating, boolean isInvisible, short airTicks, String customName, boolean isCustomNameVisible, boolean isSilent, UUID uuid, float health, int potionEffectColor, boolean isPotionEffectAmbient, byte numberOfArrowsInEntity, boolean isAIDisable) {
+    public DefaultZombie(Location location, Vector velocity, int entityId, boolean isFire, boolean isSneaking, boolean isSprinting, boolean isEating, boolean isInvisible, short airTicks, String customName, boolean isCustomNameVisible, boolean isSilent, UUID uuid, float health, int potionEffectColor, boolean isPotionEffectAmbient, byte numberOfArrowsInEntity, boolean isAIDisable) {
         this.location = location;
         this.velocity = velocity;
         this.entityId = entityId;
         this.isFire = isFire;
-        this.isCrounched = isCrounched;
+        this.isSneaking = isSneaking;
         this.isSprinting = isSprinting;
         this.isEating = isEating;
         this.isInvisible = isInvisible;
@@ -61,6 +61,30 @@ public class DefaultZombie extends Zombie {
         this.isPotionEffectAmbient = isPotionEffectAmbient;
         this.numberOfArrowsInEntity = numberOfArrowsInEntity;
         this.isAIDisable = isAIDisable;
+    }
+
+    public DefaultZombie(Location location, Vector velocity, int entityId, boolean isFire, boolean isSneaking, boolean isSprinting, boolean isEating, boolean isInvisible, short airTicks, String customName, boolean isCustomNameVisible, boolean isSilent, UUID uuid, float health, int potionEffectColor, boolean isPotionEffectAmbient, byte numberOfArrowsInEntity, boolean isAIDisable, boolean isChild, boolean isVillager, boolean isConverting) {
+        this.location = location;
+        this.velocity = velocity;
+        this.entityId = entityId;
+        this.isFire = isFire;
+        this.isSneaking = isSneaking;
+        this.isSprinting = isSprinting;
+        this.isEating = isEating;
+        this.isInvisible = isInvisible;
+        this.airTicks = airTicks;
+        this.customName = customName;
+        this.isCustomNameVisible = isCustomNameVisible;
+        this.isSilent = isSilent;
+        this.uuid = uuid;
+        this.health = health;
+        this.potionEffectColor = potionEffectColor;
+        this.isPotionEffectAmbient = isPotionEffectAmbient;
+        this.numberOfArrowsInEntity = numberOfArrowsInEntity;
+        this.isAIDisable = isAIDisable;
+        this.isChild = isChild;
+        this.isVillager = isVillager;
+        this.isConverting = isConverting;
     }
 
     @Override
@@ -100,12 +124,12 @@ public class DefaultZombie extends Zombie {
 
     @Override
     public boolean isSneaking() {
-        return isCrounched;
+        return isSneaking;
     }
 
     @Override
     public void setSneaking(boolean isCrounched) {
-        this.isCrounched = isCrounched;
+        this.isSneaking = isCrounched;
     }
 
     @Override

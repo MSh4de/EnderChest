@@ -5,7 +5,7 @@ import eu.mshade.enderframe.ServerListBuilder;
 import eu.mshade.enderframe.ServerListPlayerBuilder;
 import eu.mshade.enderframe.event.server.ServerStatusEvent;
 import eu.mshade.enderframe.protocol.temp.packet.PacketOutStatus;
-import eu.mshade.mwork.event.EventContainer;
+import eu.mshade.mwork.event.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
 public class ServerStatusListener implements EventListener<ServerStatusEvent> {
@@ -35,7 +35,7 @@ public class ServerStatusListener implements EventListener<ServerStatusEvent> {
      */
 
     @Override
-    public void onEvent(ServerStatusEvent event, EventContainer eventContainer) {
+    public void onEvent(ServerStatusEvent event, ParameterContainer eventContainer) {
         EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
 
         //System.out.println(ChatColor.BLACK+"Hello");

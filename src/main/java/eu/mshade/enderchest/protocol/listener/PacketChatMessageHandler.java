@@ -10,7 +10,7 @@ import eu.mshade.enderframe.mojang.chat.ChatColor;
 import eu.mshade.enderframe.world.ChunkBuffer;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.WorldBuffer;
-import eu.mshade.mwork.event.EventContainer;
+import eu.mshade.mwork.event.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
 public class PacketChatMessageHandler implements EventListener<PacketChatMessageEvent> {
@@ -23,7 +23,7 @@ public class PacketChatMessageHandler implements EventListener<PacketChatMessage
 
 
     @Override
-    public void onEvent(PacketChatMessageEvent event, EventContainer eventContainer) {
+    public void onEvent(PacketChatMessageEvent event, ParameterContainer eventContainer) {
         EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
         String displayName = enderFrameSessionHandler.getEnderFrameSession().getGameProfile().getName();
         if(event.getMessage().startsWith("/"))return;

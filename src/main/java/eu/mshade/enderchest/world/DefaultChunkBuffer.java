@@ -35,6 +35,8 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
     //private final AtomicReference<ChunkBufferStatus> chunkBufferStatus
     private byte[] biomes =  new byte[256];
 
+
+
     public DefaultChunkBuffer(int x, int z, boolean hasChange, WorldBuffer worldBuffer, File file) {
         this.x = x;
         this.z = z;

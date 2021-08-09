@@ -10,7 +10,7 @@ import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Position;
 import eu.mshade.enderframe.world.WorldBuffer;
 import eu.mshade.enderman.packet.play.*;
-import eu.mshade.mwork.event.EventContainer;
+import eu.mshade.mwork.event.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +29,8 @@ public class PacketMoveHandler implements EventListener<PacketMoveEvent> {
     }
 
     @Override
-    public void onEvent(PacketMoveEvent event, EventContainer eventContainer) {
-        EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
+    public void onEvent(PacketMoveEvent event, ParameterContainer parameterContainer) {
+        EnderFrameSessionHandler enderFrameSessionHandler = parameterContainer.getContainer(EnderFrameSessionHandler.class);
         EnderFrameSession enderFrameSession = enderFrameSessionHandler.getEnderFrameSession();
 
         Position position = event.getPosition();

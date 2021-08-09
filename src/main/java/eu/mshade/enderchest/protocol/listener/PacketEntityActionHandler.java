@@ -5,14 +5,13 @@ import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.event.entity.PacketEntityActionEvent;
 import eu.mshade.enderframe.metadata.MetadataMeaning;
-import eu.mshade.enderman.packet.play.PacketOutEntityMetadata;
-import eu.mshade.mwork.event.EventContainer;
+import eu.mshade.mwork.event.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
 public class PacketEntityActionHandler implements EventListener<PacketEntityActionEvent> {
 
     @Override
-    public void onEvent(PacketEntityActionEvent event, EventContainer eventContainer) {
+    public void onEvent(PacketEntityActionEvent event, ParameterContainer eventContainer) {
         EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
         EnderFrameSession enderFrameSession = enderFrameSessionHandler.getEnderFrameSession();
 

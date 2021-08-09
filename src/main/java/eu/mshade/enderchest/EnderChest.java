@@ -2,15 +2,21 @@ package eu.mshade.enderchest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import eu.mshade.enderchest.marshals.*;
 import eu.mshade.enderchest.protocol.listener.*;
 import eu.mshade.enderframe.EnderFrame;
+import eu.mshade.enderframe.entity.Player;
+import eu.mshade.enderframe.entity.Zombie;
 import eu.mshade.enderframe.event.PacketEvent;
 import eu.mshade.enderframe.event.entity.*;
 import eu.mshade.enderframe.event.server.ServerPingEvent;
 import eu.mshade.enderframe.event.server.ServerStatusEvent;
 import eu.mshade.enderframe.mojang.chat.*;
-import eu.mshade.enderman.packet.play.PacketInEntityAction;
+import eu.mshade.enderframe.world.ChunkBuffer;
+import eu.mshade.enderframe.world.Location;
+import eu.mshade.enderframe.world.Vector;
 import eu.mshade.mwork.MWork;
+import eu.mshade.mwork.binarytag.marshal.BinaryTagMarshal;
 import eu.mshade.mwork.event.EventBus;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
@@ -66,6 +72,14 @@ public class EnderChest {
         packetEventBus.subscribe(PacketMoveEvent.class, new PacketMoveHandler(dedicatedEnderChest));
         packetEventBus.subscribe(PacketQuitEvent.class, new PacketQuitHandler(dedicatedEnderChest));
         packetEventBus.subscribe(PacketEntityActionEvent.class, new PacketEntityActionHandler());
+
+        BinaryTagMarshal binaryTagMarshal = MWork.get().getBinaryTagMarshal();
+
+        binaryTagMarshal.registerAdaptor(ChunkBuffer.class, new DefaultChunkMarshal());
+        binaryTagMarshal.registerAdaptor(Zombie.class, new DefaultZombieMarshal());
+        binaryTagMarshal.registerAdaptor(Location.class, new DefaultLocationMarshal());
+        binaryTagMarshal.registerAdaptor(Player.class, new DefaultPlayerMarshal());
+        binaryTagMarshal.registerAdaptor(Vector.class, new DefaultVectorMarshal());
 
         eventLoopGroup.scheduleAtFixedRate(() -> {
             dedicatedEnderChest.getEnderFrameSessions().forEach(enderFrameSession -> {

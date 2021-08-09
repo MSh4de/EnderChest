@@ -1,28 +1,21 @@
 package eu.mshade.enderchest.entity;
 
-import eu.mshade.enderframe.EnderFrameSession;
-import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.entity.EntityType;
+import eu.mshade.enderframe.entity.LivingEntity;
 import eu.mshade.enderframe.entity.Player;
-import eu.mshade.enderframe.mojang.SkinParts;
-import eu.mshade.enderframe.protocol.ProtocolVersion;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Vector;
-import eu.mshade.enderman.packet.play.PacketOutEntityTeleport;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.Objects;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class DefaultPlayer extends Player {
+public class DefaultLivingEntity extends LivingEntity {
 
-    private EnderFrameSessionHandler enderFrameSessionHandler;
+
     private Location location;
     private Vector velocity;
-    private final int entityId;
+    private int entityId;
     private boolean isFire;
     private boolean isCrounched;
     private boolean isSprinting;
@@ -32,36 +25,20 @@ public class DefaultPlayer extends Player {
     private String customName;
     private boolean isCustomNameVisible;
     private boolean isSilent;
-    private final UUID uuid;
+    private UUID uuid;
     private final Queue<Player> viewers = new ConcurrentLinkedQueue<>();
     private float health;
     private int potionEffectColor;
     private boolean isPotionEffectAmbient;
     private byte numberOfArrowsInEntity;
     private boolean isAIDisable;
-    private final String name;
-    private InetSocketAddress inetSocketAddress;
-    private ProtocolVersion protocolVersion;
-    private int ping;
-    private SkinParts skinParts;
-    private boolean unused;
-    private float absorptionHearts;
-    private int score;
 
-    public DefaultPlayer(int entityId, Location location, EnderFrameSessionHandler enderFrameSessionHandler) {
-        this.entityId = entityId;
-        this.location = location;
-        this.name = enderFrameSessionHandler.getEnderFrameSession().getGameProfile().getName();
-        this.enderFrameSessionHandler = enderFrameSessionHandler;
-        this.uuid = enderFrameSessionHandler.getEnderFrameSession().getGameProfile().getId();
-    }
-
-    public DefaultPlayer(Location location, Vector velocity, int entityId, boolean isFire, boolean isSneaking, boolean isSprinting, boolean isEating, boolean isInvisible, short airTicks, String customName, boolean isCustomNameVisible, boolean isSilent, UUID uuid, float health, int potionEffectColor, boolean isPotionEffectAmbient, byte numberOfArrowsInEntity, boolean isAIDisable, String name, InetSocketAddress inetSocketAddress, ProtocolVersion protocolVersion, int ping, SkinParts skinParts, boolean unused, float absorptionHearts, int score) {
+    public DefaultLivingEntity(Location location, Vector velocity, int entityId, boolean isFire, boolean isCrounched, boolean isSprinting, boolean isEating, boolean isInvisible, short airTicks, String customName, boolean isCustomNameVisible, boolean isSilent, UUID uuid, float health, int potionEffectColor, boolean isPotionEffectAmbient, byte numberOfArrowsInEntity, boolean isAIDisable) {
         this.location = location;
         this.velocity = velocity;
         this.entityId = entityId;
         this.isFire = isFire;
-        this.isCrounched = isSneaking;
+        this.isCrounched = isCrounched;
         this.isSprinting = isSprinting;
         this.isEating = isEating;
         this.isInvisible = isInvisible;
@@ -75,15 +52,8 @@ public class DefaultPlayer extends Player {
         this.isPotionEffectAmbient = isPotionEffectAmbient;
         this.numberOfArrowsInEntity = numberOfArrowsInEntity;
         this.isAIDisable = isAIDisable;
-        this.name = name;
-        this.inetSocketAddress = inetSocketAddress;
-        this.protocolVersion = protocolVersion;
-        this.ping = ping;
-        this.skinParts = skinParts;
-        this.unused = unused;
-        this.absorptionHearts = absorptionHearts;
-        this.score = score;
     }
+
 
     @Override
     public Location getLocation() {
@@ -207,7 +177,7 @@ public class DefaultPlayer extends Player {
 
     @Override
     public EntityType getType() {
-        return EntityType.PLAYER;
+        return EntityType.BLAZE;
     }
 
     @Override
@@ -217,14 +187,11 @@ public class DefaultPlayer extends Player {
 
     @Override
     public void addViewer(Player player) {
-        enderFrameSessionHandler.getEnderFrameSession().spawnPlayer(player);
         viewers.add(player);
-        enderFrameSessionHandler.sendPacket(new PacketOutEntityTeleport(player.getEntityId(),player,false));
     }
 
     @Override
     public void removeViewer(Player player) {
-        enderFrameSessionHandler.getEnderFrameSession().removeEntities(player);
         viewers.remove(player);
     }
 
@@ -276,63 +243,5 @@ public class DefaultPlayer extends Player {
     @Override
     public void setAIDisable(boolean isDisable) {
         this.isAIDisable = isDisable;
-    }
-
-    @Override
-    public EnderFrameSessionHandler getEnderFrameSessionHandler() {
-        return this.enderFrameSessionHandler;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public SocketAddress getSocketAddress() {
-        return this.enderFrameSessionHandler.getEnderFrameSession().getSocketAddress();
-    }
-
-    @Override
-    public ProtocolVersion getProtocolVersion() {
-        return this.protocolVersion;
-    }
-
-    @Override
-    public int getPing() {
-        return this.ping;
-    }
-
-    @Override
-    public SkinParts getSkinParts() {
-        return this.skinParts;
-    }
-
-    @Override
-    public boolean unused() {
-        return this.unused;
-    }
-
-    @Override
-    public float getAbsorptionHearts() {
-        return this.absorptionHearts;
-    }
-
-    @Override
-    public int getScore() {
-        return this.score;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DefaultPlayer that = (DefaultPlayer) o;
-        return Objects.equals(enderFrameSessionHandler, that.enderFrameSessionHandler);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(enderFrameSessionHandler);
     }
 }

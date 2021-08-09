@@ -6,7 +6,7 @@ import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
 import eu.mshade.enderframe.event.entity.PacketKeepAliveEvent;
-import eu.mshade.mwork.event.EventContainer;
+import eu.mshade.mwork.event.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
 public class PacketKeepAliveHandler implements EventListener<PacketKeepAliveEvent> {
@@ -32,7 +32,7 @@ public class PacketKeepAliveHandler implements EventListener<PacketKeepAliveEven
      */
 
     @Override
-    public void onEvent(PacketKeepAliveEvent event, EventContainer eventContainer) {
+    public void onEvent(PacketKeepAliveEvent event, ParameterContainer eventContainer) {
         EnderFrameSession enderFrameSession = eventContainer.getContainer(EnderFrameSessionHandler.class).getEnderFrameSession();
         int ping = (int) (System.currentTimeMillis() - event.getThreshold());
         enderFrameSession.setPing(ping);

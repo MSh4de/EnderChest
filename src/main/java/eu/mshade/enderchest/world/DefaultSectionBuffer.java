@@ -9,16 +9,24 @@ public class DefaultSectionBuffer implements SectionBuffer {
     private ChunkBuffer chunkBuffer;
     private int y;
     private int realBlock;
-    private int[] blocks = new int[4096];
-    private final NibbleArray data = NibbleArray.allocate(4096);
-    private final NibbleArray blockLight = NibbleArray.allocate(4096);
-    private final NibbleArray skyLight = NibbleArray.allocate(4096);
+    private int[] blocks;
+    private NibbleArray data;
+    private NibbleArray blockLight;
+    private NibbleArray skyLight;
 
     public DefaultSectionBuffer(ChunkBuffer chunkBuffer, int y, int realBlock) {
+        this(chunkBuffer, y, realBlock, new int[4096], NibbleArray.allocate(4096), NibbleArray.allocate(4096), NibbleArray.allocate(4096));
+        blockLight.fill((byte) 15);
+    }
+
+    public DefaultSectionBuffer(ChunkBuffer chunkBuffer, int y, int realBlock, int[] blocks, NibbleArray data, NibbleArray blocksLight, NibbleArray skyLight) {
         this.chunkBuffer = chunkBuffer;
         this.y = y;
         this.realBlock = realBlock;
-        blockLight.fill((byte) 15);
+        this.blocks = blocks;
+        this.data = data;
+        this.blockLight = blocksLight;
+        this.skyLight = skyLight;
     }
 
     @Override

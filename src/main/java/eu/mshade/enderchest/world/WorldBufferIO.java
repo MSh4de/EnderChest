@@ -1,15 +1,18 @@
 package eu.mshade.enderchest.world;
 
+import eu.mshade.enderchest.marshals.DefaultChunkMarshal;
 import eu.mshade.enderframe.world.*;
 import eu.mshade.mwork.MWork;
-import eu.mshade.mwork.binarytag.BinaryTagType;
+import eu.mshade.mwork.ParameterContainer;
+import eu.mshade.mwork.binarytag.DefaultBinaryTagMarshal;
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
-import eu.mshade.mwork.binarytag.entity.ZstdByteArrayBinaryTag;
-import eu.mshade.mwork.binarytag.entity.ZstdListBinaryTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class WorldBufferIO {
 
@@ -44,28 +47,11 @@ public class WorldBufferIO {
     public void writeChunkBuffer(ChunkBuffer chunkBuffer) {
         if (chunkBuffer.hasChange()) {
             synchronized (chunkBuffer.getFile()) {
-                CompoundBinaryTag compoundBinaryTag = new CompoundBinaryTag();
-                compoundBinaryTag.putInt("x", chunkBuffer.getX());
-                compoundBinaryTag.putInt("z", chunkBuffer.getZ());
-                compoundBinaryTag.putBinaryTag("biomes", new ZstdByteArrayBinaryTag(chunkBuffer.getBiomes()));
-                ZstdListBinaryTag listBinaryTag = new ZstdListBinaryTag(BinaryTagType.COMPOUND);
-                for (SectionBuffer sectionBuffer : chunkBuffer.getSectionBuffers()) {
-                    if (sectionBuffer != null) {
-                        CompoundBinaryTag sectionBufferTag = new CompoundBinaryTag();
-                        sectionBufferTag.putInt("y", sectionBuffer.getY());
-                        sectionBufferTag.putInt("realBlock", sectionBuffer.getRealBlock());
-                        sectionBufferTag.putIntArray("blocks", sectionBuffer.getBlocks());
-                        sectionBufferTag.putByteArray("data", sectionBuffer.getData().getRawData());
-                        sectionBufferTag.putByteArray("blockLight", sectionBuffer.getBlockLight().getRawData());
-                        sectionBufferTag.putByteArray("skyLight", sectionBuffer.getSkyLight().getRawData());
-                        listBinaryTag.add(sectionBufferTag);
-                    }
-                }
-                compoundBinaryTag.putBinaryTag("sections", listBinaryTag);
                 try {
+                    CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) new DefaultChunkMarshal().serialize(new DefaultBinaryTagMarshal(), ChunkBuffer.class, chunkBuffer, ParameterContainer.EMPTY);
                     FileOutputStream fileOutputStream = new FileOutputStream(chunkBuffer.getFile());
                     MWork.get().getBinaryTagBufferDriver().writeCompoundBinaryTag(compoundBinaryTag, fileOutputStream);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     logger.error("", e);
                 }
             }
@@ -77,34 +63,11 @@ public class WorldBufferIO {
             try {
                 FileInputStream fileInputStream = new FileInputStream(file);
                 CompoundBinaryTag compoundBinaryTag = MWork.get().getBinaryTagBufferDriver().readCompoundBinaryTag(fileInputStream);
-                int x = compoundBinaryTag.getInt("x");
-                int z = compoundBinaryTag.getInt("z");
-                byte[] biomes = (byte[]) compoundBinaryTag.getBinaryTag("biomes").getValue();
-                DefaultChunkBuffer defaultChunkBuffer = new DefaultChunkBuffer(x, z, false, worldBuffer, file);
-                defaultChunkBuffer.setBiomes(biomes);
-                ZstdListBinaryTag sections = (ZstdListBinaryTag) compoundBinaryTag.getBinaryTag("sections");
-                sections.forEach(binaryTag -> {
-                    CompoundBinaryTag sectionBufferTag = (CompoundBinaryTag) binaryTag;
+                return new DefaultChunkMarshal().deserialize(new DefaultBinaryTagMarshal(), ChunkBuffer.class, compoundBinaryTag, new ParameterContainer()
+                        .putContainer(file)
+                        .putContainer(worldBuffer));
 
-                    int y = sectionBufferTag.getInt("y");
-                    int realBlock = sectionBufferTag.getInt("realBlock");
-                    int[] blocks = sectionBufferTag.getIntArray("blocks");
-                    byte[] data = sectionBufferTag.getByteArray("data");
-                    byte[] blockLight = sectionBufferTag.getByteArray("blockLight");
-                    byte[] skyLight = sectionBufferTag.getByteArray("skyLight");
-
-                    DefaultSectionBuffer defaultSectionBuffer = new DefaultSectionBuffer(defaultChunkBuffer, y, realBlock);
-                    defaultSectionBuffer.setBlocks(blocks);
-                    defaultSectionBuffer.getData().setRawData(data);
-                    defaultSectionBuffer.getBlockLight().setRawData(blockLight);
-                    defaultSectionBuffer.getSkyLight().setRawData(skyLight);
-                    defaultChunkBuffer.getSectionBuffers()[y] = defaultSectionBuffer;
-                });
-                return defaultChunkBuffer;
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            } catch (Exception e) {e.printStackTrace();}
         }
         return null;
     }

@@ -10,7 +10,7 @@ import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.Property;
 import eu.mshade.enderframe.protocol.MinecraftEncryption;
 import eu.mshade.mwork.MOptional;
-import eu.mshade.mwork.event.EventContainer;
+import eu.mshade.mwork.event.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -78,7 +78,7 @@ public class PacketEncryptionHandler implements EventListener<PacketEncryptionEv
      */
 
     @Override
-    public void onEvent(PacketEncryptionEvent event, EventContainer eventContainer) {
+    public void onEvent(PacketEncryptionEvent event, ParameterContainer eventContainer) {
         EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
         EnderFrameSession enderFrameSession = enderFrameSessionHandler.getEnderFrameSession();
         MinecraftEncryption minecraftEncryption = dedicatedEnderChest.getMinecraftEncryption();
