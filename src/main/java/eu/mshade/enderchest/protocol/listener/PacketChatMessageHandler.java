@@ -54,6 +54,14 @@ public class PacketChatMessageHandler implements EventListener<PacketChatMessage
                                     MetadataMeaning.IS_VILLAGER);
                         });
             }
+        }else if(args[0].equalsIgnoreCase("!link")){
+            Location location = enderFrameSessionHandler.getEnderFrameSession().getLocation();
+            ChunkBuffer chunkBuffer = location.getChunkBuffer();
+            System.out.println(location.getChunkBuffer().getEntities().size());
+
+            chunkBuffer.getEntities().stream().filter(entity -> entity.getEntityId() == Integer.parseInt(args[1])).forEach(each ->{
+                PacketMoveHandler.linkedMob.put(enderFrameSessionHandler.getEnderFrameSession(),each.getEntityId());
+            });
         }
 
         dedicatedEnderChest.getEnderFrameSessions().forEach(each -> each.sendMessage(displayName+" : "+ChatColor.translateAlternateColorCodes('&',event.getMessage())));
