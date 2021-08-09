@@ -8,6 +8,8 @@ import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.event.entity.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.metadata.attribute.AttributeProperty;
 import eu.mshade.enderframe.metadata.attribute.AttributeType;
+import eu.mshade.enderframe.protocol.packet.PacketOutSpawnPosition;
+import eu.mshade.enderframe.world.BlockPosition;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Position;
 import eu.mshade.enderframe.world.WorldBuffer;
@@ -39,7 +41,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         enderFrameSession.sendLoginSuccess();
 
         WorldBuffer world = dedicatedEnderChest.getWorldManager().getWorldBuffer("world");
-        Location location = new Location(world, 7.5, 0, 7.5);
+        Location location = new Location(world, 7, 0, 7);
         int highest = location.getChunkBuffer().getHighest(location.getBlockX(), location.getBlockZ());
         location.setY(highest+1);
         enderFrameSession.setLocation(location);
@@ -59,7 +61,9 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         });
 
         world.spawnPlayer(enderFrameSessionHandler,location);
+        enderFrameSession.getEnderFrameSessionHandler().sendPacket(new PacketOutSpawnPosition(new BlockPosition(location.getBlockX(),location.getBlockY(),location.getBlockZ())));
 
+        enderFrameSession.sendPosition(location);
         enderFrameSession.sendSquareChunk(10, location.getChunkX(), location.getChunkZ(), world);
         enderFrameSession.sendPosition(location);
 
