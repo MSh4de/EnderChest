@@ -9,6 +9,7 @@ import eu.mshade.enderframe.event.entity.*;
 import eu.mshade.enderframe.event.server.ServerPingEvent;
 import eu.mshade.enderframe.event.server.ServerStatusEvent;
 import eu.mshade.enderframe.mojang.chat.*;
+import eu.mshade.enderman.packet.play.PacketInEntityAction;
 import eu.mshade.mwork.MWork;
 import eu.mshade.mwork.event.EventBus;
 import io.netty.bootstrap.ServerBootstrap;
@@ -64,6 +65,7 @@ public class EnderChest {
         packetEventBus.subscribe(PacketFinallyJoinEvent.class, new PacketFinallyJoinHandler(dedicatedEnderChest));
         packetEventBus.subscribe(PacketMoveEvent.class, new PacketMoveHandler(dedicatedEnderChest));
         packetEventBus.subscribe(PacketQuitEvent.class, new PacketQuitHandler(dedicatedEnderChest));
+        packetEventBus.subscribe(PacketEntityActionEvent.class, new PacketEntityActionHandler());
 
         eventLoopGroup.scheduleAtFixedRate(() -> {
             dedicatedEnderChest.getEnderFrameSessions().forEach(enderFrameSession -> {
