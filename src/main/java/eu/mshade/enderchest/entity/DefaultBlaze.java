@@ -10,7 +10,7 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class DefaultBlaze implements Blaze {
+public class DefaultBlaze extends Blaze {
     private Location location;
     private Vector velocity;
     private int entityId;
@@ -94,12 +94,12 @@ public class DefaultBlaze implements Blaze {
     }
 
     @Override
-    public boolean isCrounched() {
+    public boolean isSneaking() {
         return isCrounched;
     }
 
     @Override
-    public void setCrounched(boolean isCrounched) {
+    public void setSneaking(boolean isCrounched) {
         this.isCrounched = isCrounched;
     }
 

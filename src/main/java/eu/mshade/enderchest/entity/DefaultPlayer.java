@@ -8,6 +8,7 @@ import eu.mshade.enderframe.protocol.ProtocolVersion;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Vector;
 import eu.mshade.enderman.packet.play.PacketOutDestroyEntities;
+import eu.mshade.enderman.packet.play.PacketOutEntityTeleport;
 import eu.mshade.enderman.packet.play.PacketOutSpawnPlayer;
 
 import java.net.InetSocketAddress;
@@ -15,7 +16,7 @@ import java.net.SocketAddress;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class DefaultPlayer implements Player {
+public class DefaultPlayer extends Player {
 
     private EnderFrameSessionHandler enderFrameSessionHandler;
     private Location location;
@@ -49,6 +50,7 @@ public class DefaultPlayer implements Player {
     public DefaultPlayer(int entityId, Location location, EnderFrameSessionHandler enderFrameSessionHandler) {
         this.entityId = entityId;
         this.location = location;
+        this.name = enderFrameSessionHandler.getEnderFrameSession().getGameProfile().getName();
         this.enderFrameSessionHandler = enderFrameSessionHandler;
         this.uuid = enderFrameSessionHandler.getEnderFrameSession().getGameProfile().getId();
     }
@@ -110,12 +112,12 @@ public class DefaultPlayer implements Player {
     }
 
     @Override
-    public boolean isCrounched() {
+    public boolean isSneaking() {
         return isCrounched;
     }
 
     @Override
-    public void setCrounched(boolean isCrounched) {
+    public void setSneaking(boolean isCrounched) {
         this.isCrounched = isCrounched;
     }
 
@@ -208,6 +210,7 @@ public class DefaultPlayer implements Player {
     public void addViewer(Player player) {
         enderFrameSessionHandler.getEnderFrameSession().spawnPlayer(player);
         viewers.add(player);
+        enderFrameSessionHandler.sendPacket(new PacketOutEntityTeleport(player.getEntityId(),player,false));
     }
 
     @Override

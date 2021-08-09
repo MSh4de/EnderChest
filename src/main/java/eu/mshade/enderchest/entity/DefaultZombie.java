@@ -10,7 +10,7 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class DefaultZombie implements Zombie {
+public class DefaultZombie extends Zombie {
 
     private Location location;
     private Vector velocity;
@@ -99,12 +99,12 @@ public class DefaultZombie implements Zombie {
     }
 
     @Override
-    public boolean isCrounched() {
+    public boolean isSneaking() {
         return isCrounched;
     }
 
     @Override
-    public void setCrounched(boolean isCrounched) {
+    public void setSneaking(boolean isCrounched) {
         this.isCrounched = isCrounched;
     }
 
