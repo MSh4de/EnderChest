@@ -18,8 +18,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.json.XMLTokener.entity;
-
 public class DefaultWorldBuffer implements WorldBuffer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultWorldBuffer.class);
@@ -91,6 +89,7 @@ public class DefaultWorldBuffer implements WorldBuffer {
         ChunkBuffer readChunkBuffer = worldManager.getWorldBufferIO().readChunkBuffer(this, file);
         watchDogChunk.addChunkBuffer(readChunkBuffer);
         chunks.put(id, readChunkBuffer);
+
         return readChunkBuffer;
     }
 
@@ -185,7 +184,7 @@ public class DefaultWorldBuffer implements WorldBuffer {
             location.getChunkBuffer().addEntity(entity);
 
             worldManager.getDedicatedEnderChest().getEnderFrameSessions()
-                    .forEach(session -> session.spawnMob(entity));
+                    .forEach(session -> session.sendMob(entity));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -201,7 +200,6 @@ public class DefaultWorldBuffer implements WorldBuffer {
         try {
             int id = EntityIdManager.get().getFreeId();
             Player player = new DefaultPlayer( id, location, sessionHandler);
-            location.getChunkBuffer().addEntity(player);
             entityPlayer.put(sessionHandler.getEnderFrameSession(), player);
             /*worldManager.getDedicatedEnderChest().getEnderFrameSessions()
                     .stream().filter(session -> !session.getEnderFrameSessionHandler().equals(player.getEnderFrameSessionHandler()))
