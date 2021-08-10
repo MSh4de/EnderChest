@@ -15,7 +15,8 @@ public class DefaultZombieMarshal extends DefaultLivingEntityMarshal {
 
     @Override
     public BinaryTag<?> serialize(BinaryTagMarshal binaryTagMarshal, Type type, Entity entity, ParameterContainer parameterContainer) throws Exception {
-        CompoundBinaryTag compoundBinaryTag = new CompoundBinaryTag();
+        CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) super.serialize(binaryTagMarshal, type, entity, parameterContainer);
+
         Zombie zombie = (Zombie)entity;
 
         compoundBinaryTag.putBoolean("isChild", zombie.isChild());
@@ -29,6 +30,7 @@ public class DefaultZombieMarshal extends DefaultLivingEntityMarshal {
     public Zombie deserialize(BinaryTagMarshal binaryTagMarshal, Type type, BinaryTag<?> binaryTag, ParameterContainer parameterContainer) throws Exception {
         LivingEntity livingEntity = super.deserialize(binaryTagMarshal, type, binaryTag, parameterContainer);
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
+
         return new DefaultZombie(livingEntity.getLocation(),
                 livingEntity.getVelocity(),
                 livingEntity.getEntityId(),

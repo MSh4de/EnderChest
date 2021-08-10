@@ -21,7 +21,7 @@ public class DefaultPlayerMarshal extends DefaultLivingEntityMarshal {
 
     @Override
     public BinaryTag<?> serialize(BinaryTagMarshal binaryTagMarshal, Type type, Entity entity, ParameterContainer parameterContainer) throws Exception {
-        CompoundBinaryTag compoundBinaryTag = new CompoundBinaryTag();
+        CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) super.serialize(binaryTagMarshal, type, entity, parameterContainer);
         Player player = (Player)entity;
 
         compoundBinaryTag.putString("name", player.getName());

@@ -14,15 +14,16 @@ public class DefaultLivingEntityMarshal extends DefaultEntityMarshal {
 
     @Override
     public BinaryTag<?> serialize(BinaryTagMarshal binaryTagMarshal, Type type, Entity entity, ParameterContainer parameterContainer) throws Exception {
-        CompoundBinaryTag compoundBinaryTag = new CompoundBinaryTag();
+        CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) super.serialize(binaryTagMarshal, type, entity, parameterContainer);
         LivingEntity livingEntity = (LivingEntity) entity;
 
         compoundBinaryTag.putFloat("health",livingEntity.getHealth());
         compoundBinaryTag.putInt("potionEffectColor", livingEntity.getPotionEffectColor());
         compoundBinaryTag.putBoolean("isPotionEffectAmbient", livingEntity.isPotionEffectAmbient());
         compoundBinaryTag.putByte("numberOfArrowInEntity", livingEntity.getNumberOfArrowInEntity());
+        System.out.println("t "+livingEntity.getNumberOfArrowInEntity());
+        System.out.println("test "+compoundBinaryTag.getByte("numberOfArrowInEntity"));
         compoundBinaryTag.putBoolean("isAIDisable", livingEntity.isAIDisable());
-
         return compoundBinaryTag;
     }
 
