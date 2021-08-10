@@ -5,6 +5,7 @@ import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.Zombie;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Vector;
+import eu.mshade.enderman.packet.play.PacketOutEntityTeleport;
 
 import java.util.Queue;
 import java.util.UUID;
@@ -219,11 +220,14 @@ public class DefaultZombie extends Zombie {
 
     @Override
     public void addViewer(Player player) {
+        player.getEnderFrameSessionHandler().getEnderFrameSession().sendMob(this);
         viewers.add(player);
+        player.getEnderFrameSessionHandler().sendPacket(new PacketOutEntityTeleport(this.getEntityId(),this,false));
     }
 
     @Override
     public void removeViewer(Player player) {
+        player.getEnderFrameSessionHandler().getEnderFrameSession().removeEntities(player);
         viewers.remove(player);
     }
 
