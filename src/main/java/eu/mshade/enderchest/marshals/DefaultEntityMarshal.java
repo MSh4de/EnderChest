@@ -33,7 +33,7 @@ public class DefaultEntityMarshal implements BinaryTagMarshalBuffer<Entity> {
         compoundBinaryTag.putBoolean("isCustomNameVisible", entity.isCustomNameVisible());
         compoundBinaryTag.putBoolean("isSilent", entity.isSilent());
         compoundBinaryTag.putBinaryTag("uuid", binaryTagMarshal.marshal(entity.getUUID()));
-        compoundBinaryTag.putString("entityType", entity.getType().toString());
+        compoundBinaryTag.putString("entityType", entity.getType().name());
 
         return compoundBinaryTag;
     }
@@ -55,6 +55,6 @@ public class DefaultEntityMarshal implements BinaryTagMarshalBuffer<Entity> {
                 compoundBinaryTag.getBoolean("isCustomNameVisible"),
                 compoundBinaryTag.getBoolean("isSilent"),
                 binaryTagMarshal.unMarshal(compoundBinaryTag.getBinaryTag("uuid"), UUID.class),
-                EntityType.valueOf(compoundBinaryTag.getString("entityType")));
+                EntityType.getEntityTypeByName(compoundBinaryTag.getString("entityType")));
     }
 }
