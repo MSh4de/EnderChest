@@ -2,6 +2,8 @@ package eu.mshade.enderchest.marshals;
 
 import eu.mshade.enderchest.world.DefaultChunkBuffer;
 import eu.mshade.enderframe.entity.Entity;
+import eu.mshade.enderframe.entity.EntityType;
+import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.world.ChunkBuffer;
 import eu.mshade.enderframe.world.SectionBuffer;
 import eu.mshade.enderframe.world.WorldBuffer;
@@ -30,25 +32,25 @@ public class DefaultChunkMarshal implements BinaryTagMarshalBuffer<ChunkBuffer> 
         ZstdListBinaryTag listBinaryTagEntities = new ZstdListBinaryTag(BinaryTagType.COMPOUND);
 
         for (SectionBuffer sectionBuffer : chunkBuffer.getSectionBuffers()) {
-            if (sectionBuffer != null)
-                listBinaryTagSections.add(binaryTagMarshal.marshal(sectionBuffer));
+            if (sectionBuffer != null) listBinaryTagSections.add(binaryTagMarshal.marshal(sectionBuffer));
         }
 
-        for(Entity entity : chunkBuffer.getEntities())
+        for(Entity entity : chunkBuffer.getEntities()) {
+            System.out.println(entity);
             listBinaryTagEntities.add(binaryTagMarshal.marshal(entity));
+        }
 
         compoundBinaryTag.putBinaryTag("sections", listBinaryTagSections);
         compoundBinaryTag.putBinaryTag("entities", listBinaryTagEntities);
-
         return compoundBinaryTag;
     }
 
     @Override
     public ChunkBuffer deserialize(BinaryTagMarshal binaryTagMarshal, Type type, BinaryTag<?> binaryTag, ParameterContainer parameterContainer) throws Exception {
-        CompoundBinaryTag compoundBinaryTag = new CompoundBinaryTag();
+        CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
-        File file = parameterContainer.getContainer(File.class);
-        WorldBuffer worldBuffer = parameterContainer.getContainer(WorldBuffer.class);
+        File file = parameterContainer.getContainer("file", File.class);
+        WorldBuffer worldBuffer = parameterContainer.getContainer("worldBuffer", WorldBuffer.class);
 
         int x = compoundBinaryTag.getInt("x");
         int z = compoundBinaryTag.getInt("z");
@@ -57,16 +59,18 @@ public class DefaultChunkMarshal implements BinaryTagMarshalBuffer<ChunkBuffer> 
         ZstdListBinaryTag sectionBinaryTags = (ZstdListBinaryTag) compoundBinaryTag.getBinaryTag("sections");
         ZstdListBinaryTag entityBinaryTags = (ZstdListBinaryTag) compoundBinaryTag.getBinaryTag("entities");
 
-        ChunkBuffer chunkBuffer = new DefaultChunkBuffer(x, z, false, worldBuffer, file);
+        ChunkBuffer chunkBuffer = new DefaultChunkBuffer(x, z, file, false, worldBuffer, biome);
         SectionBuffer[] sectionBuffers = chunkBuffer.getSectionBuffers();
 
         sectionBinaryTags.forEach(sectionBinaryTag -> {
-            SectionBuffer sectionBuffer = binaryTagMarshal.unMarshal(sectionBinaryTag, SectionBuffer.class, parameterContainer.putContainer(chunkBuffer));
+            SectionBuffer sectionBuffer = binaryTagMarshal.unMarshal(sectionBinaryTag, SectionBuffer.class, parameterContainer.putContainer("chunkBuffer", chunkBuffer));
             sectionBuffers[sectionBuffer.getY()] = sectionBuffer;
         });
 
-        entityBinaryTags.forEach(entityBinaryTag -> {
-            chunkBuffer.addEntity(binaryTagMarshal.unMarshal(entityBinaryTag, Entity.class, parameterContainer));
+        entityBinaryTags.forEach(entityBinaryTag ->{
+            CompoundBinaryTag compoundBinaryTagEntity = (CompoundBinaryTag)entityBinaryTag;
+            EntityType entityType = EntityType.getEntityTypeByName(compoundBinaryTagEntity.getString("entityType"));
+            chunkBuffer.addEntity(binaryTagMarshal.unMarshal(entityBinaryTag, entityType.getClazz(), parameterContainer));
         });
 
         return chunkBuffer;
