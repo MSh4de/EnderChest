@@ -48,7 +48,7 @@ public class WorldBufferIO {
         if (chunkBuffer.hasChange()) {
             synchronized (chunkBuffer.getFile()) {
                 try {
-                    CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) new DefaultChunkMarshal().serialize(new DefaultBinaryTagMarshal(), ChunkBuffer.class, chunkBuffer, ParameterContainer.EMPTY);
+                    CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) MWork.get().getBinaryTagMarshal().marshal(chunkBuffer);
                     FileOutputStream fileOutputStream = new FileOutputStream(chunkBuffer.getFile());
                     MWork.get().getBinaryTagBufferDriver().writeCompoundBinaryTag(compoundBinaryTag, fileOutputStream);
                 } catch (Exception e) {
@@ -63,9 +63,10 @@ public class WorldBufferIO {
             try {
                 FileInputStream fileInputStream = new FileInputStream(file);
                 CompoundBinaryTag compoundBinaryTag = MWork.get().getBinaryTagBufferDriver().readCompoundBinaryTag(fileInputStream);
-                return new DefaultChunkMarshal().deserialize(new DefaultBinaryTagMarshal(), ChunkBuffer.class, compoundBinaryTag, new ParameterContainer()
-                        .putContainer(file)
-                        .putContainer(worldBuffer));
+                ParameterContainer parameterContainer = new ParameterContainer();
+                parameterContainer.putContainer("file",file);
+                parameterContainer.putContainer("worldBuffer",worldBuffer);
+                return MWork.get().getBinaryTagMarshal().unMarshal(compoundBinaryTag, ChunkBuffer.class, parameterContainer);
 
             } catch (Exception e) {e.printStackTrace();}
         }
