@@ -160,6 +160,7 @@ public class DefaultWorldBuffer implements WorldBuffer {
 
     @Override
     public void addEntity(Entity entity) {
+        if(this.entities.contains(entity)) return;
         this.entities.add(entity);
     }
 
@@ -182,9 +183,8 @@ public class DefaultWorldBuffer implements WorldBuffer {
                     .putContainer(id)
                     .putContainer(location));
             location.getChunkBuffer().addEntity(entity);
-
-            worldManager.getDedicatedEnderChest().getEnderFrameSessions()
-                    .forEach(session -> session.sendMob(entity));
+            location.getChunkBuffer().getViewers().forEach(each -> each.sendMob(entity));
+            //worldManager.getDedicatedEnderChest().getEnderFrameSessions().forEach(each -> each.sendMob(entity));
         } catch (Exception e) {
             e.printStackTrace();
         }
