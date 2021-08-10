@@ -1,6 +1,5 @@
 package eu.mshade.enderchest.entity;
 
-import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.entity.EntityType;
 import eu.mshade.enderframe.entity.Player;
@@ -217,7 +216,7 @@ public class DefaultPlayer extends Player {
 
     @Override
     public void addViewer(Player player) {
-        enderFrameSessionHandler.getEnderFrameSession().spawnPlayer(player);
+        enderFrameSessionHandler.getEnderFrameSession().sendPlayer(player);
         viewers.add(player);
         enderFrameSessionHandler.sendPacket(new PacketOutEntityTeleport(player.getEntityId(),player,false));
     }
