@@ -2,6 +2,7 @@ package eu.mshade.enderchest.marshals;
 
 import eu.mshade.enderchest.entity.DefaultEntity;
 import eu.mshade.enderframe.entity.Entity;
+import eu.mshade.enderframe.entity.EntityIdManager;
 import eu.mshade.enderframe.entity.EntityType;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Vector;
@@ -22,7 +23,6 @@ public class DefaultEntityMarshal implements BinaryTagMarshalBuffer<Entity> {
 
         compoundBinaryTag.putBinaryTag("location", binaryTagMarshal.marshal(entity.getLocation()));
         compoundBinaryTag.putBinaryTag("velocity", binaryTagMarshal.marshal(entity.getVelocity()));
-        compoundBinaryTag.putInt("entityId", entity.getEntityId());
         compoundBinaryTag.putBoolean("isFire", entity.isFire());
         compoundBinaryTag.putBoolean("isSneaking", entity.isSneaking());
         compoundBinaryTag.putBoolean("isSprinting", entity.isSprinting());
@@ -44,7 +44,7 @@ public class DefaultEntityMarshal implements BinaryTagMarshalBuffer<Entity> {
         return new DefaultEntity(
                 binaryTagMarshal.unMarshal(compoundBinaryTag.getBinaryTag("location"), Location.class, parameterContainer),
                 binaryTagMarshal.unMarshal(compoundBinaryTag.getBinaryTag("velocity"), Vector.class),
-                compoundBinaryTag.getInt("entityId"),
+                EntityIdManager.get().getFreeId(),
                 compoundBinaryTag.getBoolean("isFire"),
                 compoundBinaryTag.getBoolean("isSneaking"),
                 compoundBinaryTag.getBoolean("isSprinting"),
