@@ -33,17 +33,20 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
     private SectionBuffer[] sectionBuffers = new SectionBuffer[16];
     private final Queue<Entity> entities = new ConcurrentLinkedQueue<>();
     //private final AtomicReference<ChunkBufferStatus> chunkBufferStatus
-    private byte[] biomes =  new byte[256];
+    private byte[] biomes;
 
-
-
-    public DefaultChunkBuffer(int x, int z, boolean hasChange, WorldBuffer worldBuffer, File file) {
+    public DefaultChunkBuffer(int x, int z, File file, boolean hasChange, WorldBuffer worldBuffer, byte[] biomes) {
         this.x = x;
         this.z = z;
-        this.hasChange = hasChange;
         this.file = file;
-        this.id = ChunkBuffer.ofId(x, z);
+        this.hasChange = hasChange;
         this.worldBuffer = worldBuffer;
+        this.biomes = biomes;
+        this.id = ChunkBuffer.ofId(x, z);
+    }
+
+    public DefaultChunkBuffer(int x, int z, boolean hasChange, WorldBuffer worldBuffer, File file) {
+        this(x, z, file, hasChange, worldBuffer, new byte[256]);
     }
 
     @Override
