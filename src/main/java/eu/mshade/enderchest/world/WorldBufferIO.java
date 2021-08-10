@@ -58,13 +58,14 @@ public class WorldBufferIO {
         }
     }
 
-    public ChunkBuffer readChunkBuffer(WorldBuffer worldBuffer, File file) {
+    public ChunkBuffer readChunkBuffer(WorldBuffer worldBuffer, WorldManager worldManager, File file) {
         synchronized (file) {
             try {
                 FileInputStream fileInputStream = new FileInputStream(file);
                 CompoundBinaryTag compoundBinaryTag = MWork.get().getBinaryTagBufferDriver().readCompoundBinaryTag(fileInputStream);
                 ParameterContainer parameterContainer = new ParameterContainer();
                 parameterContainer.putContainer(file);
+                parameterContainer.putContainer(worldBuffer);
                 parameterContainer.putContainer(worldBuffer);
                 return MWork.get().getBinaryTagMarshal().unMarshal(compoundBinaryTag, ChunkBuffer.class, parameterContainer);
 

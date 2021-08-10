@@ -86,7 +86,7 @@ public class DefaultWorldBuffer implements WorldBuffer {
             chunks.put(id, buffer);
             return buffer;
         }
-        ChunkBuffer readChunkBuffer = worldManager.getWorldBufferIO().readChunkBuffer(this, file);
+        ChunkBuffer readChunkBuffer = worldManager.getWorldBufferIO().readChunkBuffer(this, worldManager, file);
         watchDogChunk.addChunkBuffer(readChunkBuffer);
         chunks.put(id, readChunkBuffer);
 
