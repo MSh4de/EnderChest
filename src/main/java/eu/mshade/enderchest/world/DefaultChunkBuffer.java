@@ -198,7 +198,14 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
 
     @Override
     public void addEntity(Entity entity) {
-        this.entities.add(entity);
+        getWorldBuffer().addEntity(entity);
+        getEntities().add(entity);
+    }
+
+    @Override
+    public void removeEntity(Entity entity) {
+        getWorldBuffer().removeEntity(entity);
+        getEntities().remove(entity);
     }
 
     public void setBiomes(byte[] biomes) {
