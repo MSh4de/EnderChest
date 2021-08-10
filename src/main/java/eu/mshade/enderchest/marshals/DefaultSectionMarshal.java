@@ -30,7 +30,7 @@ public class DefaultSectionMarshal implements BinaryTagMarshalBuffer<SectionBuff
 
     @Override
     public SectionBuffer deserialize(BinaryTagMarshal binaryTagMarshal, Type type, BinaryTag<?> binaryTag, ParameterContainer parameterContainer) throws Exception {
-        ChunkBuffer chunkBuffer = parameterContainer.getContainer(ChunkBuffer.class);
+        ChunkBuffer chunkBuffer = parameterContainer.getContainer("chunkBuffer", ChunkBuffer.class);
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
         return new DefaultSectionBuffer(chunkBuffer,
