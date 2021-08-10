@@ -20,7 +20,7 @@ public class DefaultBlaze extends Blaze {
     private boolean isEating;
     private boolean isInvisible;
     private short airTicks;
-    private String customName;
+    private String customName = "";
     private boolean isCustomNameVisible;
     private boolean isSilent;
     private UUID uuid;
@@ -35,6 +35,7 @@ public class DefaultBlaze extends Blaze {
         this.entityId = entityId;
         this.location = location;
         this.uuid = UUID.randomUUID();
+        this.velocity = new Vector();
     }
 
     public DefaultBlaze(Location location, Vector velocity, int entityId, boolean isFire, boolean isCrounched, boolean isSprinting, boolean isEating, boolean isInvisible, short airTicks, String customName, boolean isCustomNameVisible, boolean isSilent, UUID uuid, float health, int potionEffectColor, boolean isPotionEffectAmbient, byte numberOfArrowsInEntity, boolean isAIDisable) {

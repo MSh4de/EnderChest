@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class DefaultZombie extends Zombie {
 
     private Location location;
-    private Vector velocity;
+    private Vector velocity = new Vector();
     private int entityId;
     private boolean isFire;
     private boolean isSneaking;
@@ -22,7 +22,7 @@ public class DefaultZombie extends Zombie {
     private boolean isEating;
     private boolean isInvisible;
     private short airTicks;
-    private String customName;
+    private String customName = "";
     private boolean isCustomNameVisible;
     private boolean isSilent;
     private UUID uuid;

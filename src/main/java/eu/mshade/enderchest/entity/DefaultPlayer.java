@@ -28,7 +28,7 @@ public class DefaultPlayer extends Player {
     private boolean isEating;
     private boolean isInvisible;
     private short airTicks;
-    private String customName;
+    private String customName = "";
     private boolean isCustomNameVisible;
     private boolean isSilent;
     private final UUID uuid;
@@ -53,6 +53,7 @@ public class DefaultPlayer extends Player {
         this.name = enderFrameSessionHandler.getEnderFrameSession().getGameProfile().getName();
         this.enderFrameSessionHandler = enderFrameSessionHandler;
         this.uuid = enderFrameSessionHandler.getEnderFrameSession().getGameProfile().getId();
+        this.velocity = new Vector();
     }
 
     public DefaultPlayer(Location location, Vector velocity, int entityId, boolean isFire, boolean isSneaking, boolean isSprinting, boolean isEating, boolean isInvisible, short airTicks, String customName, boolean isCustomNameVisible, boolean isSilent, UUID uuid, float health, int potionEffectColor, boolean isPotionEffectAmbient, byte numberOfArrowsInEntity, boolean isAIDisable, String name, InetSocketAddress inetSocketAddress, ProtocolVersion protocolVersion, int ping, SkinParts skinParts, boolean unused, float absorptionHearts, int score) {

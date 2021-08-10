@@ -22,7 +22,7 @@ public class DefaultLivingEntity extends LivingEntity {
     private boolean isEating;
     private boolean isInvisible;
     private short airTicks;
-    private String customName;
+    private String customName = "";
     private boolean isCustomNameVisible;
     private boolean isSilent;
     private UUID uuid;

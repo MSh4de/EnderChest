@@ -14,7 +14,7 @@ public class DefaultEntity extends Entity {
 
     private final EntityType entityType;
     private Location location;
-    private Vector velocity;
+    private Vector velocity = new Vector();
     private final int entityId;
     private boolean isFire;
     private boolean isSneaking;
@@ -22,7 +22,7 @@ public class DefaultEntity extends Entity {
     private boolean isEating;
     private boolean isInvisible;
     private short airTicks;
-    private String customName;
+    private String customName = "";
     private boolean isCustomNameVisible;
     private boolean isSilent;
     private final UUID uuid;
