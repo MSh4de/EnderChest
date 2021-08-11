@@ -14,6 +14,7 @@ import eu.mshade.mwork.binarytag.marshal.BinaryTagMarshalBuffer;
 
 import java.lang.reflect.Type;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class DefaultEntityMarshal implements BinaryTagMarshalBuffer<Entity> {
 
@@ -41,8 +42,7 @@ public class DefaultEntityMarshal implements BinaryTagMarshalBuffer<Entity> {
     @Override
     public Entity deserialize(BinaryTagMarshal binaryTagMarshal, Type type, BinaryTag<?> binaryTag, ParameterContainer parameterContainer) throws Exception {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
-        return new DefaultEntity(
-                binaryTagMarshal.unMarshal(compoundBinaryTag.getBinaryTag("location"), Location.class, parameterContainer),
+        return new DefaultEntity(binaryTagMarshal.unMarshal(compoundBinaryTag.getBinaryTag("location"), Location.class, parameterContainer),
                 binaryTagMarshal.unMarshal(compoundBinaryTag.getBinaryTag("velocity"), Vector.class),
                 EntityIdManager.get().getFreeId(),
                 compoundBinaryTag.getBoolean("isFire"),

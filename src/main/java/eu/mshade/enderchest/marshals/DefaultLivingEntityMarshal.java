@@ -42,6 +42,8 @@ public class DefaultLivingEntityMarshal extends DefaultEntityMarshal {
                 entity.isCustomNameVisible(),
                 entity.isSilent(),
                 entity.getUUID(),
+                entity.getType(),
+                entity.getViewers(),
                 compoundBinaryTag.getFloat("health"),
                 compoundBinaryTag.getInt("potionEffectColor"),
                 compoundBinaryTag.getBoolean("isPotionEffectAmbient"),

@@ -2,6 +2,7 @@ package eu.mshade.enderchest.marshals;
 
 import eu.mshade.enderchest.entity.DefaultZombie;
 import eu.mshade.enderframe.entity.Entity;
+import eu.mshade.enderframe.entity.EntityType;
 import eu.mshade.enderframe.entity.LivingEntity;
 import eu.mshade.enderframe.entity.Zombie;
 import eu.mshade.mwork.ParameterContainer;
@@ -10,6 +11,7 @@ import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
 import eu.mshade.mwork.binarytag.marshal.BinaryTagMarshal;
 
 import java.lang.reflect.Type;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class DefaultZombieMarshal extends DefaultLivingEntityMarshal {
 
@@ -22,6 +24,7 @@ public class DefaultZombieMarshal extends DefaultLivingEntityMarshal {
         compoundBinaryTag.putBoolean("isChild", zombie.isChild());
         compoundBinaryTag.putBoolean("isVillager", zombie.isVillager());
         compoundBinaryTag.putBoolean("isConverting", zombie.isConverting());
+        compoundBinaryTag.putInt("age", zombie.getAge());
 
         return compoundBinaryTag;
     }
@@ -51,6 +54,7 @@ public class DefaultZombieMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.isAIDisable(),
                 compoundBinaryTag.getBoolean("isChild"),
                 compoundBinaryTag.getBoolean("isVillager"),
-                compoundBinaryTag.getBoolean("isConverting"));
+                compoundBinaryTag.getBoolean("isConverting"),
+                compoundBinaryTag.getInt("age"));
     }
 }

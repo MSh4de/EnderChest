@@ -7,15 +7,12 @@ import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.LivingEntity;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.mojang.SkinParts;
-import eu.mshade.enderframe.protocol.ProtocolVersion;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.binarytag.BinaryTag;
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
 import eu.mshade.mwork.binarytag.marshal.BinaryTagMarshal;
-import eu.mshade.mwork.binarytag.marshal.BinaryTagMarshalBuffer;
 
 import java.lang.reflect.Type;
-import java.net.InetSocketAddress;
 
 public class DefaultPlayerMarshal extends DefaultLivingEntityMarshal {
 
@@ -51,18 +48,20 @@ public class DefaultPlayerMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.isCustomNameVisible(),
                 livingEntity.isSilent(),
                 livingEntity.getUUID(),
+                livingEntity.getViewers(),
                 livingEntity.getHealth(),
                 livingEntity.getPotionEffectColor(),
                 livingEntity.isPotionEffectAmbient(),
                 livingEntity.getNumberOfArrowInEntity(),
                 livingEntity.isAIDisable(),
+                enderFrameSessionHandler,
                 compoundBinaryTag.getString("name"),
-                (InetSocketAddress) enderFrameSession.getSocketAddress(),
+                enderFrameSession.getSocketAddress(),
                 enderFrameSessionHandler.getProtocolVersion(),
                 0,
-                SkinParts.fromByte((byte) 127),
+                SkinParts.fromByte((byte)127),
                 false,
-                compoundBinaryTag.getFloat("absorptionHearts"),
+                compoundBinaryTag.getFloat("absorptionHeart"),
                 compoundBinaryTag.getInt("score"));
     }
 }
