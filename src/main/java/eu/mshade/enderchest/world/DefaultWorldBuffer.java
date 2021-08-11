@@ -182,6 +182,8 @@ public class DefaultWorldBuffer implements WorldBuffer {
             Entity entity = entityFactory.factoryEntity(entityType, ParameterContainer.of()
                     .putContainer(id)
                     .putContainer(location));
+            System.out.println(entity);
+            System.out.println(location.getChunkBuffer());
             location.getChunkBuffer().addEntity(entity);
             location.getChunkBuffer().getViewers().forEach(each -> each.sendMob(entity));
             //worldManager.getDedicatedEnderChest().getEnderFrameSessions().forEach(each -> each.sendMob(entity));

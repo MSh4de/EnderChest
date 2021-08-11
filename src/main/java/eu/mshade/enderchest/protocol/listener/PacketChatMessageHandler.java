@@ -34,14 +34,11 @@ public class PacketChatMessageHandler implements EventListener<PacketChatMessage
 
             Location location = enderFrameSessionHandler.getEnderFrameSession().getLocation();
             WorldBuffer world = location.getWorld();
-
             world.spawnEntity(EntityType.ZOMBIE, location);
-            System.out.println(location.getChunkBuffer().getEntities().size());
         }else if(args[0].equalsIgnoreCase("!change")){
             if(args[1].equalsIgnoreCase("byte")) {
                 Location location = enderFrameSessionHandler.getEnderFrameSession().getLocation();
                 ChunkBuffer chunkBuffer = location.getChunkBuffer();
-                System.out.println(location.getChunkBuffer().getEntities().size());
 
                 chunkBuffer.getEntities().stream()
                         .findFirst()

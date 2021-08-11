@@ -21,8 +21,6 @@ public class DefaultLivingEntityMarshal extends DefaultEntityMarshal {
         compoundBinaryTag.putInt("potionEffectColor", livingEntity.getPotionEffectColor());
         compoundBinaryTag.putBoolean("isPotionEffectAmbient", livingEntity.isPotionEffectAmbient());
         compoundBinaryTag.putByte("numberOfArrowInEntity", livingEntity.getNumberOfArrowInEntity());
-        System.out.println("t "+livingEntity.getNumberOfArrowInEntity());
-        System.out.println("test "+compoundBinaryTag.getByte("numberOfArrowInEntity"));
         compoundBinaryTag.putBoolean("isAIDisable", livingEntity.isAIDisable());
         return compoundBinaryTag;
     }
