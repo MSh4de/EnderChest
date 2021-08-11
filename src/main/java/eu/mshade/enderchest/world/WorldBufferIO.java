@@ -1,10 +1,8 @@
 package eu.mshade.enderchest.world;
 
-import eu.mshade.enderchest.marshals.DefaultChunkMarshal;
 import eu.mshade.enderframe.world.*;
 import eu.mshade.mwork.MWork;
 import eu.mshade.mwork.ParameterContainer;
-import eu.mshade.mwork.binarytag.DefaultBinaryTagMarshal;
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +24,7 @@ public class WorldBufferIO {
         compoundBinaryTag.putString("levelType", worldLevel.getLevelType().toString());
         compoundBinaryTag.putString("dimension", worldLevel.getDimension().toString());
         compoundBinaryTag.putString("difficulty", worldLevel.getDifficulty().toString());
-        try(FileOutputStream fileOutputStream = new FileOutputStream(file)){
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
             MWork.get().getBinaryTagBufferDriver().writeCompoundBinaryTag(compoundBinaryTag, fileOutputStream);
         } catch (IOException e) {
             logger.error("", e);
@@ -66,10 +64,12 @@ public class WorldBufferIO {
                 ParameterContainer parameterContainer = new ParameterContainer();
                 parameterContainer.putContainer(file);
                 parameterContainer.putContainer(worldBuffer);
-                parameterContainer.putContainer(worldBuffer);
+                parameterContainer.putContainer(worldManager);
                 return MWork.get().getBinaryTagMarshal().unMarshal(compoundBinaryTag, ChunkBuffer.class, parameterContainer);
 
-            } catch (Exception e) {e.printStackTrace();}
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return null;
     }
