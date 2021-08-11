@@ -2,6 +2,7 @@ package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderchest.DedicatedEnderChest;
 import eu.mshade.enderframe.*;
+import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.event.entity.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.protocol.packet.PacketOutSpawnPosition;
 import eu.mshade.enderframe.world.BlockPosition;
@@ -36,7 +37,6 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         enderFrameSession.setLocation(location);
 
 
-
         enderFrameSession.sendJoinGame(GameMode.CREATIVE, world.getWorldLevel().getDimension(), world.getWorldLevel().getDifficulty(), 20, world.getWorldLevel().getLevelType(), false);
         enderFrameSession.sendAbilities(false, false, true, false, 0.2F, 0.2F);
 
@@ -49,7 +49,8 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
             target.sendMessage(String.format("%s join server", enderFrameSession.getGameProfile().getName()));
         });
 
-        world.spawnPlayer(enderFrameSessionHandler,location);
+        Player player = world.spawnPlayer(enderFrameSessionHandler,location);
+        enderFrameSession.setPlayer(player);
         enderFrameSession.getEnderFrameSessionHandler().sendPacket(new PacketOutSpawnPosition(new BlockPosition(location.getBlockX(),location.getBlockY(),location.getBlockZ())));
 
         enderFrameSession.sendPosition(location);
