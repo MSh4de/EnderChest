@@ -5,7 +5,6 @@ import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.Zombie;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Vector;
-import eu.mshade.enderman.packet.play.PacketOutEntityTeleport;
 
 import java.util.Queue;
 import java.util.UUID;
@@ -222,7 +221,7 @@ public class DefaultZombie extends Zombie {
     public void addViewer(Player player) {
         player.getEnderFrameSessionHandler().getEnderFrameSession().sendMob(this);
         viewers.add(player);
-        player.getEnderFrameSessionHandler().sendPacket(new PacketOutEntityTeleport(this.getEntityId(),this,false));
+        player.getEnderFrameSessionHandler().getEnderFrameSession().sendTeleport(this,false);
     }
 
     @Override
@@ -309,5 +308,34 @@ public class DefaultZombie extends Zombie {
     @Override
     public void setConverting(boolean isConverting) {
         this.isConverting = isConverting;
+    }
+
+    @Override
+    public String toString() {
+        return "DefaultZombie{" +
+                "location=" + location +
+                ", velocity=" + velocity +
+                ", entityId=" + entityId +
+                ", isFire=" + isFire +
+                ", isSneaking=" + isSneaking +
+                ", isSprinting=" + isSprinting +
+                ", isEating=" + isEating +
+                ", isInvisible=" + isInvisible +
+                ", airTicks=" + airTicks +
+                ", customName='" + customName + '\'' +
+                ", isCustomNameVisible=" + isCustomNameVisible +
+                ", isSilent=" + isSilent +
+                ", uuid=" + uuid +
+                ", entityType=" + entityType +
+                ", viewers=" + viewers +
+                ", health=" + health +
+                ", potionEffectColor=" + potionEffectColor +
+                ", isPotionEffectAmbient=" + isPotionEffectAmbient +
+                ", numberOfArrowsInEntity=" + numberOfArrowsInEntity +
+                ", isAIDisable=" + isAIDisable +
+                ", isChild=" + isChild +
+                ", isVillager=" + isVillager +
+                ", isConverting=" + isConverting +
+                '}';
     }
 }

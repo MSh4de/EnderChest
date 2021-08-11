@@ -7,7 +7,6 @@ import eu.mshade.enderframe.mojang.SkinParts;
 import eu.mshade.enderframe.protocol.ProtocolVersion;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Vector;
-import eu.mshade.enderman.packet.play.PacketOutEntityTeleport;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -219,7 +218,7 @@ public class DefaultPlayer extends Player {
     public void addViewer(Player player) {
         enderFrameSessionHandler.getEnderFrameSession().sendPlayer(player);
         viewers.add(player);
-        enderFrameSessionHandler.sendPacket(new PacketOutEntityTeleport(player.getEntityId(),player,false));
+        enderFrameSessionHandler.getEnderFrameSession().sendTeleport(player,false);
     }
 
     @Override
