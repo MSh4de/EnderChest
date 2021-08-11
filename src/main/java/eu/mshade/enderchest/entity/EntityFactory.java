@@ -17,10 +17,12 @@ public class EntityFactory {
     private EntityFactory() {
         entityFactory = this;
 
+        registerFactoryEntity(EntityType.ARMOR_STAND, parameterContainer ->
+            new DefaultArmorStand(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.ZOMBIE, parameterContainer ->
-                new DefaultZombie(parameterContainer.getContainer(Integer.class), parameterContainer.getContainer(Location.class)));
+                new DefaultZombie(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.BLAZE, parameterContainer ->
-                new DefaultBlaze(parameterContainer.getContainer(Integer.class), parameterContainer.getContainer(Location.class)));
+                new DefaultBlaze(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
     }
 
     public static EntityFactory get() {
