@@ -2,6 +2,8 @@ package eu.mshade.enderchest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import eu.mshade.enderchest.entity.DefaultArmorStand;
+import eu.mshade.enderchest.entity.DefaultBlaze;
 import eu.mshade.enderchest.entity.DefaultPlayer;
 import eu.mshade.enderchest.entity.DefaultZombie;
 import eu.mshade.enderchest.marshals.*;
@@ -9,6 +11,8 @@ import eu.mshade.enderchest.protocol.listener.*;
 import eu.mshade.enderchest.world.DefaultChunkBuffer;
 import eu.mshade.enderchest.world.DefaultSectionBuffer;
 import eu.mshade.enderframe.EnderFrame;
+import eu.mshade.enderframe.entity.ArmorStand;
+import eu.mshade.enderframe.entity.Blaze;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.Zombie;
 import eu.mshade.enderframe.event.PacketEvent;
@@ -16,10 +20,7 @@ import eu.mshade.enderframe.event.entity.*;
 import eu.mshade.enderframe.event.server.ServerPingEvent;
 import eu.mshade.enderframe.event.server.ServerStatusEvent;
 import eu.mshade.enderframe.mojang.chat.*;
-import eu.mshade.enderframe.world.ChunkBuffer;
-import eu.mshade.enderframe.world.Location;
-import eu.mshade.enderframe.world.SectionBuffer;
-import eu.mshade.enderframe.world.Vector;
+import eu.mshade.enderframe.world.*;
 import eu.mshade.mwork.MWork;
 import eu.mshade.mwork.binarytag.marshal.BinaryTagMarshal;
 import eu.mshade.mwork.event.EventBus;
@@ -87,6 +88,9 @@ public class EnderChest {
         binaryTagMarshal.registerAdaptor(Location.class, new DefaultLocationMarshal());
         binaryTagMarshal.registerAdaptor(Arrays.asList(Player.class, DefaultPlayer.class), new DefaultPlayerMarshal());
         binaryTagMarshal.registerAdaptor(Vector.class, new DefaultVectorMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(Blaze.class, DefaultBlaze.class), new DefaultBlazeMarshal());
+        binaryTagMarshal.registerAdaptor(Rotation.class, new DefaultRotationMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(ArmorStand.class, DefaultArmorStand.class), new DefaultArmorStandMarshal());
 
         eventLoopGroup.scheduleAtFixedRate(() -> {
             dedicatedEnderChest.getEnderFrameSessions().forEach(enderFrameSession -> {
