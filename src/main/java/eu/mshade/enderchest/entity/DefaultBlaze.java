@@ -21,6 +21,6 @@ public class DefaultBlaze extends Blaze {
     }
 
     public DefaultBlaze(Location location, int entityId) {
-        super(location, entityId, 20f, false);
+        this(location, entityId, 20f, false);
     }
 }

@@ -20,6 +20,6 @@ public class DefaultArmorStand extends ArmorStand {
     }
 
     public DefaultArmorStand(Location location, int entityId) {
-        super(location, entityId);
+        this(location, entityId, false, true, false, false);
     }
 }
