@@ -2,19 +2,20 @@ package eu.mshade.enderchest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import eu.mshade.enderchest.entity.DefaultArmorStand;
-import eu.mshade.enderchest.entity.DefaultBlaze;
-import eu.mshade.enderchest.entity.DefaultPlayer;
-import eu.mshade.enderchest.entity.DefaultZombie;
-import eu.mshade.enderchest.marshals.*;
+import eu.mshade.enderchest.entity.*;
+import eu.mshade.enderchest.marshals.assets.DefaultAgeableMarshal;
+import eu.mshade.enderchest.marshals.assets.DefaultRideableMarshal;
+import eu.mshade.enderchest.marshals.entity.*;
+import eu.mshade.enderchest.marshals.utils.DefaultRotationMarshal;
+import eu.mshade.enderchest.marshals.utils.DefaultVectorMarshal;
+import eu.mshade.enderchest.marshals.world.DefaultChunkMarshal;
+import eu.mshade.enderchest.marshals.world.DefaultLocationMarshal;
+import eu.mshade.enderchest.marshals.world.DefaultSectionMarshal;
 import eu.mshade.enderchest.protocol.listener.*;
 import eu.mshade.enderchest.world.DefaultChunkBuffer;
 import eu.mshade.enderchest.world.DefaultSectionBuffer;
 import eu.mshade.enderframe.EnderFrame;
-import eu.mshade.enderframe.entity.ArmorStand;
-import eu.mshade.enderframe.entity.Blaze;
-import eu.mshade.enderframe.entity.Player;
-import eu.mshade.enderframe.entity.Zombie;
+import eu.mshade.enderframe.entity.*;
 import eu.mshade.enderframe.event.PacketEvent;
 import eu.mshade.enderframe.event.entity.*;
 import eu.mshade.enderframe.event.server.ServerPingEvent;
@@ -91,6 +92,10 @@ public class EnderChest {
         binaryTagMarshal.registerAdaptor(Arrays.asList(Blaze.class, DefaultBlaze.class), new DefaultBlazeMarshal());
         binaryTagMarshal.registerAdaptor(Rotation.class, new DefaultRotationMarshal());
         binaryTagMarshal.registerAdaptor(Arrays.asList(ArmorStand.class, DefaultArmorStand.class), new DefaultArmorStandMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(Arrow.class, DefaultArrow.class), new DefaultArrowMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(Ageable.class, DefaultAgeableEntity.class), new DefaultAgeableMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(Rideable.class, DefaultRideableEntity.class), new DefaultRideableMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(Pig.class, DefaultPigEntity.class), new DefaultPigMarshal());
 
         eventLoopGroup.scheduleAtFixedRate(() -> {
             dedicatedEnderChest.getEnderFrameSessions().forEach(enderFrameSession -> {
