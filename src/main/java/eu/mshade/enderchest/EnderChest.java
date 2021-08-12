@@ -92,7 +92,7 @@ public class EnderChest {
         binaryTagMarshal.registerAdaptor(Arrays.asList(Blaze.class, DefaultBlaze.class), new DefaultBlazeMarshal());
         binaryTagMarshal.registerAdaptor(Rotation.class, new DefaultRotationMarshal());
         binaryTagMarshal.registerAdaptor(Arrays.asList(ArmorStand.class, DefaultArmorStand.class), new DefaultArmorStandMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Arrow.class, DefaultArrow.class), new DefaultArrowMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(Arrow.class, DefaultArrowEntity.class), new DefaultArrowMarshal());
         binaryTagMarshal.registerAdaptor(Arrays.asList(Ageable.class, DefaultAgeableEntity.class), new DefaultAgeableMarshal());
         binaryTagMarshal.registerAdaptor(Arrays.asList(Rideable.class, DefaultRideableEntity.class), new DefaultRideableMarshal());
         binaryTagMarshal.registerAdaptor(Arrays.asList(Pig.class, DefaultPigEntity.class), new DefaultPigMarshal());
