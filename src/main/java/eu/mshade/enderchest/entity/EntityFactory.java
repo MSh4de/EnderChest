@@ -17,6 +17,8 @@ public class EntityFactory {
     private EntityFactory() {
         entityFactory = this;
 
+        registerFactoryEntity(EntityType.PIG, parameterContainer ->
+                new DefaultPigEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.ARMOR_STAND, parameterContainer ->
             new DefaultArmorStand(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.ZOMBIE, parameterContainer ->
