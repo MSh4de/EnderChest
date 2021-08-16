@@ -12,11 +12,11 @@ public class DefaultPigEntity extends Pig {
         super(location, velocity, entityId, isFire, isSneaking, isSprinting, isEating, isInvisible, airTicks, customName, isCustomNameVisible, isSilent, uuid, health, potionEffectColor, isPotionEffectAmbient, numberOfArrowInEntity, isAIDisable, age, isAgeLocked, hasSaddle);
     }
 
-    public DefaultPigEntity(Location location, int entityId, float health, boolean isChild, boolean isAgeLocked, boolean hasSaddle) {
-        super(location, entityId, health, isChild ? -24000 : 0, isAgeLocked, hasSaddle);
+    public DefaultPigEntity(Location location, int entityId, float health, int age, boolean isAgeLocked, boolean hasSaddle) {
+        super(location, entityId, health, age, isAgeLocked, hasSaddle);
     }
 
     public DefaultPigEntity(Location location, int entityId) {
-        this(location, entityId, 20f, false, false, false);
+        super(location, entityId);
     }
 }
