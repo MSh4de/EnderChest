@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.marshals.entity;
 
-import eu.mshade.enderchest.entity.DefaultBlaze;
+import eu.mshade.enderchest.entity.DefaultBlazeEntity;
 import eu.mshade.enderframe.entity.Blaze;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.LivingEntity;
@@ -28,7 +28,7 @@ public class DefaultBlazeMarshal extends DefaultLivingEntityMarshal {
         LivingEntity livingEntity = super.deserialize(binaryTagMarshal, type, binaryTag, parameterContainer);
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
-        return new DefaultBlaze(livingEntity.getLocation(),
+        return new DefaultBlazeEntity(livingEntity.getLocation(),
                 livingEntity.getVelocity(),
                 livingEntity.getEntityId(),
                 livingEntity.isFire(),
