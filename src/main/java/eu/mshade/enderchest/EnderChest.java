@@ -85,17 +85,20 @@ public class EnderChest {
 
         binaryTagMarshal.registerAdaptor(Arrays.asList(SectionBuffer.class, DefaultSectionBuffer.class), new DefaultSectionMarshal());
         binaryTagMarshal.registerAdaptor(Arrays.asList(ChunkBuffer.class, DefaultChunkBuffer.class), new DefaultChunkMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Zombie.class, DefaultZombie.class), new DefaultZombieMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(Zombie.class, DefaultZombieEntity.class), new DefaultZombieMarshal());
         binaryTagMarshal.registerAdaptor(Location.class, new DefaultLocationMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Player.class, DefaultPlayer.class), new DefaultPlayerMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(Player.class, DefaultPlayerEntity.class), new DefaultPlayerMarshal());
         binaryTagMarshal.registerAdaptor(Vector.class, new DefaultVectorMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Blaze.class, DefaultBlaze.class), new DefaultBlazeMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(Blaze.class, DefaultBlazeEntity.class), new DefaultBlazeMarshal());
         binaryTagMarshal.registerAdaptor(Rotation.class, new DefaultRotationMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(ArmorStand.class, DefaultArmorStand.class), new DefaultArmorStandMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(ArmorStand.class, DefaultArmorStandEntity.class), new DefaultArmorStandMarshal());
         binaryTagMarshal.registerAdaptor(Arrays.asList(Arrow.class, DefaultArrowEntity.class), new DefaultArrowMarshal());
         binaryTagMarshal.registerAdaptor(Arrays.asList(Ageable.class, DefaultAgeableEntity.class), new DefaultAgeableMarshal());
         binaryTagMarshal.registerAdaptor(Arrays.asList(Rideable.class, DefaultRideableEntity.class), new DefaultRideableMarshal());
         binaryTagMarshal.registerAdaptor(Arrays.asList(Pig.class, DefaultPigEntity.class), new DefaultPigMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(Bat.class, DefaultBatEntity.class), new DefaultBatMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(Spider.class, DefaultSpiderEntity.class), new DefaultSpiderMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(CaveSpider.class, DefaultCaveSpiderEntity.class), new DefaultCaveSpiderMarshal());
 
         eventLoopGroup.scheduleAtFixedRate(() -> {
             dedicatedEnderChest.getEnderFrameSessions().forEach(enderFrameSession -> {
