@@ -13,8 +13,8 @@ public class DefaultMagmaCubeEntity extends MagmaCube {
         super(location, velocity, entityId, isFire, isSneaking, isSprinting, isEating, isInvisible, airTicks, customName, isCustomNameVisible, isSilent, uuid, health, potionEffectColor, isPotionEffectAmbient, numberOfArrowInEntity, isAIDisable, size);
     }
 
-    public DefaultMagmaCubeEntity(Location location, EntityType entityType, int entityId, float health, byte size) {
-        super(location, entityType, entityId, health, size);
+    public DefaultMagmaCubeEntity(Location location, int entityId, float health, byte size) {
+        super(location, EntityType.MAGMA_CUBE, entityId, health, size);
     }
 
     public DefaultMagmaCubeEntity(Location location, int entityId) {
