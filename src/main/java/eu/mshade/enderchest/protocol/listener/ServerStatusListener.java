@@ -11,7 +11,7 @@ import eu.mshade.enderframe.motd.MotdComponent;
 import eu.mshade.enderframe.motd.MotdPlayer;
 import eu.mshade.enderframe.motd.MotdVersion;
 import eu.mshade.enderframe.protocol.temp.packet.PacketOutStatus;
-import eu.mshade.mwork.event.EventContainer;
+import eu.mshade.mwork.event.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
 import java.util.concurrent.CompletableFuture;
@@ -24,7 +24,7 @@ public class ServerStatusListener implements EventListener<ServerStatusEvent> {
     }
 
     @Override
-    public void onEvent(ServerStatusEvent event, EventContainer eventContainer) {
+    public void onEvent(ServerStatusEvent event, ParameterContainer eventContainer) {
         EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
 
         RedstonePacketOutMotd redstonePacketOutMotd = new RedstonePacketOutMotd();

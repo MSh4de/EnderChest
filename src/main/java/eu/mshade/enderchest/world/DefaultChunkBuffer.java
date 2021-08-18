@@ -1,6 +1,7 @@
 package eu.mshade.enderchest.world;
 
 import eu.mshade.enderframe.EnderFrameSession;
+import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.world.ChunkBuffer;
 import eu.mshade.enderframe.world.SectionBuffer;
 import eu.mshade.enderframe.world.WorldBuffer;
@@ -8,10 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 public  class DefaultChunkBuffer implements ChunkBuffer {
 
@@ -28,16 +31,22 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
     private Collection<EnderFrameSession> enderFrameSessions = new ConcurrentLinkedQueue<>();
     private WorldBuffer worldBuffer;
     private SectionBuffer[] sectionBuffers = new SectionBuffer[16];
+    private final Queue<Entity> entities = new ConcurrentLinkedQueue<>();
     //private final AtomicReference<ChunkBufferStatus> chunkBufferStatus
-    private byte[] biomes =  new byte[256];
+    private byte[] biomes;
 
-    public DefaultChunkBuffer(int x, int z, boolean hasChange, WorldBuffer worldBuffer, File file) {
+    public DefaultChunkBuffer(int x, int z, File file, boolean hasChange, WorldBuffer worldBuffer, byte[] biomes) {
         this.x = x;
         this.z = z;
-        this.hasChange = hasChange;
         this.file = file;
-        this.id = ChunkBuffer.ofId(x, z);
+        this.hasChange = hasChange;
         this.worldBuffer = worldBuffer;
+        this.biomes = biomes;
+        this.id = ChunkBuffer.ofId(x, z);
+    }
+
+    public DefaultChunkBuffer(int x, int z, boolean hasChange, WorldBuffer worldBuffer, File file) {
+        this(x, z, file, hasChange, worldBuffer, new byte[256]);
     }
 
     @Override
@@ -180,6 +189,23 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
     @Override
     public boolean hasChange() {
         return hasChange;
+    }
+
+    @Override
+    public Queue<Entity> getEntities() {
+        return this.entities;
+    }
+
+    @Override
+    public void addEntity(Entity entity) {
+        getWorldBuffer().addEntity(entity);
+        getEntities().add(entity);
+    }
+
+    @Override
+    public void removeEntity(Entity entity) {
+        getWorldBuffer().removeEntity(entity);
+        getEntities().remove(entity);
     }
 
     public void setBiomes(byte[] biomes) {

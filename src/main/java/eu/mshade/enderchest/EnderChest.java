@@ -2,17 +2,32 @@ package eu.mshade.enderchest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import eu.mshade.enderchest.entity.DefaultPlayer;
+import eu.mshade.enderchest.entity.DefaultZombie;
+import eu.mshade.enderchest.marshals.*;
 import eu.mshade.enderchest.protocol.listener.*;
+<<<<<<< HEAD
 import eu.mshade.enderchest.redstone.Redstone;
 import eu.mshade.enderchest.redstone.protocol.RedstonePacketIn;
 import eu.mshade.enderchest.redstone.protocol.RedstonePacketInDeserializer;
+=======
+import eu.mshade.enderchest.world.DefaultChunkBuffer;
+import eu.mshade.enderchest.world.DefaultSectionBuffer;
+>>>>>>> feature/marshal
 import eu.mshade.enderframe.EnderFrame;
+import eu.mshade.enderframe.entity.Player;
+import eu.mshade.enderframe.entity.Zombie;
 import eu.mshade.enderframe.event.PacketEvent;
 import eu.mshade.enderframe.event.entity.*;
 import eu.mshade.enderframe.event.server.ServerPingEvent;
 import eu.mshade.enderframe.event.server.ServerStatusEvent;
 import eu.mshade.enderframe.mojang.chat.*;
+import eu.mshade.enderframe.world.ChunkBuffer;
+import eu.mshade.enderframe.world.Location;
+import eu.mshade.enderframe.world.SectionBuffer;
+import eu.mshade.enderframe.world.Vector;
 import eu.mshade.mwork.MWork;
+import eu.mshade.mwork.binarytag.marshal.BinaryTagMarshal;
 import eu.mshade.mwork.event.EventBus;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
@@ -23,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 public class EnderChest {
@@ -71,6 +87,16 @@ public class EnderChest {
         packetEventBus.subscribe(PacketFinallyJoinEvent.class, new PacketFinallyJoinHandler(dedicatedEnderChest));
         packetEventBus.subscribe(PacketMoveEvent.class, new PacketMoveHandler(dedicatedEnderChest));
         packetEventBus.subscribe(PacketQuitEvent.class, new PacketQuitHandler(dedicatedEnderChest));
+        packetEventBus.subscribe(PacketEntityActionEvent.class, new PacketEntityActionHandler());
+
+        BinaryTagMarshal binaryTagMarshal = MWork.get().getBinaryTagMarshal();
+
+        binaryTagMarshal.registerAdaptor(Arrays.asList(SectionBuffer.class, DefaultSectionBuffer.class), new DefaultSectionMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(ChunkBuffer.class, DefaultChunkBuffer.class), new DefaultChunkMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(Zombie.class, DefaultZombie.class), new DefaultZombieMarshal());
+        binaryTagMarshal.registerAdaptor(Location.class, new DefaultLocationMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(Player.class, DefaultPlayer.class), new DefaultPlayerMarshal());
+        binaryTagMarshal.registerAdaptor(Vector.class, new DefaultVectorMarshal());
 
         eventLoopGroup.scheduleAtFixedRate(() -> {
             dedicatedEnderChest.getEnderFrameSessions().forEach(enderFrameSession -> {

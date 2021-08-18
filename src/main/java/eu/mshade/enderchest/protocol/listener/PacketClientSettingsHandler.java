@@ -2,7 +2,7 @@ package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.event.entity.PacketClientSettingsEvent;
-import eu.mshade.mwork.event.EventContainer;
+import eu.mshade.mwork.event.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
 public class PacketClientSettingsHandler implements EventListener<PacketClientSettingsEvent> {
@@ -17,7 +17,7 @@ public class PacketClientSettingsHandler implements EventListener<PacketClientSe
      */
 
     @Override
-    public void onEvent(PacketClientSettingsEvent event, EventContainer eventContainer) {
+    public void onEvent(PacketClientSettingsEvent event, ParameterContainer eventContainer) {
         EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
     }
 }

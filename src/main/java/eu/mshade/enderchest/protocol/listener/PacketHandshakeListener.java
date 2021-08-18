@@ -8,7 +8,7 @@ import eu.mshade.enderframe.protocol.HandshakeStatus;
 import eu.mshade.enderframe.protocol.ProtocolStatus;
 import eu.mshade.enderframe.protocol.ProtocolVersion;
 import eu.mshade.enderframe.protocol.packet.PacketOutDisconnect;
-import eu.mshade.mwork.event.EventContainer;
+import eu.mshade.mwork.event.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
 public class PacketHandshakeListener implements EventListener<PacketHandshakeEvent> {
@@ -44,7 +44,7 @@ public class PacketHandshakeListener implements EventListener<PacketHandshakeEve
      */
 
     @Override
-    public void onEvent(PacketHandshakeEvent event, EventContainer eventContainer) {
+    public void onEvent(PacketHandshakeEvent event, ParameterContainer eventContainer) {
         EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
         HandshakeStatus handshakeStatus = event.getHandshake().getHandshakeStatus();
         ProtocolVersion protocolVersion = event.getHandshake().getVersion();
