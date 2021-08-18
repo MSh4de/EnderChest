@@ -20,4 +20,9 @@ public class DefaultCreeperEntity extends Creeper {
     public DefaultCreeperEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

@@ -15,4 +15,9 @@ public class DefaultFireworkEntity extends Firework {
     public DefaultFireworkEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

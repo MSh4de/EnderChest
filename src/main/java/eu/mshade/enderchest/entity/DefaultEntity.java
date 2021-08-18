@@ -17,4 +17,9 @@ public class DefaultEntity extends Entity {
     public DefaultEntity(Location location, EntityType entityType, int entityId) {
         super(location, entityType, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

@@ -19,4 +19,9 @@ public class DefaultBatEntity extends Bat {
     public DefaultBatEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

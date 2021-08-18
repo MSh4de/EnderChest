@@ -19,4 +19,9 @@ public class DefaultEnderCrystalEntity extends EnderCrystal {
     public DefaultEnderCrystalEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

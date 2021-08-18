@@ -19,4 +19,9 @@ public class DefaultCaveSpiderEntity extends CaveSpider {
     public DefaultCaveSpiderEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

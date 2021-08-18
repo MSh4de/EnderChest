@@ -19,4 +19,9 @@ public class DefaultBoatEntity extends Boat {
     public DefaultBoatEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

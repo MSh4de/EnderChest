@@ -19,4 +19,9 @@ public class DefaultChickenEntity extends Chicken {
     public DefaultChickenEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }
