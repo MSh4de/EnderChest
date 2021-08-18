@@ -3,9 +3,15 @@ package eu.mshade.enderchest.protocol.listener;
 import eu.mshade.enderchest.DedicatedEnderChest;
 import eu.mshade.enderframe.*;
 import eu.mshade.enderframe.event.entity.PacketFinallyJoinEvent;
+import eu.mshade.enderframe.protocol.packet.PacketOutSpawnPosition;
+import eu.mshade.enderframe.world.BlockPosition;
 import eu.mshade.enderframe.world.Location;
+import eu.mshade.enderframe.world.Vector;
 import eu.mshade.enderframe.world.WorldBuffer;
+import eu.mshade.enderman.packet.play.PacketOutEntityVelocity;
 import eu.mshade.enderman.packet.play.PacketOutSetSlot;
+import eu.mshade.enderman.packet.play.PacketOutSpawnMob;
+import eu.mshade.enderman.packet.play.PacketOutSpawnPlayer;
 import eu.mshade.mwork.event.EventContainer;
 import eu.mshade.mwork.event.EventListener;
 import org.slf4j.Logger;
@@ -29,24 +35,30 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         enderFrameSession.sendLoginSuccess();
 
         WorldBuffer world = dedicatedEnderChest.getWorldManager().getWorldBuffer("world");
-        Location location = new Location(world, 7.5, 0, 7.5);
+        Location location = new Location(world, 7, 0, 7);
         int highest = location.getChunkBuffer().getHighest(location.getBlockX(), location.getBlockZ());
         location.setY(highest+1);
+        System.out.println(location);
         enderFrameSession.setLocation(location);
 
         enderFrameSession.sendJoinGame(GameMode.CREATIVE, world.getWorldLevel().getDimension(), world.getWorldLevel().getDifficulty(), 20, world.getWorldLevel().getLevelType(), false);
-        enderFrameSession.sendSquareChunk(10, location.getChunkX(), location.getChunkZ(), world);
-        enderFrameSession.sendPosition(location);
         enderFrameSession.sendAbilities(false, false, true, false, 0.5F, 0.2F);
 
+        enderFrameSessionHandler.sendPacket(new PacketOutSpawnPosition(new BlockPosition(7, location.getBlockY(), 7)));
 
         dedicatedEnderChest.addPlayer(enderFrameSession);
 
         PlayerInfoBuilder playerInfoBuilder = PlayerInfoBuilder.of(PlayerInfoType.ADD_PLAYER);
         dedicatedEnderChest.getEnderFrameSessions().forEach(playerInfoBuilder::withPlayer);
         dedicatedEnderChest.getEnderFrameSessions().forEach(target -> target.sendPlayerInfo(playerInfoBuilder));
+        enderFrameSession.sendPosition(location);
+        //enderFrameSessionHandler.sendPacket(new PacketOutEntityVelocity(0, new Vector(0, 2, 0)));
+        enderFrameSession.sendSquareChunk(10, location.getChunkX(), location.getChunkZ(), world);
+        enderFrameSession.sendPosition(location);
 
         enderFrameSessionHandler.sendPacket(new PacketOutSetSlot());
+        enderFrameSessionHandler.sendPacket(new PacketOutSpawnPlayer(1, enderFrameSession.getGameProfile().getId(), 7, location.getBlockY(), 7));
+
 
         logger.info(String.format("%s join server", enderFrameSession.getGameProfile().getName()));
 
