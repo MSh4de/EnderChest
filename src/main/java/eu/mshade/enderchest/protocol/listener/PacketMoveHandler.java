@@ -4,10 +4,12 @@ import eu.mshade.enderchest.DedicatedEnderChest;
 import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.event.entity.PacketMoveEvent;
+import eu.mshade.enderframe.event.entity.PacketMoveType;
 import eu.mshade.enderframe.world.ChunkBuffer;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Position;
 import eu.mshade.enderframe.world.WorldBuffer;
+import eu.mshade.enderman.packet.play.PacketOutEntityRelativeMove;
 import eu.mshade.mwork.event.EventContainer;
 import eu.mshade.mwork.event.EventListener;
 import org.slf4j.Logger;
@@ -57,8 +59,5 @@ public class PacketMoveHandler implements EventListener<PacketMoveEvent> {
         if (before.getChunkX() != now.getChunkX() || before.getChunkZ() != now.getChunkZ()) {
             enderFrameSession.sendSquareChunk(10, now.getChunkX(), now.getChunkZ(), now.getWorld());
         }
-
     }
-
-
 }
