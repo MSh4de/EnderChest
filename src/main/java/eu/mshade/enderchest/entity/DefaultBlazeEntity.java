@@ -20,4 +20,9 @@ public class DefaultBlazeEntity extends Blaze {
     public DefaultBlazeEntity(Location location, int entityId) {
         this(location, entityId, 20f, false);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

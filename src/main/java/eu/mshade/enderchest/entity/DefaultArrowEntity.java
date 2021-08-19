@@ -1,6 +1,7 @@
 package eu.mshade.enderchest.entity;
 
 import eu.mshade.enderframe.entity.Arrow;
+import eu.mshade.enderframe.entity.ProjectileSource;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Vector;
 
@@ -12,11 +13,16 @@ public class DefaultArrowEntity extends Arrow {
         super(location, velocity, entityId, isFire, isSneaking, isSprinting, isEating, isInvisible, airTicks, customName, isCustomNameVisible, isSilent, uuid, isCritical);
     }
 
-    public DefaultArrowEntity(Location location, int entityId, boolean isCritical) {
-        super(location, new Vector(), entityId, isCritical);
+    public DefaultArrowEntity(Location location, int entityId, boolean isCritical, ProjectileSource source, boolean isBouncy) {
+        super(location, entityId, isCritical, source, isBouncy);
     }
 
     public DefaultArrowEntity(Location location, int entityId) {
-        this(location, entityId, false);
+        super(location, entityId);
+    }
+
+    @Override
+    public void tick() {
+
     }
 }

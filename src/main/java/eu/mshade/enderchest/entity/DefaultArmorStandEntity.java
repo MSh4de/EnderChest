@@ -20,4 +20,9 @@ public class DefaultArmorStandEntity extends ArmorStand {
     public DefaultArmorStandEntity(Location location, int entityId) {
         this(location, entityId, false, true, false, false);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

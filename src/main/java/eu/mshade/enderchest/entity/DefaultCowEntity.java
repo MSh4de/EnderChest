@@ -19,4 +19,9 @@ public class DefaultCowEntity extends Cow {
     public DefaultCowEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

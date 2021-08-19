@@ -19,4 +19,9 @@ public class DefaultEndermanEntity extends Enderman {
     public DefaultEndermanEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }
