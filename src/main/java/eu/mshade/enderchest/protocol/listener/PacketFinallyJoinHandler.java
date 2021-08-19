@@ -2,22 +2,16 @@ package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderchest.DedicatedEnderChest;
 import eu.mshade.enderframe.*;
+import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.event.entity.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.protocol.packet.PacketOutSpawnPosition;
 import eu.mshade.enderframe.world.BlockPosition;
 import eu.mshade.enderframe.world.Location;
-import eu.mshade.enderframe.world.Vector;
 import eu.mshade.enderframe.world.WorldBuffer;
-<<<<<<< HEAD
-import eu.mshade.enderman.packet.play.PacketOutEntityVelocity;
 import eu.mshade.enderman.packet.play.PacketOutSetSlot;
-import eu.mshade.enderman.packet.play.PacketOutSpawnMob;
 import eu.mshade.enderman.packet.play.PacketOutSpawnPlayer;
-import eu.mshade.mwork.event.EventContainer;
-=======
-import eu.mshade.mwork.event.ParameterContainer;
->>>>>>> feature/marshal
 import eu.mshade.mwork.event.EventListener;
+import eu.mshade.mwork.event.ParameterContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +45,11 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 =======
 >>>>>>> feature/marshal
 
+<<<<<<< HEAD
         enderFrameSessionHandler.sendPacket(new PacketOutSpawnPosition(new BlockPosition(7, location.getBlockY(), 7)));
 
+=======
+>>>>>>> feature/recovery
         enderFrameSession.sendJoinGame(GameMode.CREATIVE, world.getWorldLevel().getDimension(), world.getWorldLevel().getDifficulty(), 20, world.getWorldLevel().getLevelType(), false);
         enderFrameSession.sendAbilities(false, false, true, false, 0.2F, 0.2F);
 
@@ -71,20 +68,19 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         enderFrameSessionHandler.sendPacket(new PacketOutSpawnPlayer(1, enderFrameSession.getGameProfile().getId(), 7, location.getBlockY(), 7));
 
 
-=======
         dedicatedEnderChest.getEnderFrameSessions().forEach(target ->{
             target.sendPlayerInfo(playerInfoBuilder);
             target.sendMessage(String.format("%s join server", enderFrameSession.getGameProfile().getName()));
         });
 
-        world.spawnPlayer(enderFrameSessionHandler,location);
+        Player player = world.spawnPlayer(enderFrameSessionHandler,location);
+        enderFrameSession.setPlayer(player);
         enderFrameSession.getEnderFrameSessionHandler().sendPacket(new PacketOutSpawnPosition(new BlockPosition(location.getBlockX(),location.getBlockY(),location.getBlockZ())));
 
         enderFrameSession.sendPosition(location);
         enderFrameSession.sendSquareChunk(10, location.getChunkX(), location.getChunkZ(), world);
         enderFrameSession.sendPosition(location);
 
->>>>>>> feature/marshal
         logger.info(String.format("%s join server", enderFrameSession.getGameProfile().getName()));
 
         enderFrameSession.sendMessage("Welcome to project MShade");

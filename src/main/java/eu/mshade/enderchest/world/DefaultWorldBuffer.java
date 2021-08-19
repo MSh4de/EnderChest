@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.world;
 
-import eu.mshade.enderchest.entity.DefaultPlayer;
+import eu.mshade.enderchest.entity.DefaultPlayerEntity;
 import eu.mshade.enderchest.entity.EntityFactory;
 import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
@@ -182,6 +182,8 @@ public class DefaultWorldBuffer implements WorldBuffer {
             Entity entity = entityFactory.factoryEntity(entityType, ParameterContainer.of()
                     .putContainer(id)
                     .putContainer(location));
+            System.out.println(entity);
+            System.out.println(location.getChunkBuffer());
             location.getChunkBuffer().addEntity(entity);
             location.getChunkBuffer().getViewers().forEach(each -> each.sendMob(entity));
             //worldManager.getDedicatedEnderChest().getEnderFrameSessions().forEach(each -> each.sendMob(entity));
@@ -199,7 +201,7 @@ public class DefaultWorldBuffer implements WorldBuffer {
 
         try {
             int id = EntityIdManager.get().getFreeId();
-            Player player = new DefaultPlayer( id, location, sessionHandler);
+            Player player = new DefaultPlayerEntity( id, location, sessionHandler);
             entityPlayer.put(sessionHandler.getEnderFrameSession(), player);
             /*worldManager.getDedicatedEnderChest().getEnderFrameSessions()
                     .stream().filter(session -> !session.getEnderFrameSessionHandler().equals(player.getEnderFrameSessionHandler()))
