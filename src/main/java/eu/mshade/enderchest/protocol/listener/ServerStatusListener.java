@@ -5,7 +5,7 @@ import eu.mshade.enderframe.ServerListBuilder;
 import eu.mshade.enderframe.ServerListPlayerBuilder;
 import eu.mshade.enderframe.event.server.ServerStatusEvent;
 import eu.mshade.enderframe.protocol.temp.packet.PacketOutStatus;
-import eu.mshade.mwork.event.ParameterContainer;
+import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
 public class ServerStatusListener implements EventListener<ServerStatusEvent> {

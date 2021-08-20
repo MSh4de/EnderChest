@@ -19,4 +19,9 @@ public class DefaultWolfEntity extends Wolf {
     public DefaultWolfEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

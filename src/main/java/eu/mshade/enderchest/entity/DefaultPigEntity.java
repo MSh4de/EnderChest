@@ -19,4 +19,9 @@ public class DefaultPigEntity extends Pig {
     public DefaultPigEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

@@ -51,7 +51,7 @@ public class DefaultOcelotMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.isAIDisable(),
                 compoundBinaryTag.getByte("ocelotType"),
                 tameable.isSitting(),
-                tameable.isTamed(),
+                tameable.isTame(),
                 tameable.getOwner());
     }
 }

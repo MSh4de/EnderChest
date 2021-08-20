@@ -3,10 +3,13 @@ package eu.mshade.enderchest.marshals.entity;
 import eu.mshade.enderchest.entity.DefaultPlayerEntity;
 import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
+import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.LivingEntity;
 import eu.mshade.enderframe.entity.Player;
+import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.SkinParts;
+import eu.mshade.mwork.MOptional;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.binarytag.BinaryTag;
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
@@ -21,9 +24,10 @@ public class DefaultPlayerMarshal extends DefaultLivingEntityMarshal {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) super.serialize(binaryTagMarshal, type, entity, parameterContainer);
         Player player = (Player)entity;
 
-        compoundBinaryTag.putString("name", player.getName());
         compoundBinaryTag.putFloat("absorptionHearts", player.getAbsorptionHearts());
         compoundBinaryTag.putInt("score", player.getScore());
+        compoundBinaryTag.putBinaryTag("gameMode", binaryTagMarshal.marshal(player.getGameMode()));
+        compoundBinaryTag.putBinaryTag("gameProfile", binaryTagMarshal.marshal(player.getGameProfile()));
 
         return compoundBinaryTag;
     }
@@ -54,13 +58,14 @@ public class DefaultPlayerMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getNumberOfArrowInEntity(),
                 livingEntity.isAIDisable(),
                 enderFrameSessionHandler,
-                compoundBinaryTag.getString("name"),
-                enderFrameSession.getSocketAddress(),
+                enderFrameSession.getPlayer().getSocketAddress(),
                 enderFrameSessionHandler.getProtocolVersion(),
-                0,
                 SkinParts.fromByte((byte)127),
                 false,
                 compoundBinaryTag.getFloat("absorptionHeart"),
-                compoundBinaryTag.getInt("score"));
+                compoundBinaryTag.getInt("score"),
+                MOptional.empty(),
+                binaryTagMarshal.unMarshal(compoundBinaryTag.getBinaryTag("gameMode"), GameMode.class),
+                binaryTagMarshal.unMarshal(compoundBinaryTag.getBinaryTag("gameProfile"), GameProfile.class));
     }
 }

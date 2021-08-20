@@ -19,4 +19,9 @@ public class DefaultGhastEntity extends Ghast {
     public DefaultGhastEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

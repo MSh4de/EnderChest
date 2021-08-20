@@ -19,4 +19,9 @@ public class DefaultHorseEntity extends Horse {
     public DefaultHorseEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

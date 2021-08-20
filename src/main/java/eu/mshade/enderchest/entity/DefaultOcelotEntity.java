@@ -19,4 +19,9 @@ public class DefaultOcelotEntity extends Ocelot {
     public DefaultOcelotEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

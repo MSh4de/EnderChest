@@ -68,7 +68,9 @@ public class DefaultChunkMarshal implements BinaryTagMarshalBuffer<ChunkBuffer> 
             SectionBuffer sectionBuffer = binaryTagMarshal.unMarshal(sectionBinaryTag, SectionBuffer.class, parameterContainer.putContainer(chunkBuffer));
             sectionBuffers[sectionBuffer.getY()] = sectionBuffer;
         });
+
         entityBinaryTags.forEach(entityBinaryTag ->{
+            System.out.println(entityBinaryTags.size());
             CompoundBinaryTag compoundBinaryTagEntity = (CompoundBinaryTag)entityBinaryTag;
             EntityType entityType = EntityType.getEntityTypeByName(compoundBinaryTagEntity.getString("entityType"));
             chunkBuffer.addEntity(binaryTagMarshal.unMarshal(entityBinaryTag, entityType.getClazz(), parameterContainer));

@@ -8,7 +8,7 @@ import eu.mshade.enderframe.protocol.packet.PacketOutSpawnPosition;
 import eu.mshade.enderframe.world.BlockPosition;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.WorldBuffer;
-import eu.mshade.mwork.event.ParameterContainer;
+import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +34,8 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         Location location = new Location(world, 7, 0, 7);
         int highest = location.getChunkBuffer().getHighest(location.getBlockX(), location.getBlockZ());
         location.setY(highest+1);
+        Player player = world.spawnPlayer(enderFrameSessionHandler,location);
+        enderFrameSession.setPlayer(player);
         enderFrameSession.setLocation(location);
 
 
@@ -46,18 +48,16 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         dedicatedEnderChest.getEnderFrameSessions().forEach(playerInfoBuilder::withPlayer);
         dedicatedEnderChest.getEnderFrameSessions().forEach(target ->{
             target.sendPlayerInfo(playerInfoBuilder);
-            target.sendMessage(String.format("%s join server", enderFrameSession.getGameProfile().getName()));
+            target.sendMessage(String.format("%s join server", enderFrameSession.getPlayer().getGameProfile().getName()));
         });
 
-        Player player = world.spawnPlayer(enderFrameSessionHandler,location);
-        enderFrameSession.setPlayer(player);
-        enderFrameSession.getEnderFrameSessionHandler().sendPacket(new PacketOutSpawnPosition(new BlockPosition(location.getBlockX(),location.getBlockY(),location.getBlockZ())));
+        enderFrameSession.getPlayer().getEnderFrameSessionHandler().sendPacket(new PacketOutSpawnPosition(new BlockPosition(location.getBlockX(),location.getBlockY(),location.getBlockZ())));
 
         enderFrameSession.sendPosition(location);
         enderFrameSession.sendSquareChunk(10, location.getChunkX(), location.getChunkZ(), world);
         enderFrameSession.sendPosition(location);
 
-        logger.info(String.format("%s join server", enderFrameSession.getGameProfile().getName()));
+        logger.info(String.format("%s join server", enderFrameSession.getPlayer().getGameProfile().getName()));
 
         enderFrameSession.sendMessage("Welcome to project MShade");
         enderFrameSession.sendPlayerList("Hey this is test", "and this is test");

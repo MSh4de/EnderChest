@@ -48,6 +48,7 @@ public class DefaultFurnaceMinecartMarshal extends DefaultMinecartMarshal {
                 compoundBinaryTag.getInt("blockYPosition"),
                 compoundBinaryTag.getBoolean("isShowingBlock"),
                 entity.getDamageTaken(),
-                compoundBinaryTag.getBoolean("isPowered"));
+                compoundBinaryTag.getBoolean("isPowered"),
+                entity.getVehicleVelocity());
     }
 }

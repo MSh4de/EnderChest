@@ -19,4 +19,9 @@ public class DefaultSpiderEntity extends Spider {
     public DefaultSpiderEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

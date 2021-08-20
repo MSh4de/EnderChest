@@ -3,7 +3,9 @@ package eu.mshade.enderchest.marshals.entity;
 import eu.mshade.enderchest.entity.DefaultMinecartEntity;
 import eu.mshade.enderframe.entity.Damageable;
 import eu.mshade.enderframe.entity.Entity;
+import eu.mshade.enderframe.entity.EntityType;
 import eu.mshade.enderframe.entity.Minecart;
+import eu.mshade.enderframe.world.Vector;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.binarytag.BinaryTag;
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
@@ -18,12 +20,14 @@ public class DefaultMinecartMarshal extends DefaultEntityMarshal {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) super.serialize(binaryTagMarshal, type, entity, parameterContainer);
         Minecart minecart = (Minecart) entity;
 
+        compoundBinaryTag.putString("entityType", entity.getType().name());
         compoundBinaryTag.putInt("shakingPower", minecart.getShakingPower());
         compoundBinaryTag.putInt("shakingDirection", minecart.getShakingDirection());
         compoundBinaryTag.putInt("blockId", minecart.getBlockId());
         compoundBinaryTag.putInt("blockYPosition", minecart.getBlockYPosition());
         compoundBinaryTag.putBoolean("isShowingBlock", minecart.isShowBlock());
         compoundBinaryTag.addCompound((CompoundBinaryTag) binaryTagMarshal.marshal(minecart, Damageable.class));
+        compoundBinaryTag.putBinaryTag("vehicleVelocity", binaryTagMarshal.marshal(((Minecart) entity).getVehicleVelocity()));
 
         return compoundBinaryTag;
     }
@@ -47,12 +51,14 @@ public class DefaultMinecartMarshal extends DefaultEntityMarshal {
                 entity.isCustomNameVisible(),
                 entity.isSilent(),
                 entity.getUUID(),
+                EntityType.getEntityTypeByName(compoundBinaryTag.getString("entityType")),
                 compoundBinaryTag.getInt("shakingPower"),
                 compoundBinaryTag.getInt("shakingDirection"),
                 compoundBinaryTag.getInt("blockId"),
                 compoundBinaryTag.getInt("blockData"),
                 compoundBinaryTag.getInt("blockYPosition"),
                 compoundBinaryTag.getBoolean("isShowingBlock"),
-                damageable.getDamageTaken());
+                damageable.getDamageTaken(),
+                binaryTagMarshal.unMarshal(compoundBinaryTag.getBinaryTag("vehicleVelocity"), Vector.class));
     }
 }

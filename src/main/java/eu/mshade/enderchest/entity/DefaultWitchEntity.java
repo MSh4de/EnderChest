@@ -19,4 +19,9 @@ public class DefaultWitchEntity extends Witch {
     public DefaultWitchEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

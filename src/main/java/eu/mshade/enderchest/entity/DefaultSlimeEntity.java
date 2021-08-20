@@ -20,4 +20,9 @@ public class DefaultSlimeEntity extends Slime {
     public DefaultSlimeEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

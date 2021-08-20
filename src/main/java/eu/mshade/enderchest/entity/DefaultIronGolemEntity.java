@@ -19,4 +19,9 @@ public class DefaultIronGolemEntity extends IronGolem {
     public DefaultIronGolemEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

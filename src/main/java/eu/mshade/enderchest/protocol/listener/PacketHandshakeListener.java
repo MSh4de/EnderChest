@@ -8,7 +8,7 @@ import eu.mshade.enderframe.protocol.HandshakeStatus;
 import eu.mshade.enderframe.protocol.ProtocolStatus;
 import eu.mshade.enderframe.protocol.ProtocolVersion;
 import eu.mshade.enderframe.protocol.packet.PacketOutDisconnect;
-import eu.mshade.mwork.event.ParameterContainer;
+import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
 public class PacketHandshakeListener implements EventListener<PacketHandshakeEvent> {

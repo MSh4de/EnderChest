@@ -5,7 +5,7 @@ import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.event.entity.PacketEntityActionEvent;
 import eu.mshade.enderframe.metadata.MetadataMeaning;
-import eu.mshade.mwork.event.ParameterContainer;
+import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
 public class PacketEntityActionHandler implements EventListener<PacketEntityActionEvent> {
@@ -15,7 +15,7 @@ public class PacketEntityActionHandler implements EventListener<PacketEntityActi
         EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
         EnderFrameSession enderFrameSession = enderFrameSessionHandler.getEnderFrameSession();
 
-        Player player = enderFrameSession.getLocation().getChunkBuffer().getWorldBuffer().getPlayer(enderFrameSessionHandler);
+        Player player = enderFrameSession.getPlayer();
 
         switch (event.getActionType()){
             case START_SNEAKING:
