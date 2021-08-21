@@ -19,4 +19,9 @@ public class DefaultZombiePigmanEntity extends ZombiePigman {
     public DefaultZombiePigmanEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

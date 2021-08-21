@@ -4,16 +4,19 @@ import eu.mshade.enderchest.entity.DefaultPlayerEntity;
 import eu.mshade.enderchest.entity.EntityFactory;
 import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
+import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.EntityIdManager;
 import eu.mshade.enderframe.entity.EntityType;
 import eu.mshade.enderframe.entity.Player;
+import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.world.*;
 import eu.mshade.mwork.ParameterContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.net.SocketAddress;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -30,7 +33,6 @@ public class DefaultWorldBuffer implements WorldBuffer {
     private final Map<UUID, File> chunkFiles = new ConcurrentHashMap<>();
     private final WorldManager worldManager;
     private final Queue<Entity> entities = new ConcurrentLinkedQueue<>();
-    private final HashMap<EnderFrameSession, Player> entityPlayer = new HashMap<>();
 
     public DefaultWorldBuffer(WorldManager worldManager, WorldLevel worldLevel, File worldFolder) {
         this.worldManager = worldManager;
@@ -152,12 +154,6 @@ public class DefaultWorldBuffer implements WorldBuffer {
     public Queue<Entity> getEntities() {
        return this.entities;
     }
-
-    @Override
-    public Player getPlayer(EnderFrameSessionHandler sessionHandler) {
-        return entityPlayer.get(sessionHandler.getEnderFrameSession());
-    }
-
     @Override
     public void addEntity(Entity entity) {
         if(this.entities.contains(entity)) return;
@@ -185,8 +181,7 @@ public class DefaultWorldBuffer implements WorldBuffer {
             System.out.println(entity);
             System.out.println(location.getChunkBuffer());
             location.getChunkBuffer().addEntity(entity);
-            location.getChunkBuffer().getViewers().forEach(each -> each.sendMob(entity));
-            //worldManager.getDedicatedEnderChest().getEnderFrameSessions().forEach(each -> each.sendMob(entity));
+            location.getChunkBuffer().getViewers().forEach(each -> each.getEnderFrameSessionHandler().getEnderFrameSession().sendMob(entity));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -201,11 +196,8 @@ public class DefaultWorldBuffer implements WorldBuffer {
 
         try {
             int id = EntityIdManager.get().getFreeId();
-            Player player = new DefaultPlayerEntity( id, location, sessionHandler);
-            entityPlayer.put(sessionHandler.getEnderFrameSession(), player);
-            /*worldManager.getDedicatedEnderChest().getEnderFrameSessions()
-                    .stream().filter(session -> !session.getEnderFrameSessionHandler().equals(player.getEnderFrameSessionHandler()))
-                    .forEach(session -> session.spawnPlayer(player));*/
+            EnderFrameSession enderFrameSession = sessionHandler.getEnderFrameSession();
+            Player player = new DefaultPlayerEntity(location, id, sessionHandler, enderFrameSession.getSocketAddress(), sessionHandler.getProtocolVersion(), GameMode.SURVIVAL, enderFrameSession.getGameProfile());
 
             return player;
         } catch (Exception e) {

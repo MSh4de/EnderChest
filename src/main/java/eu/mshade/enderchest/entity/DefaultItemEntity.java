@@ -15,4 +15,9 @@ public class DefaultItemEntity extends Item {
     public DefaultItemEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

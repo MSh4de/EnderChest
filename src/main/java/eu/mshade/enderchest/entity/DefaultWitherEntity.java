@@ -19,4 +19,9 @@ public class DefaultWitherEntity extends Wither {
     public DefaultWitherEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

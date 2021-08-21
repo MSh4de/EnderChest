@@ -48,8 +48,7 @@ public class DefaultSheepMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getNumberOfArrowInEntity(),
                 livingEntity.isAIDisable(),
                 binaryTagMarshal.unMarshal(binaryTag, SheepColor.class),
-                compoundBinaryTag.getBoolean("isConverting"),
-                ageable.getAge(),
-                ageable.getAgeLock());
+                compoundBinaryTag.getBoolean("isSheared"),
+                compoundBinaryTag.getInt("age"));
     }
 }

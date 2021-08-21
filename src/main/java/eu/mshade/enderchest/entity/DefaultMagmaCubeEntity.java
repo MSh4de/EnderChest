@@ -20,4 +20,9 @@ public class DefaultMagmaCubeEntity extends MagmaCube {
     public DefaultMagmaCubeEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

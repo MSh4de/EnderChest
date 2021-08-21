@@ -19,4 +19,9 @@ public class DefaultGuardianEntity extends Guardian {
     public DefaultGuardianEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

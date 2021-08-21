@@ -20,4 +20,9 @@ public class DefaultSkeletonEntity extends Skeleton {
     public DefaultSkeletonEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

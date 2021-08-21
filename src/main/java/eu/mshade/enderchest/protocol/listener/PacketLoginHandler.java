@@ -5,7 +5,7 @@ import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.event.entity.PacketLoginEvent;
 import eu.mshade.enderframe.mojang.GameProfile;
-import eu.mshade.mwork.event.ParameterContainer;
+import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
 public class PacketLoginHandler implements EventListener<PacketLoginEvent> {

@@ -5,12 +5,12 @@ import eu.mshade.enderframe.entity.Tameable;
 public class DefaultTameableEntity implements Tameable {
 
     private boolean isSitting;
-    private boolean isTamed;
+    private boolean isTame;
     private final String owner;
 
-    public DefaultTameableEntity(boolean isSitting, boolean isTamed, String owner) {
+    public DefaultTameableEntity(boolean isSitting, boolean isTame, String owner) {
         this.isSitting = isSitting;
-        this.isTamed = isTamed;
+        this.isTame = isTame;
         this.owner = owner;
     }
 
@@ -25,13 +25,13 @@ public class DefaultTameableEntity implements Tameable {
     }
 
     @Override
-    public boolean isTamed() {
-        return this.isTamed;
+    public boolean isTame() {
+        return isTame;
     }
 
     @Override
-    public void setTamed(boolean isTamed) {
-        this.isTamed = isTamed;
+    public void setTame(boolean isTame) {
+        this.isTame = isTame;
     }
 
     @Override

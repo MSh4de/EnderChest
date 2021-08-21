@@ -19,4 +19,9 @@ public class DefaultLivingEntity extends LivingEntity {
     public DefaultLivingEntity(Location location, EntityType entityType, int entityId, float health) {
         super(location, entityType, entityId, health);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

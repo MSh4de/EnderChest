@@ -46,6 +46,6 @@ public class DefaultSkeletonMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.isPotionEffectAmbient(),
                 livingEntity.getNumberOfArrowInEntity(),
                 livingEntity.isAIDisable(),
-                binaryTagMarshal.unMarshal(binaryTag, SkeletonType.class));
+                binaryTagMarshal.unMarshal(compoundBinaryTag.getBinaryTag("skeletonType"), SkeletonType.class));
     }
 }

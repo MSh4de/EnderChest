@@ -20,4 +20,9 @@ public class DefaultVillagerEntity extends Villager {
     public DefaultVillagerEntity(Location location, int entityId) {
         super(location, entityId);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

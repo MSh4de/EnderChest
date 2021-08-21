@@ -18,11 +18,14 @@ import eu.mshade.enderchest.redstone.protocol.RedstonePacketInDeserializer;
 import eu.mshade.enderchest.world.DefaultChunkBuffer;
 import eu.mshade.enderchest.world.DefaultSectionBuffer;
 import eu.mshade.enderframe.EnderFrame;
+import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.entity.*;
 import eu.mshade.enderframe.event.PacketEvent;
 import eu.mshade.enderframe.event.entity.*;
 import eu.mshade.enderframe.event.server.ServerPingEvent;
 import eu.mshade.enderframe.event.server.ServerStatusEvent;
+import eu.mshade.enderframe.mojang.GameProfile;
+import eu.mshade.enderframe.mojang.Property;
 import eu.mshade.enderframe.mojang.chat.*;
 import eu.mshade.enderframe.world.*;
 import eu.mshade.mwork.MWork;
@@ -136,6 +139,9 @@ public class EnderChest {
         binaryTagMarshal.registerAdaptor(Arrays.asList(Firework.class, DefaultFireworkEntity.class), new DefaultFireworkMarshal());
         binaryTagMarshal.registerAdaptor(Arrays.asList(ItemFrame.class, DefaultItemFrameEntity.class), new DefaultItemFrameMarshal());
         binaryTagMarshal.registerAdaptor(Arrays.asList(EnderCrystal.class, DefaultEnderCrystalEntity.class), new DefaultEnderCrystalMarshal());
+        binaryTagMarshal.registerAdaptor(GameMode.class, new DefaultGameModeMarshal());
+        binaryTagMarshal.registerAdaptor(GameProfile.class, new DefaultGameProfileMarshal());
+        binaryTagMarshal.registerAdaptor(Property.class, new DefaultPropertyMarshal());
 
         eventLoopGroup.scheduleAtFixedRate(() ->
                 dedicatedEnderChest.getEnderFrameSessions().forEach(enderFrameSession ->

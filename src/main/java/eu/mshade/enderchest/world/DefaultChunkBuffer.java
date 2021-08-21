@@ -1,7 +1,7 @@
 package eu.mshade.enderchest.world;
 
-import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.entity.Entity;
+import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.world.ChunkBuffer;
 import eu.mshade.enderframe.world.SectionBuffer;
 import eu.mshade.enderframe.world.WorldBuffer;
@@ -28,7 +28,7 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
     private File file;
     private boolean hasChange;
     private AtomicLong health = new AtomicLong(System.currentTimeMillis());
-    private Collection<EnderFrameSession> enderFrameSessions = new ConcurrentLinkedQueue<>();
+    private Queue<Player> players = new ConcurrentLinkedQueue<>();
     private WorldBuffer worldBuffer;
     private SectionBuffer[] sectionBuffers = new SectionBuffer[16];
     private final Queue<Entity> entities = new ConcurrentLinkedQueue<>();
@@ -68,9 +68,9 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
     }
 
     @Override
-    public Collection<EnderFrameSession> getViewers() {
+    public Queue<Player> getViewers() {
         getHealth().set(System.currentTimeMillis());
-        return enderFrameSessions;
+        return players;
     }
 
     @Override

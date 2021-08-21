@@ -19,4 +19,9 @@ public class DefaultZombieEntity extends Zombie {
     public DefaultZombieEntity(Location location, int entityId) {
         this(location, entityId, 20f, false, false, false, false);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

@@ -11,7 +11,7 @@ import eu.mshade.enderframe.motd.MotdComponent;
 import eu.mshade.enderframe.motd.MotdPlayer;
 import eu.mshade.enderframe.motd.MotdVersion;
 import eu.mshade.enderframe.protocol.temp.packet.PacketOutStatus;
-import eu.mshade.mwork.event.ParameterContainer;
+import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
 import java.util.concurrent.CompletableFuture;

@@ -3,6 +3,7 @@ package eu.mshade.enderchest.protocol.listener;
 import eu.mshade.enderchest.DedicatedEnderChest;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.entity.EntityType;
+import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.Zombie;
 import eu.mshade.enderframe.event.entity.PacketChatMessageEvent;
 import eu.mshade.enderframe.metadata.MetadataMeaning;
@@ -10,7 +11,7 @@ import eu.mshade.enderframe.mojang.chat.ChatColor;
 import eu.mshade.enderframe.world.ChunkBuffer;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.WorldBuffer;
-import eu.mshade.mwork.event.ParameterContainer;
+import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
 public class PacketChatMessageHandler implements EventListener<PacketChatMessageEvent> {
@@ -25,19 +26,20 @@ public class PacketChatMessageHandler implements EventListener<PacketChatMessage
     @Override
     public void onEvent(PacketChatMessageEvent event, ParameterContainer eventContainer) {
         EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
-        String displayName = enderFrameSessionHandler.getEnderFrameSession().getGameProfile().getName();
+        Player player = enderFrameSessionHandler.getEnderFrameSession().getPlayer();
+        String displayName = player.getGameProfile().getName();
         if(event.getMessage().startsWith("/"))return;
         String[] args = event.getMessage().split(" ");
 
         if(args[0].equalsIgnoreCase("!spawn")){
             System.out.println("SPAWN ENTITY");
 
-            Location location = enderFrameSessionHandler.getEnderFrameSession().getLocation();
+            Location location = player.getLocation();
             WorldBuffer world = location.getWorld();
             world.spawnEntity(EntityType.ZOMBIE, location);
         }else if(args[0].equalsIgnoreCase("!change")){
             if(args[1].equalsIgnoreCase("byte")) {
-                Location location = enderFrameSessionHandler.getEnderFrameSession().getLocation();
+                Location location = player.getLocation();
                 ChunkBuffer chunkBuffer = location.getChunkBuffer();
 
                 chunkBuffer.getEntities().stream()
@@ -45,14 +47,14 @@ public class PacketChatMessageHandler implements EventListener<PacketChatMessage
                         .map(entity -> ((Zombie) entity))
                         .ifPresent(e -> {
                             System.out.println("Entity id: " + e.getEntityId());
-                            e.setChild(true);
+                            e.setAdult();
                             e.setVillager(true);
                             enderFrameSessionHandler.getEnderFrameSession().sendMetadata(e, MetadataMeaning.IS_CHILD,
                                     MetadataMeaning.IS_VILLAGER);
                         });
             }
         }else if(args[0].equalsIgnoreCase("!link")){
-            Location location = enderFrameSessionHandler.getEnderFrameSession().getLocation();
+            Location location = player.getLocation();
             ChunkBuffer chunkBuffer = location.getChunkBuffer();
             System.out.println(location.getChunkBuffer().getEntities().size());
 
