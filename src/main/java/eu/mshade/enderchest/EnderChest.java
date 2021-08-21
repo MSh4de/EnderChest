@@ -12,14 +12,11 @@ import eu.mshade.enderchest.marshals.world.DefaultChunkMarshal;
 import eu.mshade.enderchest.marshals.world.DefaultLocationMarshal;
 import eu.mshade.enderchest.marshals.world.DefaultSectionMarshal;
 import eu.mshade.enderchest.protocol.listener.*;
-<<<<<<< HEAD
 import eu.mshade.enderchest.redstone.Redstone;
 import eu.mshade.enderchest.redstone.protocol.RedstonePacketIn;
 import eu.mshade.enderchest.redstone.protocol.RedstonePacketInDeserializer;
-=======
 import eu.mshade.enderchest.world.DefaultChunkBuffer;
 import eu.mshade.enderchest.world.DefaultSectionBuffer;
->>>>>>> feature/marshal
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.entity.*;
 import eu.mshade.enderframe.event.PacketEvent;
