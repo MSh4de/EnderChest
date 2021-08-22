@@ -27,7 +27,6 @@ public class DefaultMinecartMarshal extends DefaultEntityMarshal {
         compoundBinaryTag.putInt("blockYPosition", minecart.getBlockYPosition());
         compoundBinaryTag.putBoolean("isShowingBlock", minecart.isShowBlock());
         compoundBinaryTag.addCompound((CompoundBinaryTag) binaryTagMarshal.marshal(minecart, Damageable.class));
-        compoundBinaryTag.putBinaryTag("vehicleVelocity", binaryTagMarshal.marshal(((Minecart) entity).getVehicleVelocity()));
 
         return compoundBinaryTag;
     }
@@ -58,7 +57,6 @@ public class DefaultMinecartMarshal extends DefaultEntityMarshal {
                 compoundBinaryTag.getInt("blockData"),
                 compoundBinaryTag.getInt("blockYPosition"),
                 compoundBinaryTag.getBoolean("isShowingBlock"),
-                damageable.getDamageTaken(),
-                binaryTagMarshal.unMarshal(compoundBinaryTag.getBinaryTag("vehicleVelocity"), Vector.class));
+                damageable.getDamageTaken());
     }
 }

@@ -2,11 +2,10 @@ package eu.mshade.enderchest.redstone;
 
 import eu.mshade.enderchest.redstone.protocol.RedstonePacketIn;
 import eu.mshade.enderchest.redstone.protocol.RedstonePacketOut;
-import eu.mshade.mwork.event.EventContainer;
+import eu.mshade.mwork.ParameterContainer;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelPromise;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -14,7 +13,7 @@ public class RedstoneSession extends ChannelInboundHandlerAdapter {
 
     private Channel channel;
     private Redstone redstone;
-    private EventContainer eventContainer = EventContainer.of()
+    private ParameterContainer parameterContainer = ParameterContainer.of()
             .putContainer(this);
 
     public RedstoneSession(Channel channel, Redstone redstone) {
@@ -32,7 +31,7 @@ public class RedstoneSession extends ChannelInboundHandlerAdapter {
             if (awaitRedstonePacketIn != null) {
                 awaitRedstonePacketIn.complete(redstonePacketIn);
             }else {
-                redstone.getRedstonePacketEventBus().publish(redstonePacketIn, eventContainer);
+                redstone.getRedstonePacketEventBus().publish(redstonePacketIn, parameterContainer);
             }
         }
     }

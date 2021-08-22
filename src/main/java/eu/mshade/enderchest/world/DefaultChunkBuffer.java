@@ -200,6 +200,7 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
     public void addEntity(Entity entity) {
         getWorldBuffer().addEntity(entity);
         getEntities().add(entity);
+        System.out.println("test");
         hasChange = true;
     }
 
@@ -207,6 +208,7 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
     public void removeEntity(Entity entity) {
         getWorldBuffer().removeEntity(entity);
         getEntities().remove(entity);
+        System.out.println("test2");
         hasChange = true;
     }
 

@@ -36,7 +36,7 @@ public class DefaultChunkMarshal implements BinaryTagMarshalBuffer<ChunkBuffer> 
         for (SectionBuffer sectionBuffer : chunkBuffer.getSectionBuffers()) {
             if (sectionBuffer != null) listBinaryTagSections.add(binaryTagMarshal.marshal(sectionBuffer));
         }
-
+        System.out.println(chunkBuffer.getEntities());
         for(Entity entity : chunkBuffer.getEntities()) {
             listBinaryTagEntities.add(binaryTagMarshal.marshal(entity));
         }
