@@ -55,7 +55,7 @@ public class DefaultWolfMarshal extends DefaultLivingEntityMarshal {
                 compoundBinaryTag.getBoolean("isBegging"),
                 compoundBinaryTag.getBoolean("isCollarColor"),
                 tameable.isSitting(),
-                tameable.isTame(),
+                tameable.isTamed(),
                 tameable.getOwner());
     }
 }

@@ -25,12 +25,12 @@ public class DefaultTameableEntity implements Tameable {
     }
 
     @Override
-    public boolean isTame() {
+    public boolean isTamed() {
         return isTame;
     }
 
     @Override
-    public void setTame(boolean isTame) {
+    public void setTamed(boolean isTame) {
         this.isTame = isTame;
     }
 
