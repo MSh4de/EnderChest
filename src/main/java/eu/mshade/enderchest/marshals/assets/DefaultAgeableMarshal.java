@@ -25,6 +25,7 @@ public class DefaultAgeableMarshal implements BinaryTagMarshalBuffer<Ageable> {
     @Override
     public Ageable deserialize(BinaryTagMarshal binaryTagMarshal, Type type, BinaryTag<?> binaryTag, ParameterContainer parameterContainer) throws Exception {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
+
         return new DefaultAgeableEntity(compoundBinaryTag.getInt("age"),
                 compoundBinaryTag.getBoolean("ageLock"));
     }

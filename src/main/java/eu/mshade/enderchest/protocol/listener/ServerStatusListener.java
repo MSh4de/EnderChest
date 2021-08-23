@@ -33,13 +33,10 @@ public class ServerStatusListener implements EventListener<ServerStatusEvent> {
         MotdComponent motdComponent = new MotdComponent(motdVersion, motdPlayer, TextComponent.of("Hello"));
         CompletableFuture<RedstonePacketInMotd> redstonePacketInMotdCompletableFuture = CompletableFuture.completedFuture(new RedstonePacketInMotd(motdComponent));
 
-
         for (RedstoneSession redstoneSession : redstone.getRedstoneSessions()) {
-            System.out.println(redstoneSession);
             redstonePacketInMotdCompletableFuture = redstone.sendPacket(redstoneSession, redstonePacketOutMotd, RedstonePacketInMotd.class);
         }
         redstonePacketInMotdCompletableFuture.thenAccept(redstonePacketInMotd -> {
-            System.out.println(redstonePacketInMotd);
             enderFrameSessionHandler.sendPacket(new PacketOutStatus(redstonePacketInMotd.getMotdComponent()));
         });
 

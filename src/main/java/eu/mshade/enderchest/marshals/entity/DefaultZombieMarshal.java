@@ -30,8 +30,8 @@ public class DefaultZombieMarshal extends DefaultLivingEntityMarshal {
     @Override
     public Zombie deserialize(BinaryTagMarshal binaryTagMarshal, Type type, BinaryTag<?> binaryTag, ParameterContainer parameterContainer) throws Exception {
         LivingEntity livingEntity = super.deserialize(binaryTagMarshal, type, binaryTag, parameterContainer);
-        Ageable ageable = binaryTagMarshal.unMarshal(binaryTag, Ageable.class);
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
+        Ageable ageable = binaryTagMarshal.unMarshal(compoundBinaryTag, Ageable.class);
 
         return new DefaultZombieEntity(livingEntity.getLocation(),
                 livingEntity.getVelocity(),
