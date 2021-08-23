@@ -1,9 +1,12 @@
 package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderchest.DedicatedEnderChest;
+import eu.mshade.enderchest.entity.EntityFactory;
 import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
+import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.Player;
+import eu.mshade.enderframe.entity.Zombie;
 import eu.mshade.enderframe.event.entity.PacketMoveEvent;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Position;
@@ -14,7 +17,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 
 public class PacketMoveHandler implements EventListener<PacketMoveEvent> {
@@ -60,8 +65,9 @@ public class PacketMoveHandler implements EventListener<PacketMoveEvent> {
             enderFrameSession.sendSquareChunk(10, now.getChunkX(), now.getChunkZ(), now.getWorld());
         }
 
+
         for (Player viewer : player.getViewers()) {
-            viewer.getEnderFrameSessionHandler().getEnderFrameSession().moveTo(player, event.getPacketMoveType(), now, before, position.isGround());
+            viewer.getEnderFrameSessionHandler().getEnderFrameSession().moveTo(player, event.getPacketMoveType(), position.isGround());
         }
     }
 
