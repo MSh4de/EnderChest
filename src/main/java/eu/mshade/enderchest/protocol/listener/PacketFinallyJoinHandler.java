@@ -41,7 +41,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         enderFrameSession.setLocation(location);
 
         enderFrameSession.sendJoinGame(GameMode.CREATIVE, world.getWorldLevel().getDimension(), world.getWorldLevel().getDifficulty(), 20, world.getWorldLevel().getLevelType(), false);
-        enderFrameSession.sendAbilities(false, false, true, false, 0.4F, 0.2F);
+        enderFrameSession.sendAbilities(false, false, true, false, 0.2F, 0.2F);
 
         dedicatedEnderChest.addPlayer(enderFrameSession);
 
