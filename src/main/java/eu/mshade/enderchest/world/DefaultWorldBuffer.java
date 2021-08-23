@@ -9,14 +9,12 @@ import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.EntityIdManager;
 import eu.mshade.enderframe.entity.EntityType;
 import eu.mshade.enderframe.entity.Player;
-import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.world.*;
 import eu.mshade.mwork.ParameterContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.net.SocketAddress;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -181,7 +179,7 @@ public class DefaultWorldBuffer implements WorldBuffer {
             System.out.println(entity);
             System.out.println(location.getChunkBuffer());
             location.getChunkBuffer().addEntity(entity);
-            location.getChunkBuffer().getViewers().forEach(each -> each.getEnderFrameSessionHandler().getEnderFrameSession().sendMob(entity));
+            location.getChunkBuffer().getViewers().forEach(each -> each.getEnderFrameSessionHandler().getEnderFrameSession().sendEntity(entity));
         } catch (Exception e) {
             e.printStackTrace();
         }
