@@ -17,4 +17,11 @@ public class RedstonePacketInMotd extends RedstonePacketIn {
     public MotdComponent getMotdComponent() {
         return motdComponent;
     }
+
+    @Override
+    public String toString() {
+        return "RedstonePacketInMotd{" +
+                "motdComponent=" + motdComponent +
+                '}';
+    }
 }
