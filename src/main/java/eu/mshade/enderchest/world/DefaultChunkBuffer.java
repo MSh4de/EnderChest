@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 public  class DefaultChunkBuffer implements ChunkBuffer {
@@ -26,7 +27,7 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
     private int z;
     private UUID id;
     private File file;
-    private boolean hasChange;
+    private AtomicBoolean hasChange;
     private AtomicLong health = new AtomicLong(System.currentTimeMillis());
     private Queue<Player> players = new ConcurrentLinkedQueue<>();
     private WorldBuffer worldBuffer;
@@ -39,7 +40,7 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
         this.x = x;
         this.z = z;
         this.file = file;
-        this.hasChange = hasChange;
+        this.hasChange = new AtomicBoolean(hasChange);
         this.worldBuffer = worldBuffer;
         this.biomes = biomes;
         this.id = ChunkBuffer.ofId(x, z);
@@ -123,7 +124,7 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
             int i = sectionBuffer.getRealBlock() - 1;
             sectionBuffer.setRealBlock(Math.max(i, 0));
         }else sectionBuffer.setRealBlock(sectionBuffer.getRealBlock() + 1);
-        hasChange = true;
+        hasChange.set(true);
         sectionBuffer.getBlocks()[getIndex(x, y, z)] = block;
     }
 
@@ -139,7 +140,7 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
         getHealth().set(System.currentTimeMillis());
         SectionBuffer sectionBuffer = getSectionBuffer(y);
         sectionBuffer.getBlockLight().set(getIndex(x, y, z), light);
-        hasChange = true;
+        hasChange.set(true);
     }
 
     @Override
@@ -154,13 +155,13 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
         getHealth().set(System.currentTimeMillis());
         SectionBuffer sectionBuffer = getSectionBuffer(y);
         sectionBuffer.getSkyLight().set(getIndex(x, y, z), light);
-        hasChange = true;
+        hasChange.set(true);
     }
 
     @Override
     public void setBiome(int x, int z, int biome) {
         getHealth().set(System.currentTimeMillis());
-        hasChange = true;
+        hasChange.set(true);
         biomes[(z & 0xF) * WIDTH + (x & 0xF)] = (byte) biome;
     }
 
@@ -188,7 +189,7 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
 
     @Override
     public boolean hasChange() {
-        return hasChange;
+        return hasChange.get();
     }
 
     @Override
@@ -200,14 +201,14 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
     public void addEntity(Entity entity) {
         getWorldBuffer().addEntity(entity);
         getEntities().add(entity);
-        hasChange = true;
+        hasChange.set(true);
     }
 
     @Override
     public void removeEntity(Entity entity) {
         getWorldBuffer().removeEntity(entity);
         getEntities().remove(entity);
-        hasChange = true;
+        hasChange.set(true);
     }
 
     public void setBiomes(byte[] biomes) {

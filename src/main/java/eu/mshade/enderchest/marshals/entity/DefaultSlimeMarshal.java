@@ -18,7 +18,7 @@ public class DefaultSlimeMarshal extends DefaultLivingEntityMarshal {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) super.serialize(binaryTagMarshal, type, entity, parameterContainer);
         Slime slime = (Slime) entity;
 
-        compoundBinaryTag.putByte("size", slime.size());
+        compoundBinaryTag.putByte("size", slime.getSize());
         return compoundBinaryTag;
     }
 

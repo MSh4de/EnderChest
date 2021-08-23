@@ -92,6 +92,7 @@ public class PacketEncryptionHandler implements EventListener<PacketEncryptionEv
                     .uri(new URI("https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" + enderFrameSession.getGameProfile().getName() + "&serverId=" + hashServerId + "&ip=" + enderFrameSession.getSocketAddress()))
                     .build();
             JSONObject jsonObject = new JSONObject(httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString()).body());
+            System.out.println(jsonObject);
             String id = jsonObject.getString("id");
             UUID uuid = UUID.fromString(id.substring(0, 8)
                     + "-" + id.substring(8, 12)

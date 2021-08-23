@@ -16,7 +16,7 @@ public class DefaultTameableMarshal implements BinaryTagMarshalBuffer<Tameable> 
     public BinaryTag<?> serialize(BinaryTagMarshal binaryTagMarshal, Type type, Tameable tameable, ParameterContainer parameterContainer) throws Exception {
         CompoundBinaryTag compoundBinaryTag = new CompoundBinaryTag();
 
-        compoundBinaryTag.putBoolean("isTame", tameable.isTame());
+        compoundBinaryTag.putBoolean("isTame", tameable.isTamed());
         compoundBinaryTag.putBoolean("isSitting", tameable.isSitting());
         compoundBinaryTag.putString("owner", tameable.getOwner());
 

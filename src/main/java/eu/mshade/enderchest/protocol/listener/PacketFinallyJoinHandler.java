@@ -41,12 +41,9 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         enderFrameSession.setLocation(location);
 
         enderFrameSession.sendJoinGame(GameMode.CREATIVE, world.getWorldLevel().getDimension(), world.getWorldLevel().getDifficulty(), 20, world.getWorldLevel().getLevelType(), false);
-        enderFrameSession.sendAbilities(false, false, true, false, 0.5F, 0.2F);
-        enderFrameSessionHandler.sendPacket(new PacketOutSpawnPosition(new BlockPosition(7, location.getBlockY(), 7)));
+        enderFrameSession.sendAbilities(false, false, true, false, 0.4F, 0.2F);
 
-        enderFrameSession.sendJoinGame(GameMode.CREATIVE, world.getWorldLevel().getDimension(), world.getWorldLevel().getDifficulty(), 20, world.getWorldLevel().getLevelType(), false);
-        enderFrameSession.sendAbilities(false, false, true, false, 0.2F, 0.2F);
-
+        dedicatedEnderChest.addPlayer(enderFrameSession);
 
         PlayerInfoBuilder playerInfoBuilder = PlayerInfoBuilder.of(PlayerInfoType.ADD_PLAYER);
         dedicatedEnderChest.getEnderFrameSessions().forEach(playerInfoBuilder::withPlayer);
@@ -57,7 +54,6 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
 
         dedicatedEnderChest.getEnderFrameSessions().forEach(target ->{
-            target.sendPlayerInfo(playerInfoBuilder);
             target.sendMessage(String.format("%s join server", enderFrameSession.getPlayer().getGameProfile().getName()));
         });
 
@@ -72,7 +68,6 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         enderFrameSession.sendMessage("Welcome to project MShade");
         enderFrameSession.sendPlayerList("Hey this is test", "and this is test");
 
-        dedicatedEnderChest.addPlayer(enderFrameSession);
     }
 
 

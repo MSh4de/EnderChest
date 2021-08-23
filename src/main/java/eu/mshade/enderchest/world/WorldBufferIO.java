@@ -43,8 +43,8 @@ public class WorldBufferIO {
     }
 
     public void writeChunkBuffer(ChunkBuffer chunkBuffer) {
-        if (chunkBuffer.hasChange()) {
-            synchronized (chunkBuffer.getFile()) {
+        synchronized (chunkBuffer.getFile()) {
+            if (chunkBuffer.hasChange()) {
                 try {
                     CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) MWork.get().getBinaryTagMarshal().marshal(chunkBuffer);
                     FileOutputStream fileOutputStream = new FileOutputStream(chunkBuffer.getFile());

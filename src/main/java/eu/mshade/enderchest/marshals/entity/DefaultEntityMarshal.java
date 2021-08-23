@@ -12,6 +12,7 @@ import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
 import eu.mshade.mwork.binarytag.marshal.BinaryTagMarshal;
 import eu.mshade.mwork.binarytag.marshal.BinaryTagMarshalBuffer;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
