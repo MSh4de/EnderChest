@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 public class EnderChest {
 
     private final EventLoopGroup eventLoopGroup;
-    private Redstone redstone;
+    private final Redstone redstone;
     private final DedicatedEnderChest dedicatedEnderChest;
     private final Logger logger = LoggerFactory.getLogger(EnderChest.class);
 
@@ -142,6 +142,10 @@ public class EnderChest {
         binaryTagMarshal.registerAdaptor(GameMode.class, new DefaultGameModeMarshal());
         binaryTagMarshal.registerAdaptor(GameProfile.class, new DefaultGameProfileMarshal());
         binaryTagMarshal.registerAdaptor(Property.class, new DefaultPropertyMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(Silverfish.class, DefaultSilverfishEntity.class), new DefaultSilverfishMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(GiantZombie.class, DefaultGiantZombieEntity.class), new DefaultGiantZombieMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(EnderDragon.class, DefaultEnderDragonEntity.class), new DefaultEnderDragonMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(Squid.class, DefaultSquidEntity.class), new DefaultSquidMarshal());
 
         eventLoopGroup.scheduleAtFixedRate(() ->
                 dedicatedEnderChest.getEnderFrameSessions().forEach(enderFrameSession ->
