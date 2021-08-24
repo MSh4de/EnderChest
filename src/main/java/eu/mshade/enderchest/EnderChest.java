@@ -146,6 +146,8 @@ public class EnderChest {
         binaryTagMarshal.registerAdaptor(Arrays.asList(GiantZombie.class, DefaultGiantZombieEntity.class), new DefaultGiantZombieMarshal());
         binaryTagMarshal.registerAdaptor(Arrays.asList(EnderDragon.class, DefaultEnderDragonEntity.class), new DefaultEnderDragonMarshal());
         binaryTagMarshal.registerAdaptor(Arrays.asList(Squid.class, DefaultSquidEntity.class), new DefaultSquidMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(Mooshroom.class, DefaultMooshroomEntity.class), new DefaultMooshroomMarshal());
+        binaryTagMarshal.registerAdaptor(Arrays.asList(Snowman.class, DefaultSnowmanEntity.class), new DefaultSnowmanMarshal());
 
         eventLoopGroup.scheduleAtFixedRate(() ->
                 dedicatedEnderChest.getEnderFrameSessions().forEach(enderFrameSession ->

@@ -17,6 +17,10 @@ public class EntityFactory {
     private EntityFactory() {
         entityFactory = this;
 
+        registerFactoryEntity(EntityType.SNOW_GOLEM, parameterContainer ->
+                new DefaultSnowmanEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+        registerFactoryEntity(EntityType.MOOSHROOM, parameterContainer ->
+                new DefaultMooshroomEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.SQUID, parameterContainer ->
                 new DefaultSquidEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.ENDER_DRAGON, parameterContainer ->
