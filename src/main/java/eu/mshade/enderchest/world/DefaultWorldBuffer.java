@@ -170,16 +170,18 @@ public class DefaultWorldBuffer implements WorldBuffer {
 
         EntityFactory entityFactory = EntityFactory.get();
         EntityIdManager entityIdManager = EntityIdManager.get();
+        Location entityLocation = location.clone();
+        
         try {
             int id = entityIdManager.getFreeId();
-            System.out.println("id : "+id);
             Entity entity = entityFactory.factoryEntity(entityType, ParameterContainer.of()
                     .putContainer(id)
-                    .putContainer(location));
-            System.out.println(entity);
-            System.out.println(location.getChunkBuffer());
+                    .putContainer(entityLocation));
+
             location.getChunkBuffer().addEntity(entity);
-            location.getChunkBuffer().getViewers().forEach(each -> each.getEnderFrameSessionHandler().getEnderFrameSession().sendEntity(entity));
+            location.getChunkBuffer().getViewers().stream()
+                    .filter(player -> player.getLocation().distance(entityLocation) <= 64)
+                    .forEach(player -> player.getEnderFrameSessionHandler().getEnderFrameSession().sendEntity(entity));
         } catch (Exception e) {
             e.printStackTrace();
         }
