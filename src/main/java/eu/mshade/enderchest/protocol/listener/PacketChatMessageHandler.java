@@ -2,6 +2,7 @@ package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderchest.DedicatedEnderChest;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
+import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.EntityType;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.Zombie;
@@ -13,6 +14,10 @@ import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.WorldBuffer;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class PacketChatMessageHandler implements EventListener<PacketChatMessageEvent> {
 
@@ -37,6 +42,11 @@ public class PacketChatMessageHandler implements EventListener<PacketChatMessage
             Location location = player.getLocation();
             WorldBuffer world = location.getWorld();
             world.spawnEntity(EntityType.ZOMBIE, location);
+            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+                Entity test = location.getChunkBuffer().getEntities().element();
+                test.tick();
+                enderFrameSessionHandler.getEnderFrameSession().sendMove(test, true);
+            }, 1, 1, TimeUnit.SECONDS);
         }else if(args[0].equalsIgnoreCase("!change")){
             if(args[1].equalsIgnoreCase("byte")) {
                 Location location = player.getLocation();
