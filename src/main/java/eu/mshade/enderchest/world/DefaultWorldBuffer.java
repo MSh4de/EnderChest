@@ -194,9 +194,8 @@ public class DefaultWorldBuffer implements WorldBuffer {
             throw new NullPointerException("Location cannot be null when trying to spawn an entity.");
 
         try {
-            int id = EntityIdManager.get().getFreeId();
             EnderFrameSession enderFrameSession = sessionHandler.getEnderFrameSession();
-            Player player = new DefaultPlayerEntity(location.clone().add(1,1,1), id, sessionHandler, enderFrameSession.getSocketAddress(), sessionHandler.getProtocolVersion(), GameMode.SURVIVAL, enderFrameSession.getGameProfile());
+            Player player = new DefaultPlayerEntity(location.clone().add(1,1,1), enderFrameSession.getEntityId(), sessionHandler, enderFrameSession.getSocketAddress(), sessionHandler.getProtocolVersion(), GameMode.SURVIVAL, enderFrameSession.getGameProfile());
             enderFrameSession.sendEntity(player);
             return player;
         } catch (Exception e) {
