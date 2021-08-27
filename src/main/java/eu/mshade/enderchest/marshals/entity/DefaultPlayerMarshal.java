@@ -36,7 +36,6 @@ public class DefaultPlayerMarshal extends DefaultLivingEntityMarshal {
     public Player deserialize(BinaryTagMarshal binaryTagMarshal, Type type, BinaryTag<?> binaryTag, ParameterContainer parameterContainer) throws Exception {
         LivingEntity livingEntity = super.deserialize(binaryTagMarshal, type, binaryTag, parameterContainer);
         EnderFrameSessionHandler enderFrameSessionHandler = parameterContainer.getContainer(EnderFrameSessionHandler.class);
-        EnderFrameSession enderFrameSession = enderFrameSessionHandler.getEnderFrameSession();
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
         return new DefaultPlayerEntity(livingEntity.getLocation(),
@@ -58,9 +57,6 @@ public class DefaultPlayerMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getNumberOfArrowInEntity(),
                 livingEntity.isAIDisable(),
                 enderFrameSessionHandler,
-                enderFrameSession.getPlayer().getSocketAddress(),
-                enderFrameSessionHandler.getProtocolVersion(),
-                SkinParts.fromByte((byte)127),
                 false,
                 compoundBinaryTag.getFloat("absorptionHeart"),
                 compoundBinaryTag.getInt("score"),
