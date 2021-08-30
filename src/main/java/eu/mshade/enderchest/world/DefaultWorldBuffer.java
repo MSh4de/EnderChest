@@ -5,7 +5,10 @@ import eu.mshade.enderchest.entity.EntityFactory;
 import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.GameMode;
-import eu.mshade.enderframe.entity.*;
+import eu.mshade.enderframe.entity.Entity;
+import eu.mshade.enderframe.entity.EntityIdManager;
+import eu.mshade.enderframe.entity.EntityType;
+import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.world.*;
 import eu.mshade.mwork.ParameterContainer;
 import org.slf4j.Logger;
@@ -15,16 +18,14 @@ import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class DefaultWorldBuffer implements WorldBuffer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultWorldBuffer.class);
 
-    private WorldLevel worldLevel;
-    private File chunksFolder;
-    private File worldFolder;
+    private final WorldLevel worldLevel;
+    private final File chunksFolder;
+    private final File worldFolder;
     private ChunkGenerator chunkGenerator;
     private final Map<UUID, ChunkBuffer> chunks = new ConcurrentHashMap<>();
     private final Map<UUID, File> chunkFiles = new ConcurrentHashMap<>();
@@ -65,6 +66,7 @@ public class DefaultWorldBuffer implements WorldBuffer {
     public void flushChunkBuffer(ChunkBuffer chunkBuffer) {
         //this.chunkFiles.computeIfAbsent(chunkBuffer.getId(), integer -> chunkBuffer.getFile());
         worldManager.getWorldBufferIO().writeChunkBuffer(chunkBuffer);
+        chunkBuffer.clearEntities();
         this.chunks.remove(chunkBuffer.getId());
     }
 

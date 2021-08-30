@@ -1,6 +1,7 @@
 package eu.mshade.enderchest.world;
 
 import eu.mshade.enderframe.entity.Entity;
+import eu.mshade.enderframe.entity.EntityIdManager;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.world.ChunkBuffer;
 import eu.mshade.enderframe.world.SectionBuffer;
@@ -9,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.UUID;
@@ -19,19 +19,19 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public  class DefaultChunkBuffer implements ChunkBuffer {
 
-    private static Logger logger = LoggerFactory.getLogger(DefaultChunkBuffer.class);
+    private static final Logger logger = LoggerFactory.getLogger(DefaultChunkBuffer.class);
 
     public static final int WIDTH = 16, HEIGHT = 16, DEPTH = 256, SEC_DEPTH = 16;
 
-    private int x;
-    private int z;
-    private UUID id;
-    private File file;
-    private AtomicBoolean hasChange;
-    private AtomicLong health = new AtomicLong(System.currentTimeMillis());
-    private Queue<Player> players = new ConcurrentLinkedQueue<>();
-    private WorldBuffer worldBuffer;
-    private SectionBuffer[] sectionBuffers = new SectionBuffer[16];
+    private final int x;
+    private final int z;
+    private final UUID id;
+    private final File file;
+    private final AtomicBoolean hasChange;
+    private final AtomicLong health = new AtomicLong(System.currentTimeMillis());
+    private final Queue<Player> players = new ConcurrentLinkedQueue<>();
+    private final WorldBuffer worldBuffer;
+    private final SectionBuffer[] sectionBuffers = new SectionBuffer[16];
     private final Queue<Entity> entities = new ConcurrentLinkedQueue<>();
     //private final AtomicReference<ChunkBufferStatus> chunkBufferStatus
     private byte[] biomes;
@@ -199,8 +199,9 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
 
     @Override
     public void addEntity(Entity entity) {
-        getWorldBuffer().addEntity(entity);
         getEntities().add(entity);
+        getWorldBuffer().addEntity(entity);
+
         hasChange.set(true);
     }
 
@@ -208,7 +209,14 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
     public void removeEntity(Entity entity) {
         getWorldBuffer().removeEntity(entity);
         getEntities().remove(entity);
+        EntityIdManager.get().flushId(entity.getEntityId());
+
         hasChange.set(true);
+    }
+
+    @Override
+    public void clearEntities() {
+        this.entities.forEach(this::removeEntity);
     }
 
     public void setBiomes(byte[] biomes) {
