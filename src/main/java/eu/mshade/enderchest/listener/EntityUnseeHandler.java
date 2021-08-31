@@ -6,7 +6,7 @@ import eu.mshade.enderframe.event.EntityUnseeEvent;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
-public class EntityUnSeeHandler implements EventListener<EntityUnseeEvent> {
+public class EntityUnseeHandler implements EventListener<EntityUnseeEvent> {
 
     @Override
     public void onEvent(EntityUnseeEvent event, ParameterContainer eventContainer) {
