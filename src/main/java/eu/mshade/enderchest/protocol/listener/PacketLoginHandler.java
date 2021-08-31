@@ -3,14 +3,14 @@ package eu.mshade.enderchest.protocol.listener;
 import eu.mshade.enderchest.DedicatedEnderChest;
 import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
-import eu.mshade.enderframe.packetevent.PacketLoginEvent;
 import eu.mshade.enderframe.mojang.GameProfile;
+import eu.mshade.enderframe.packetevent.PacketLoginEvent;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
 public class PacketLoginHandler implements EventListener<PacketLoginEvent> {
 
-    private DedicatedEnderChest dedicatedEnderChest;
+    private final DedicatedEnderChest dedicatedEnderChest;
 
     public PacketLoginHandler(DedicatedEnderChest dedicatedEnderChest) {
         this.dedicatedEnderChest = dedicatedEnderChest;
@@ -29,7 +29,7 @@ public class PacketLoginHandler implements EventListener<PacketLoginEvent> {
 
     @Override
     public void onEvent(PacketLoginEvent event, ParameterContainer eventContainer) {
-        EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
+        EnderFrameSessionHandler enderFrameSessionHandler = event.getPlayer().getEnderFrameSessionHandler();
         EnderFrameSession enderFrameSession = enderFrameSessionHandler.getEnderFrameProtocol().getEnderFrameSession(enderFrameSessionHandler);
         enderFrameSessionHandler.setEnderFrameSession(enderFrameSession);
         enderFrameSession.setGameProfile(new GameProfile(event.getName()));

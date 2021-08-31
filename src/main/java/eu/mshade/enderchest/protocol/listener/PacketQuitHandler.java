@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 public class PacketQuitHandler implements EventListener<PacketQuitEvent> {
 
-    private static Logger logger = LoggerFactory.getLogger(PacketQuitHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(PacketQuitHandler.class);
 
     private final DedicatedEnderChest dedicatedEnderChest;
 

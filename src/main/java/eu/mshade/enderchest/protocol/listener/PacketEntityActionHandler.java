@@ -12,7 +12,7 @@ public class PacketEntityActionHandler implements EventListener<PacketEntityActi
 
     @Override
     public void onEvent(PacketEntityActionEvent event, ParameterContainer eventContainer) {
-        EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
+        EnderFrameSessionHandler enderFrameSessionHandler = event.getPlayer().getEnderFrameSessionHandler();
         EnderFrameSession enderFrameSession = enderFrameSessionHandler.getEnderFrameSession();
 
         Player player = enderFrameSession.getPlayer();

@@ -4,10 +4,10 @@ import eu.mshade.enderchest.DedicatedEnderChest;
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
-import eu.mshade.enderframe.packetevent.PacketEncryptionEvent;
-import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.Property;
+import eu.mshade.enderframe.packetevent.PacketEncryptionEvent;
+import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.protocol.MinecraftEncryption;
 import eu.mshade.mwork.MOptional;
 import eu.mshade.mwork.ParameterContainer;
@@ -79,7 +79,7 @@ public class PacketEncryptionHandler implements EventListener<PacketEncryptionEv
 
     @Override
     public void onEvent(PacketEncryptionEvent event, ParameterContainer eventContainer) {
-        EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
+        EnderFrameSessionHandler enderFrameSessionHandler = event.getPlayer().getEnderFrameSessionHandler();
         EnderFrameSession enderFrameSession = enderFrameSessionHandler.getEnderFrameSession();
         MinecraftEncryption minecraftEncryption = dedicatedEnderChest.getMinecraftEncryption();
         try {
@@ -110,7 +110,7 @@ public class PacketEncryptionHandler implements EventListener<PacketEncryptionEv
             GameProfile gameProfile = new GameProfile(uuid, jsonObject.getString("name"), properties);
             enderFrameSession.setGameProfile(gameProfile);
 
-            EnderFrame.get().getPacketEventBus().publish(new PacketFinallyJoinEvent(), eventContainer);
+            EnderFrame.get().getPacketEventBus().publish(new PacketFinallyJoinEvent(event.getPlayer()), eventContainer);
 
         }catch (Exception e){
             LOGGER.error("", e);

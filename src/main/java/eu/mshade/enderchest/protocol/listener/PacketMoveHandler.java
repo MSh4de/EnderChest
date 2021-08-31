@@ -61,7 +61,7 @@ public class PacketMoveHandler implements EventListener<PacketMoveEvent> {
 
 
         for (Player viewer : player.getViewers()) {
-            viewer.getEnderFrameSessionHandler().getEnderFrameSession().moveTo(player, event.getPacketMoveType(), position.isGround());
+            viewer.getEnderFrameSessionHandler().getEnderFrameSession().moveTo(player);
         }
     }
 

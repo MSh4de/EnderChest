@@ -99,6 +99,9 @@ public class EnderChest {
         enderFrameEventBus.subscribe(ChunkLoadEvent.class, new ChunkLoadHandler());
         enderFrameEventBus.subscribe(ChunkSeeEvent.class, new ChunkSeeHandler());
         enderFrameEventBus.subscribe(ChunkUnseeEvent.class, new ChunkUnseeHandler());
+        enderFrameEventBus.subscribe(EntityMoveEvent.class, new EntityMoveHandler());
+        enderFrameEventBus.subscribe(EntityTeleportEvent.class, new EntityTeleportHandler());
+        enderFrameEventBus.subscribe(EntityChunkChangeEvent.class, new EntityChunkChangeHandler());
 
         BinaryTagMarshal binaryTagMarshal = MWork.get().getBinaryTagMarshal();
 
