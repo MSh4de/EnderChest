@@ -182,7 +182,11 @@ public class DefaultWorldBuffer implements WorldBuffer {
             location.getChunkBuffer().addEntity(entity);
             location.getChunkBuffer().getViewers().stream()
                     .filter(player -> player.getLocation().distance(entityLocation) <= 64)
-                    .forEach(player -> player.getEnderFrameSessionHandler().getEnderFrameSession().sendEntity(entity));
+                    .map(Player::getEnderFrameSessionHandler)
+                    .map(EnderFrameSessionHandler::getEnderFrameSession)
+                    .forEach(session -> session.sendEntity(entity));
+
+            return entity;
         } catch (Exception e) {
             e.printStackTrace();
         }
