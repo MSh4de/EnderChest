@@ -18,14 +18,14 @@ import java.util.concurrent.CompletableFuture;
 
 public class ServerStatusListener implements EventListener<ServerStatusEvent> {
 
-    private Redstone redstone;
+    private final Redstone redstone;
     public ServerStatusListener(Redstone redstone) {
         this.redstone = redstone;
     }
 
     @Override
     public void onEvent(ServerStatusEvent event, ParameterContainer eventContainer) {
-        EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
+        EnderFrameSessionHandler enderFrameSessionHandler = event.getPlayer().getEnderFrameSessionHandler();
 
         RedstonePacketOutMotd redstonePacketOutMotd = new RedstonePacketOutMotd();
         MotdVersion motdVersion = new MotdVersion("1.8.X", 47);

@@ -33,7 +33,7 @@ public class PacketKeepAliveHandler implements EventListener<PacketKeepAliveEven
 
     @Override
     public void onEvent(PacketKeepAliveEvent event, ParameterContainer eventContainer) {
-        EnderFrameSession enderFrameSession = eventContainer.getContainer(EnderFrameSessionHandler.class).getEnderFrameSession();
+        EnderFrameSession enderFrameSession = event.getPlayer().getEnderFrameSessionHandler().getEnderFrameSession();
         int ping = (int) (System.currentTimeMillis() - event.getThreshold());
         enderFrameSession.getPlayer().setPing(ping);
         PlayerInfoBuilder playerInfoBuilder = PlayerInfoBuilder
