@@ -3,8 +3,7 @@ package eu.mshade.enderchest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import eu.mshade.enderchest.entity.*;
-import eu.mshade.enderchest.listener.ChunkUnloadHandler;
-import eu.mshade.enderchest.listener.EntityUnSeeHandler;
+import eu.mshade.enderchest.listener.*;
 import eu.mshade.enderchest.marshals.assets.DefaultAgeableMarshal;
 import eu.mshade.enderchest.marshals.assets.DefaultRideableMarshal;
 import eu.mshade.enderchest.marshals.assets.DefaultTameableMarshal;
@@ -92,10 +91,14 @@ public class EnderChest {
         packetEventBus.subscribe(PacketQuitEvent.class, new PacketQuitHandler(dedicatedEnderChest));
         packetEventBus.subscribe(PacketEntityActionEvent.class, new PacketEntityActionHandler());
 
-        EventBus<EnderFrameEvent> eventEventBus = enderFrame.getEnderFrameEventBus();
+        EventBus<EnderFrameEvent> enderFrameEventBus = enderFrame.getEnderFrameEventBus();
 
-        eventEventBus.subscribe(EntityUnseeEvent.class, new EntityUnSeeHandler());
-        eventEventBus.subscribe(ChunkUnloadEvent.class, new ChunkUnloadHandler());
+        enderFrameEventBus.subscribe(EntityUnseeEvent.class, new EntityUnSeeHandler());
+        enderFrameEventBus.subscribe(EntitySeeEvent.class, new EntitySeeHandler());
+        enderFrameEventBus.subscribe(ChunkUnloadEvent.class, new ChunkUnloadHandler());
+        enderFrameEventBus.subscribe(EntityMoveEvent.class, new EntityMoveHandler());
+        enderFrameEventBus.subscribe(EntityTeleportEvent.class, new EntityTeleportHandler());
+        enderFrameEventBus.subscribe(EntityChunkChangeEvent.class, new EntityChunkChangeHandler());
 
         BinaryTagMarshal binaryTagMarshal = MWork.get().getBinaryTagMarshal();
 
