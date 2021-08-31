@@ -6,7 +6,7 @@ import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.EntityType;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.Zombie;
-import eu.mshade.enderframe.event.entity.PacketChatMessageEvent;
+import eu.mshade.enderframe.packetevent.PacketChatMessageEvent;
 import eu.mshade.enderframe.metadata.MetadataMeaning;
 import eu.mshade.enderframe.mojang.chat.ChatColor;
 import eu.mshade.enderframe.world.ChunkBuffer;
@@ -16,7 +16,6 @@ import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class PacketChatMessageHandler implements EventListener<PacketChatMessageEvent> {

@@ -5,7 +5,7 @@ import eu.mshade.enderchest.redstone.RedstoneSession;
 import eu.mshade.enderchest.redstone.protocol.packet.RedstonePacketInMotd;
 import eu.mshade.enderchest.redstone.protocol.packet.RedstonePacketOutMotd;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
-import eu.mshade.enderframe.event.server.ServerStatusEvent;
+import eu.mshade.enderframe.packetevent.ServerStatusEvent;
 import eu.mshade.enderframe.mojang.chat.TextComponent;
 import eu.mshade.enderframe.motd.MotdComponent;
 import eu.mshade.enderframe.motd.MotdPlayer;

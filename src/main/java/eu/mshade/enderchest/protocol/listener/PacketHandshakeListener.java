@@ -2,7 +2,7 @@ package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderchest.DedicatedEnderChest;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
-import eu.mshade.enderframe.event.entity.PacketHandshakeEvent;
+import eu.mshade.enderframe.packetevent.PacketHandshakeEvent;
 import eu.mshade.enderframe.mojang.chat.TextComponent;
 import eu.mshade.enderframe.protocol.HandshakeStatus;
 import eu.mshade.enderframe.protocol.ProtocolStatus;

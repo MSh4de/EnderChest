@@ -3,6 +3,8 @@ package eu.mshade.enderchest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import eu.mshade.enderchest.entity.*;
+import eu.mshade.enderchest.listener.ChunkUnloadHandler;
+import eu.mshade.enderchest.listener.EntityUnSeeHandler;
 import eu.mshade.enderchest.marshals.assets.DefaultAgeableMarshal;
 import eu.mshade.enderchest.marshals.assets.DefaultRideableMarshal;
 import eu.mshade.enderchest.marshals.assets.DefaultTameableMarshal;
@@ -20,10 +22,9 @@ import eu.mshade.enderchest.world.DefaultSectionBuffer;
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.entity.*;
-import eu.mshade.enderframe.event.PacketEvent;
-import eu.mshade.enderframe.event.entity.*;
-import eu.mshade.enderframe.event.server.ServerPingEvent;
-import eu.mshade.enderframe.event.server.ServerStatusEvent;
+import eu.mshade.enderframe.event.*;
+import eu.mshade.enderframe.event.ChunkUnloadEvent;
+import eu.mshade.enderframe.packetevent.*;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.Property;
 import eu.mshade.enderframe.mojang.chat.*;
@@ -90,6 +91,11 @@ public class EnderChest {
         packetEventBus.subscribe(PacketMoveEvent.class, new PacketMoveHandler(dedicatedEnderChest));
         packetEventBus.subscribe(PacketQuitEvent.class, new PacketQuitHandler(dedicatedEnderChest));
         packetEventBus.subscribe(PacketEntityActionEvent.class, new PacketEntityActionHandler());
+
+        EventBus<EnderFrameEvent> eventEventBus = enderFrame.getEnderFrameEventBus();
+
+        eventEventBus.subscribe(EntityUnseeEvent.class, new EntityUnSeeHandler());
+        eventEventBus.subscribe(ChunkUnloadEvent.class, new ChunkUnloadHandler());
 
         BinaryTagMarshal binaryTagMarshal = MWork.get().getBinaryTagMarshal();
 

@@ -5,7 +5,7 @@ import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
 import eu.mshade.enderframe.entity.Player;
-import eu.mshade.enderframe.event.entity.PacketQuitEvent;
+import eu.mshade.enderframe.packetevent.PacketQuitEvent;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 import org.slf4j.Logger;
