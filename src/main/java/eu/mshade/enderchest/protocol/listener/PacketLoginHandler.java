@@ -3,7 +3,7 @@ package eu.mshade.enderchest.protocol.listener;
 import eu.mshade.enderchest.DedicatedEnderChest;
 import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
-import eu.mshade.enderframe.event.entity.PacketLoginEvent;
+import eu.mshade.enderframe.packetevent.PacketLoginEvent;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;

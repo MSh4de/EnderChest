@@ -5,7 +5,7 @@ import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
-import eu.mshade.enderframe.event.entity.PacketKeepAliveEvent;
+import eu.mshade.enderframe.packetevent.PacketKeepAliveEvent;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 

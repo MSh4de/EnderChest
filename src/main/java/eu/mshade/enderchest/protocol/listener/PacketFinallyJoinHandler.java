@@ -3,7 +3,7 @@ package eu.mshade.enderchest.protocol.listener;
 import eu.mshade.enderchest.DedicatedEnderChest;
 import eu.mshade.enderframe.*;
 import eu.mshade.enderframe.entity.Player;
-import eu.mshade.enderframe.event.entity.PacketFinallyJoinEvent;
+import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.protocol.packet.PacketOutSpawnPosition;
 import eu.mshade.enderframe.world.BlockPosition;
 import eu.mshade.enderframe.world.Location;
