@@ -13,7 +13,6 @@ public class EntityUnseeHandler implements EventListener<EntityUnseeEvent> {
         Entity entity = event.getEntity();
         Player player = event.getPlayer();
 
-        player.getEnderFrameSessionHandler().getEnderFrameSession().removeEntities(entity);
-        entity.getViewers().remove(player);
+
     }
 }
