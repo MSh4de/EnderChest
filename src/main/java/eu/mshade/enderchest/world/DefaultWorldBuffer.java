@@ -2,6 +2,7 @@ package eu.mshade.enderchest.world;
 
 import eu.mshade.enderchest.entity.DefaultPlayerEntity;
 import eu.mshade.enderchest.entity.EntityFactory;
+import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.GameMode;
@@ -9,6 +10,8 @@ import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.EntityIdManager;
 import eu.mshade.enderframe.entity.EntityType;
 import eu.mshade.enderframe.entity.Player;
+import eu.mshade.enderframe.event.ChunkLoadEvent;
+import eu.mshade.enderframe.event.ChunkUnloadEvent;
 import eu.mshade.enderframe.world.*;
 import eu.mshade.mwork.ParameterContainer;
 import org.slf4j.Logger;
@@ -65,33 +68,55 @@ public class DefaultWorldBuffer implements WorldBuffer {
     @Override
     public void flushChunkBuffer(ChunkBuffer chunkBuffer) {
         //this.chunkFiles.computeIfAbsent(chunkBuffer.getId(), integer -> chunkBuffer.getFile());
-        worldManager.getWorldBufferIO().writeChunkBuffer(chunkBuffer);
-        chunkBuffer.clearEntities();
-        this.chunks.remove(chunkBuffer.getId());
+        ChunkUnloadEvent chunkUnloadEvent = new ChunkUnloadEvent(chunkBuffer);
+        EnderFrame.get().getEnderFrameEventBus().publish(chunkUnloadEvent);
+
+        if(!chunkUnloadEvent.isCancelled()) {
+            worldManager.getWorldBufferIO().writeChunkBuffer(chunkBuffer);
+            chunkBuffer.clearEntities();
+            this.chunks.remove(chunkBuffer.getId());
+        }
     }
 
     @Override
     public ChunkBuffer getChunkBuffer(int x, int z) {
+
         final UUID id = ChunkBuffer.ofId(x, z);
         ChunkBuffer chunkBuffer = chunks.get(id);
-        if (chunkBuffer != null) return chunkBuffer;
+        if (chunkBuffer != null){
+            ChunkLoadEvent chunkLoadEvent = new ChunkLoadEvent(chunkBuffer);
+            EnderFrame.get().getEnderFrameEventBus().publish(chunkLoadEvent);
+            if(!chunkLoadEvent.isCancelled())
+                return chunkBuffer;
+        }else {
+            File file = getChunkFile(x, z);
+            WatchDogChunk watchDogChunk = this.worldManager.getWatchDogChunk();
 
-        File file = getChunkFile(x, z);
-        WatchDogChunk watchDogChunk = this.worldManager.getWatchDogChunk();
+            if (!file.exists() && !chunks.containsKey(id)) {
+                file = new File(chunksFolder, String.format("%d,%d.dat", x, z));
+                DefaultChunkBuffer buffer = new DefaultChunkBuffer(x, z, true, this, file);
+                ChunkLoadEvent chunkLoadEvent = new ChunkLoadEvent(buffer);
+                EnderFrame.get().getEnderFrameEventBus().publish(chunkLoadEvent);
+                if (!chunkLoadEvent.isCancelled()) {
+                    getChunkGenerator().generate(buffer);
+                    watchDogChunk.addChunkBuffer(buffer);
+                    chunks.put(id, buffer);
+                    return buffer;
+                }
+            }else {
+                ChunkBuffer readChunkBuffer = worldManager.getWorldBufferIO().readChunkBuffer(this, worldManager, file);
+                ChunkLoadEvent chunkLoadEvent = new ChunkLoadEvent(readChunkBuffer);
+                EnderFrame.get().getEnderFrameEventBus().publish(chunkLoadEvent);
 
-        if (!file.exists() && !chunks.containsKey(id)) {
-            file = new File(chunksFolder, String.format("%d,%d.dat", x, z));
-            DefaultChunkBuffer buffer = new DefaultChunkBuffer(x, z, true, this, file);
-            getChunkGenerator().generate(buffer);
-            watchDogChunk.addChunkBuffer(buffer);
-            chunks.put(id, buffer);
-            return buffer;
+                if (!chunkLoadEvent.isCancelled()) {
+                    watchDogChunk.addChunkBuffer(readChunkBuffer);
+                    chunks.put(id, readChunkBuffer);
+
+                    return readChunkBuffer;
+                }
+            }
         }
-        ChunkBuffer readChunkBuffer = worldManager.getWorldBufferIO().readChunkBuffer(this, worldManager, file);
-        watchDogChunk.addChunkBuffer(readChunkBuffer);
-        chunks.put(id, readChunkBuffer);
-
-        return readChunkBuffer;
+        return null;
     }
 
 
