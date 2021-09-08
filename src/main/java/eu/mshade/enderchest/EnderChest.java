@@ -22,7 +22,6 @@ import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.entity.*;
 import eu.mshade.enderframe.event.*;
-import eu.mshade.enderframe.event.ChunkUnloadEvent;
 import eu.mshade.enderframe.packetevent.*;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.Property;
@@ -49,6 +48,7 @@ public class EnderChest {
     private final Redstone redstone;
     private final DedicatedEnderChest dedicatedEnderChest;
     private final Logger logger = LoggerFactory.getLogger(EnderChest.class);
+
 
     public EnderChest() {
         System.out.println("\n" +
@@ -95,13 +95,17 @@ public class EnderChest {
 
         enderFrameEventBus.subscribe(EntityUnseeEvent.class, new EntityUnseeHandler());
         enderFrameEventBus.subscribe(EntitySeeEvent.class, new EntitySeeHandler());
-        enderFrameEventBus.subscribe(ChunkUnloadEvent.class, new ChunkUnloadHandler());
-        enderFrameEventBus.subscribe(ChunkLoadEvent.class, new ChunkLoadHandler());
+
         enderFrameEventBus.subscribe(ChunkSeeEvent.class, new ChunkSeeHandler());
         enderFrameEventBus.subscribe(ChunkUnseeEvent.class, new ChunkUnseeHandler());
         enderFrameEventBus.subscribe(EntityMoveEvent.class, new EntityMoveHandler());
         enderFrameEventBus.subscribe(EntityTeleportEvent.class, new EntityTeleportHandler());
         enderFrameEventBus.subscribe(EntityChunkChangeEvent.class, new EntityChunkChangeHandler());
+
+        enderFrameEventBus.subscribe(ChunkUnloadEvent.class, new ChunkUnloadHandler());
+        enderFrameEventBus.subscribe(ChunkLoadEvent.class, new ChunkLoadHandler());
+        enderFrameEventBus.subscribe(WatchdogSeeEvent.class, new WatchdogSeeHandler());
+        enderFrameEventBus.subscribe(WatchdogUnseeEvent.class, new WatchdogUnseeHandler());
 
         BinaryTagMarshal binaryTagMarshal = MWork.get().getBinaryTagMarshal();
 
@@ -194,4 +198,5 @@ public class EnderChest {
     public DedicatedEnderChest getDedicatedEnderChest() {
         return dedicatedEnderChest;
     }
+
 }
