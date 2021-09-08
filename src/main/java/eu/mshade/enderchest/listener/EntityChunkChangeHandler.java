@@ -11,7 +11,6 @@ public class EntityChunkChangeHandler implements EventListener<EntityChunkChange
     public void onEvent(EntityChunkChangeEvent event, ParameterContainer eventContainer) {
         Entity entity = event.getEntity();
 
-        entity.getBeforeLocation().getChunkBuffer().removeEntity(entity);
-        entity.getLocation().getChunkBuffer().addEntity(entity);
+
     }
 }
