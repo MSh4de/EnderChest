@@ -15,15 +15,6 @@ public class EntityMoveHandler implements EventListener<EntityMoveEvent> {
     public void onEvent(EntityMoveEvent event, ParameterContainer eventContainer) {
         Entity entity = event.getEntity();
 
-        System.out.println((long) entity.getViewers().size());
-        entity.setUnsafeLocation(event.getLocation());
-        entity.getViewers()
-                .stream()
-                .map(Player::getEnderFrameSessionHandler)
-                .map(EnderFrameSessionHandler::getEnderFrameSession)
-                .forEach(session -> session.moveTo(entity));
 
-        if(!entity.getBeforeLocation().getChunkBuffer().equals(entity.getLocation().getChunkBuffer()))
-            EnderFrame.get().getEnderFrameEventBus().publish(new EntityChunkChangeEvent(entity));
     }
 }
