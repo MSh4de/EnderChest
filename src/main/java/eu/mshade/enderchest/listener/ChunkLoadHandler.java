@@ -11,5 +11,6 @@ public class ChunkLoadHandler implements EventListener<ChunkLoadEvent> {
     public void onEvent(ChunkLoadEvent event, ParameterContainer eventContainer) {
         ChunkBuffer chunkBuffer = event.getChunkBuffer();
 
+
     }
 }
