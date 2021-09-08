@@ -14,14 +14,6 @@ public class EntityTeleportHandler implements EventListener<EntityTeleportEvent>
     @Override
     public void onEvent(EntityTeleportEvent event, ParameterContainer eventContainer) {
         Entity entity = event.getEntity();
-        entity.setUnsafeLocation(event.getLocation());
-        entity.getViewers()
-                .stream()
-                .map(Player::getEnderFrameSessionHandler)
-                .map(EnderFrameSessionHandler::getEnderFrameSession)
-                .forEach(session -> session.sendTeleport(entity));
 
-        if(!entity.getBeforeLocation().getChunkBuffer().equals(entity.getLocation().getChunkBuffer()))
-            EnderFrame.get().getEnderFrameEventBus().publish(new EntityChunkChangeEvent(entity));
     }
 }
