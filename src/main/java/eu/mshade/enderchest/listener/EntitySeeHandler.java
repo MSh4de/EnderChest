@@ -14,9 +14,6 @@ public class EntitySeeHandler implements EventListener<EntitySeeEvent> {
         Entity entity = event.getEntity();
         Player player = event.getPlayer();
 
-        EnderFrameSession enderFrameSession = player.getEnderFrameSessionHandler().getEnderFrameSession();
-        enderFrameSession.sendEntity(entity);
-        enderFrameSession.sendTeleport(entity);
-        entity.getViewers().add(player);
+
     }
 }
