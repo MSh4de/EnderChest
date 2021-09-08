@@ -25,7 +25,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
     @Override
     public void onEvent(PacketFinallyJoinEvent event, ParameterContainer eventContainer) {
-        EnderFrameSessionHandler enderFrameSessionHandler = event.getPlayer().getEnderFrameSessionHandler();
+        EnderFrameSessionHandler enderFrameSessionHandler = event.getEnderFrameSessionHandler();
         EnderFrameSession enderFrameSession = enderFrameSessionHandler.getEnderFrameSession();
 
         enderFrameSession.sendCompression(256);

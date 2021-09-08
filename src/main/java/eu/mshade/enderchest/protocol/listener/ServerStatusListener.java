@@ -25,7 +25,7 @@ public class ServerStatusListener implements EventListener<ServerStatusEvent> {
 
     @Override
     public void onEvent(ServerStatusEvent event, ParameterContainer eventContainer) {
-        EnderFrameSessionHandler enderFrameSessionHandler = event.getPlayer().getEnderFrameSessionHandler();
+        EnderFrameSessionHandler enderFrameSessionHandler = event.getEnderFrameSessionHandler();
 
         RedstonePacketOutMotd redstonePacketOutMotd = new RedstonePacketOutMotd();
         MotdVersion motdVersion = new MotdVersion("1.8.X", 47);

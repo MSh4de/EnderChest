@@ -29,7 +29,7 @@ public class PacketLoginHandler implements EventListener<PacketLoginEvent> {
 
     @Override
     public void onEvent(PacketLoginEvent event, ParameterContainer eventContainer) {
-        EnderFrameSessionHandler enderFrameSessionHandler = event.getPlayer().getEnderFrameSessionHandler();
+        EnderFrameSessionHandler enderFrameSessionHandler = event.getEnderFrameSessionHandler();
         EnderFrameSession enderFrameSession = enderFrameSessionHandler.getEnderFrameProtocol().getEnderFrameSession(enderFrameSessionHandler);
         enderFrameSessionHandler.setEnderFrameSession(enderFrameSession);
         enderFrameSession.setGameProfile(new GameProfile(event.getName()));
