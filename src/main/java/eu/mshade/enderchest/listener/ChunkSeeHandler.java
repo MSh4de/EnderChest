@@ -12,6 +12,5 @@ public class ChunkSeeHandler implements EventListener<ChunkSeeEvent> {
     public void onEvent(ChunkSeeEvent event, ParameterContainer eventContainer) {
         ChunkBuffer chunkBuffer = event.getChunkBuffer();
         Player player = event.getPlayer();
-
     }
 }
