@@ -25,7 +25,7 @@ public class PacketHandshakeListener implements EventListener<PacketHandshakeEve
         EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
         Handshake handshake = event.getHandshake();
         HandshakeStatus handshakeStatus = handshake.getHandshakeStatus();
-        ProtocolVersion protocolVersion = handshake.getProtocolVersion();
+        ProtocolVersion protocolVersion = handshake.getVersion();
 
         enderFrameSessionHandler.setHandshake(handshake);
         if (handshakeStatus == HandshakeStatus.STATUS){

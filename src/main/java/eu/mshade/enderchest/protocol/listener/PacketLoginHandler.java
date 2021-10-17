@@ -15,17 +15,6 @@ public class PacketLoginHandler implements EventListener<PacketLoginEvent> {
     public PacketLoginHandler(DedicatedEnderChest dedicatedEnderChest) {
         this.dedicatedEnderChest = dedicatedEnderChest;
     }
-    /*
-    @Override
-    public void handle(PacketLoginEvent packetLoginEvent, DispatcherContainer dispatcherContainer) {
-        EnderFrameSessionHandler enderFrameSessionHandler = dispatcherContainer.getContainer(EnderFrameSessionHandler.class);
-        EnderFrameSession enderFrameSession = enderFrameSessionHandler.getEnderFrameProtocol().getEnderFrameSession(enderFrameSessionHandler);
-        enderFrameSessionHandler.setEnderFrameSession(enderFrameSession);
-        enderFrameSession.setGameProfile(new GameProfile(packetLoginEvent.getName()));
-        enderFrameSession.sendEncryption(dedicatedEnderChest.getMinecraftEncryption().getKeyPair().getPublic());
-    }
-
-     */
 
     @Override
     public void onEvent(PacketLoginEvent event, ParameterContainer eventContainer) {
