@@ -3,15 +3,12 @@ package eu.mshade.enderchest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import eu.mshade.enderchest.entity.*;
+import eu.mshade.enderchest.entity.marshal.common.*;
 import eu.mshade.enderchest.listener.*;
-import eu.mshade.enderchest.marshals.assets.DefaultAgeableMarshal;
-import eu.mshade.enderchest.marshals.assets.DefaultRideableMarshal;
-import eu.mshade.enderchest.marshals.assets.DefaultTameableMarshal;
-import eu.mshade.enderchest.marshals.entity.*;
-import eu.mshade.enderchest.marshals.utils.*;
-import eu.mshade.enderchest.marshals.world.DefaultChunkMarshal;
-import eu.mshade.enderchest.marshals.world.DefaultLocationMarshal;
-import eu.mshade.enderchest.marshals.world.DefaultSectionMarshal;
+import eu.mshade.enderchest.entity.marshal.entity.*;
+import eu.mshade.enderchest.entity.marshal.world.DefaultChunkMarshal;
+import eu.mshade.enderchest.entity.marshal.world.DefaultLocationMarshal;
+import eu.mshade.enderchest.entity.marshal.world.DefaultSectionMarshal;
 import eu.mshade.enderchest.protocol.listener.*;
 import eu.mshade.enderchest.redstone.Redstone;
 import eu.mshade.enderchest.redstone.protocol.RedstonePacketIn;
@@ -166,8 +163,8 @@ public class EnderChest {
         binaryTagMarshal.registerAdaptor(Arrays.asList(Snowman.class, DefaultSnowmanEntity.class), new DefaultSnowmanMarshal());
 
         eventLoopGroup.scheduleAtFixedRate(() ->
-                dedicatedEnderChest.getEnderFrameSessions().forEach(enderFrameSession ->
-                        enderFrameSession.sendKeepAlive((int) System.currentTimeMillis())), 0, 1, TimeUnit.SECONDS);
+                dedicatedEnderChest.getPlayers().forEach(player ->
+                        player.getEnderFrameSession().sendKeepAlive((int) System.currentTimeMillis())), 0, 1, TimeUnit.SECONDS);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             dedicatedEnderChest.getWorldManager().getWorlds().forEach(worldBuffer -> {
