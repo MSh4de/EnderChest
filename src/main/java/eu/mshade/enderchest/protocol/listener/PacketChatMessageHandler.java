@@ -70,7 +70,7 @@ public class PacketChatMessageHandler implements EventListener<PacketChatMessage
             });
         }
 
-        dedicatedEnderChest.getEnderFrameSessions().forEach(each -> each.sendMessage(displayName+" : "+ChatColor.translateAlternateColorCodes('&',event.getMessage())));
+        dedicatedEnderChest.getPlayers().forEach(each -> each.sendMessage(displayName+" : "+ChatColor.translateAlternateColorCodes('&',event.getMessage())));
         System.out.println(displayName+" : "+event.getMessage());
     }
 }

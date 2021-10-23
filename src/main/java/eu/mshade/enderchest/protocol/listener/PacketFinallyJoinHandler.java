@@ -38,22 +38,21 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         Player player = world.spawnPlayer(enderFrameSessionHandler,location);
         enderFrameSession.setPlayer(player);
 
-        enderFrameSession.setLocation(location);
 
         enderFrameSession.sendJoinGame(GameMode.CREATIVE, world.getWorldLevel().getDimension(), world.getWorldLevel().getDifficulty(), 20, world.getWorldLevel().getLevelType(), false);
         enderFrameSession.sendAbilities(false, false, true, false, 0.2F, 0.2F);
 
-        dedicatedEnderChest.addPlayer(enderFrameSession);
+        dedicatedEnderChest.addPlayer(player);
 
         PlayerInfoBuilder playerInfoBuilder = PlayerInfoBuilder.of(PlayerInfoType.ADD_PLAYER);
-        dedicatedEnderChest.getEnderFrameSessions().forEach(playerInfoBuilder::withPlayer);
-        dedicatedEnderChest.getEnderFrameSessions().forEach(target -> target.sendPlayerInfo(playerInfoBuilder));
+        dedicatedEnderChest.getPlayers().forEach(playerInfoBuilder::withPlayer);
+        dedicatedEnderChest.getPlayers().forEach(target -> target.getEnderFrameSessionHandler().getEnderFrameSession().sendPlayerInfo(playerInfoBuilder));
 
 
         enderFrameSessionHandler.sendPacket(new PacketOutSetSlot());
 
 
-        dedicatedEnderChest.getEnderFrameSessions().forEach(target ->{
+        dedicatedEnderChest.getPlayers().forEach(target ->{
             target.sendMessage(String.format("%s join server", enderFrameSession.getPlayer().getGameProfile().getName()));
         });
 

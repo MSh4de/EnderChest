@@ -28,26 +28,11 @@ public class PacketQuitHandler implements EventListener<PacketQuitEvent> {
         logger.info(String.format("%s left server", player.getName()));
         enderFrameSession.getChunkBuffers().forEach(enderFrameSession::sendUnloadChunk);
         
-        dedicatedEnderChest.removePlayer(enderFrameSession);
-        dedicatedEnderChest.getEnderFrameSessions().forEach(target -> {
-            target.sendPlayerInfo(PlayerInfoBuilder.of(PlayerInfoType.REMOVE_PLAYER).withPlayer(enderFrameSession));
+        dedicatedEnderChest.removePlayer(player);
+        dedicatedEnderChest.getPlayers().forEach(target -> {
+            target.getEnderFrameSession().sendPlayerInfo(PlayerInfoBuilder.of(PlayerInfoType.REMOVE_PLAYER).withPlayer(player));
             target.sendMessage(String.format("%s left server", player.getGameProfile().getName()));
         });
     }
 
-    /*
-    @Override
-    public void handle(PacketQuitEvent packetQuitEvent, DispatcherContainer dispatcherContainer) {
-            EnderFrameSession enderFrameSession = packetQuitEvent.getEnderFrameSession();
-            logger.info(String.format("%s left server", enderFrameSession.getGameProfile().getName()));
-            enderFrameSession.getChunkBuffers().forEach(chunkBuffer -> {
-                chunkBuffer.getViewers().remove(enderFrameSession);
-            });
-            dedicatedEnderChest.removePlayer(enderFrameSession);
-            dedicatedEnderChest.getEnderFrameSessions().forEach(target -> {
-                target.sendPlayerInfo(PlayerInfoBuilder.of(PlayerInfoType.REMOVE_PLAYER).withPlayer(enderFrameSession));
-            });
-    }
-
-     */
 }
