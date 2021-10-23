@@ -8,15 +8,6 @@ import eu.mshade.mwork.event.EventListener;
 
 public class ServerPingListener implements EventListener<ServerPingEvent> {
 
-    /*
-    @Override
-    public void handle(ServerPingEvent serverPingEvent, DispatcherContainer dispatcherContainer) {
-        EnderFrameSessionHandler bridge = dispatcherContainer.getContainer(EnderFrameSessionHandler.class);
-        bridge.sendPacketAndClose(new PacketOutPong(serverPingEvent.getPayload()));
-    }
-
-     */
-
     @Override
     public void onEvent(ServerPingEvent event, ParameterContainer eventContainer) {
         EnderFrameSessionHandler bridge = event.getEnderFrameSessionHandler();
