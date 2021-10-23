@@ -4,20 +4,19 @@ import eu.mshade.enderchest.protocol.ProtocolRepository;
 import eu.mshade.enderchest.world.DefaultChunkGenerator;
 import eu.mshade.enderchest.world.WorldManager;
 import eu.mshade.enderframe.EnderFrameSession;
-import eu.mshade.enderframe.EnderFrameSessionHandler;
+import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.protocol.MinecraftEncryption;
 import eu.mshade.enderframe.world.*;
 import eu.mshade.enderman.EndermanProtocol;
 import io.netty.channel.EventLoopGroup;
 
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class DedicatedEnderChest {
 
-    private final Queue<EnderFrameSession> enderFrameSessions = new ConcurrentLinkedQueue<>();
+    private final Queue<Player> players = new ConcurrentLinkedQueue<>();
     private final MinecraftEncryption minecraftEncryption = new MinecraftEncryption();
     private final ProtocolRepository protocolRepository = new ProtocolRepository();
     private final WorldManager worldManager;
@@ -37,16 +36,16 @@ public class DedicatedEnderChest {
 
     }
 
-    public void addPlayer(EnderFrameSession enderFrameSession){
-        this.enderFrameSessions.add(enderFrameSession);
+    public void addPlayer(Player player){
+        this.players.add(player);
     }
 
-    public void removePlayer(EnderFrameSession enderFrameSession){
-        this.enderFrameSessions.remove(enderFrameSession);
+    public void removePlayer(Player player){
+        this.players.remove(player);
     }
 
-    public Queue<EnderFrameSession> getEnderFrameSessions() {
-        return enderFrameSessions;
+    public Queue<Player> getPlayers() {
+        return players;
     }
 
     public ProtocolRepository getProtocolRepository() {
@@ -70,11 +69,11 @@ public class DedicatedEnderChest {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DedicatedEnderChest that = (DedicatedEnderChest) o;
-        return Objects.equals(enderFrameSessions, that.enderFrameSessions) && Objects.equals(minecraftEncryption, that.minecraftEncryption) && Objects.equals(protocolRepository, that.protocolRepository) && Objects.equals(worldManager, that.worldManager) && Objects.equals(eventLoopGroup, that.eventLoopGroup);
+        return Objects.equals(players, that.players) && Objects.equals(minecraftEncryption, that.minecraftEncryption) && Objects.equals(protocolRepository, that.protocolRepository) && Objects.equals(worldManager, that.worldManager) && Objects.equals(eventLoopGroup, that.eventLoopGroup);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(enderFrameSessions, minecraftEncryption, protocolRepository, worldManager, eventLoopGroup);
+        return Objects.hash(players, minecraftEncryption, protocolRepository, worldManager, eventLoopGroup);
     }
 }
