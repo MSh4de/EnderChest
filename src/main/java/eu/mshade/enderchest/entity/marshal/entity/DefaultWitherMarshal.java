@@ -41,7 +41,7 @@ public class DefaultWitherMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getCustomName(),
                 livingEntity.isCustomNameVisible(),
                 livingEntity.isSilent(),
-                livingEntity.getUUID(),
+                livingEntity.getUniqueId(),
                 livingEntity.getHealth(),
                 livingEntity.getPotionEffectColor(),
                 livingEntity.isPotionEffectAmbient(),
