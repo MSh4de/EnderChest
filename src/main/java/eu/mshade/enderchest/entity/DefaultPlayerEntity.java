@@ -23,6 +23,9 @@ public class DefaultPlayerEntity extends Player {
         super(location, entityId, enderFrameSessionHandler, gameMode, gameProfile);
     }
 
+    public DefaultPlayerEntity(Location location, Vector velocity, int entityId, boolean isFire, boolean isSneaking, boolean isSprinting, boolean isEating, boolean isInvisible, short airTicks, String customName, boolean isCustomNameVisible, boolean isSilent, UUID uuid, float health, int potionEffectColor, boolean isPotionEffectAmbient, byte numberOfArrowInEntity, boolean isAIDisable, boolean unused, float absorptionHearts, int score, MOptional<String> displayName, GameMode gameMode, GameProfile gameProfile) {
+        super(location, velocity, entityId, isFire, isSneaking, isSprinting, isEating, isInvisible, airTicks, customName, isCustomNameVisible, isSilent, uuid, health, potionEffectColor, isPotionEffectAmbient, numberOfArrowInEntity, isAIDisable, unused, absorptionHearts, score, displayName, gameMode, gameProfile);
+    }
 
     @Override
     public void tick() {
