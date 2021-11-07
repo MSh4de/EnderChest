@@ -1,20 +1,26 @@
 package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderchest.DedicatedEnderChest;
+import eu.mshade.enderchest.FakePlayer;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
+import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.EntityType;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.Zombie;
 import eu.mshade.enderframe.metadata.MetadataMeaning;
+import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.chat.ChatColor;
 import eu.mshade.enderframe.packetevent.PacketChatMessageEvent;
 import eu.mshade.enderframe.world.ChunkBuffer;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.WorldBuffer;
+import eu.mshade.enderman.packet.play.PacketOutSpawnPlayer;
+import eu.mshade.mwork.MOptional;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +47,8 @@ public class PacketChatMessageHandler implements EventListener<PacketChatMessage
             Location location = player.getLocation();
             WorldBuffer world = location.getWorld();
 
+            //enderFrameSessionHandler.sendPacket(new PacketOutSpawnPlayer(player));
+            //enderFrameSessionHandler.sendPacket(new PacketOutSpawnPlayer(player));
             Entity entity = world.spawnEntity(EntityType.ZOMBIE, location);
             Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(entity::tick, 1, 1, TimeUnit.SECONDS);
 
