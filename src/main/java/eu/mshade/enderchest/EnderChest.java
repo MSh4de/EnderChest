@@ -6,15 +6,13 @@ import eu.mshade.enderchest.entity.*;
 import eu.mshade.enderchest.entity.marshal.common.*;
 import eu.mshade.enderchest.listener.*;
 import eu.mshade.enderchest.entity.marshal.entity.*;
-import eu.mshade.enderchest.entity.marshal.world.DefaultChunkMarshal;
-import eu.mshade.enderchest.entity.marshal.world.DefaultLocationMarshal;
-import eu.mshade.enderchest.entity.marshal.world.DefaultSectionMarshal;
 import eu.mshade.enderchest.protocol.listener.*;
 import eu.mshade.enderchest.redstone.Redstone;
 import eu.mshade.enderchest.redstone.protocol.RedstonePacketIn;
 import eu.mshade.enderchest.redstone.protocol.RedstonePacketInDeserializer;
 import eu.mshade.enderchest.world.DefaultChunkBuffer;
 import eu.mshade.enderchest.world.DefaultSectionBuffer;
+import eu.mshade.enderchest.world.marshal.*;
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.entity.*;
@@ -36,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 public class EnderChest {
@@ -106,61 +103,107 @@ public class EnderChest {
 
         BinaryTagMarshal binaryTagMarshal = MWork.get().getBinaryTagMarshal();
 
-        binaryTagMarshal.registerAdaptor(Arrays.asList(SectionBuffer.class, DefaultSectionBuffer.class), new DefaultSectionMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(ChunkBuffer.class, DefaultChunkBuffer.class), new DefaultChunkMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Zombie.class, DefaultZombieEntity.class), new DefaultZombieMarshal());
-        binaryTagMarshal.registerAdaptor(Location.class, new DefaultLocationMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Player.class, DefaultPlayerEntity.class), new DefaultPlayerMarshal());
-        binaryTagMarshal.registerAdaptor(Vector.class, new DefaultVectorMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Blaze.class, DefaultBlazeEntity.class), new DefaultBlazeMarshal());
-        binaryTagMarshal.registerAdaptor(Rotation.class, new DefaultRotationMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(ArmorStand.class, DefaultArmorStandEntity.class), new DefaultArmorStandMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Arrow.class, DefaultArrowEntity.class), new DefaultArrowMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Ageable.class, DefaultAgeableEntity.class), new DefaultAgeableMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Rideable.class, DefaultRideableEntity.class), new DefaultRideableMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Pig.class, DefaultPigEntity.class), new DefaultPigMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Bat.class, DefaultBatEntity.class), new DefaultBatMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Spider.class, DefaultSpiderEntity.class), new DefaultSpiderMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(CaveSpider.class, DefaultCaveSpiderEntity.class), new DefaultCaveSpiderMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Tameable.class, DefaultTameableEntity.class), new DefaultTameableMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Chicken.class, DefaultChickenEntity.class), new DefaultChickenMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Cow.class, DefaultCowEntity.class), new DefaultCowMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Horse.class, DefaultHorseEntity.class), new DefaultHorseMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Ocelot.class, DefaultOcelotEntity.class), new DefaultOcelotMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Wolf.class, DefaultWolfEntity.class), new DefaultWolfMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Rabbit.class, DefaultRabbitEntity.class), new DefaultRabbitMarshal());
-        binaryTagMarshal.registerAdaptor(SheepColor.class, new DefaultSheepColorMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Sheep.class, DefaultSheepEntity.class), new DefaultSheepMarshal());
-        binaryTagMarshal.registerAdaptor(VillagerType.class, new DefaultVillagerTypeMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Villager.class, DefaultVillagerEntity.class), new DefaultVillagerMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Enderman.class, DefaultEndermanEntity.class), new DefaultEndermanMarshal());
-        binaryTagMarshal.registerAdaptor(CreeperState.class, new DefaultCreeperStateMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Creeper.class, DefaultCreeperEntity.class), new DefaultCreeperMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Ghast.class, DefaultGhastEntity.class), new DefaultGhastMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Slime.class, DefaultSlimeEntity.class), new DefaultSlimeMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(MagmaCube.class, DefaultMagmaCubeEntity.class), new DefaultMagmaCubeMarshal());
-        binaryTagMarshal.registerAdaptor(SkeletonType.class, new DefaultSkeletonMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Skeleton.class, DefaultSkeletonEntity.class), new DefaultSkeletonMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Witch.class, DefaultWitchEntity.class), new DefaultWitchMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(IronGolem.class, DefaultIronGolemEntity.class), new DefaultIronGolemMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Wither.class, DefaultWitherEntity.class), new DefaultWitherMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Guardian.class, DefaultGuardianEntity.class), new DefaultGuardianMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Boat.class, DefaultBoatEntity.class), new DefaultBoatMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Minecart.class, DefaultMinecartEntity.class), new DefaultMinecartMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(FurnaceMinecart.class, DefaultFurnaceMinecartEntity.class), new DefaultFurnaceMinecartMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Item.class, DefaultItemEntity.class), new DefaultItemMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Firework.class, DefaultFireworkEntity.class), new DefaultFireworkMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(ItemFrame.class, DefaultItemFrameEntity.class), new DefaultItemFrameMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(EnderCrystal.class, DefaultEnderCrystalEntity.class), new DefaultEnderCrystalMarshal());
         binaryTagMarshal.registerAdaptor(GameMode.class, new DefaultGameModeMarshal());
         binaryTagMarshal.registerAdaptor(GameProfile.class, new DefaultGameProfileMarshal());
         binaryTagMarshal.registerAdaptor(Property.class, new DefaultPropertyMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Silverfish.class, DefaultSilverfishEntity.class), new DefaultSilverfishMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(GiantZombie.class, DefaultGiantZombieEntity.class), new DefaultGiantZombieMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(EnderDragon.class, DefaultEnderDragonEntity.class), new DefaultEnderDragonMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Squid.class, DefaultSquidEntity.class), new DefaultSquidMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Mooshroom.class, DefaultMooshroomEntity.class), new DefaultMooshroomMarshal());
-        binaryTagMarshal.registerAdaptor(Arrays.asList(Snowman.class, DefaultSnowmanEntity.class), new DefaultSnowmanMarshal());
+        binaryTagMarshal.registerAdaptor(VillagerType.class, new DefaultVillagerTypeMarshal());
+        binaryTagMarshal.registerAdaptor(Rotation.class, new DefaultRotationMarshal());
+        binaryTagMarshal.registerAdaptor(Vector.class, new DefaultVectorMarshal());
+        binaryTagMarshal.registerAdaptor(Location.class, new DefaultLocationMarshal());
+        binaryTagMarshal.registerAdaptor(SkeletonType.class, new DefaultSkeletonMarshal());
+        binaryTagMarshal.registerAdaptor(SheepColor.class, new DefaultSheepColorMarshal());
+        binaryTagMarshal.registerAdaptor(CreeperState.class, new DefaultCreeperStateMarshal());
+
+        binaryTagMarshal.registerAdaptor(SectionBuffer.class, new DefaultSectionMarshal())
+                .registerSubTypes(DefaultSectionBuffer.class);
+        binaryTagMarshal.registerAdaptor(ChunkBuffer.class, new DefaultChunkMarshal())
+                .registerSubTypes(DefaultChunkBuffer.class);
+        binaryTagMarshal.registerAdaptor(Zombie.class, new DefaultZombieMarshal())
+                .registerSubTypes(DefaultZombieEntity.class);
+        binaryTagMarshal.registerAdaptor(Player.class, new DefaultPlayerMarshal())
+                .registerSubTypes(DefaultPlayerEntity.class);
+        binaryTagMarshal.registerAdaptor(Blaze.class, new DefaultBlazeMarshal())
+                .registerSubTypes(DefaultBlazeEntity.class);
+        binaryTagMarshal.registerAdaptor(ArmorStand.class, new DefaultArmorStandMarshal())
+                .registerSubTypes(DefaultArmorStandEntity.class);
+        binaryTagMarshal.registerAdaptor(Arrow.class, new DefaultArrowMarshal())
+                .registerSubTypes(DefaultArrowEntity.class);
+        binaryTagMarshal.registerAdaptor(Ageable.class, new DefaultAgeableMarshal())
+                .registerSubTypes(DefaultAgeableEntity.class);
+        binaryTagMarshal.registerAdaptor(Rideable.class, new DefaultRideableMarshal())
+                .registerSubTypes(DefaultRideableEntity.class);
+        binaryTagMarshal.registerAdaptor(Pig.class, new DefaultPigMarshal())
+                .registerSubTypes(DefaultPigEntity.class);
+        binaryTagMarshal.registerAdaptor(Bat.class, new DefaultBatMarshal())
+                .registerSubTypes(DefaultBatEntity.class);
+        binaryTagMarshal.registerAdaptor(Spider.class, new DefaultSpiderMarshal())
+                .registerSubTypes(DefaultSpiderEntity.class);
+        binaryTagMarshal.registerAdaptor(CaveSpider.class, new DefaultCaveSpiderMarshal())
+                .registerSubTypes(DefaultCaveSpiderEntity.class);
+        binaryTagMarshal.registerAdaptor(Tameable.class, new DefaultTameableMarshal())
+                .registerSubTypes(DefaultTameableEntity.class);
+        binaryTagMarshal.registerAdaptor(Chicken.class, new DefaultChickenMarshal())
+                .registerSubTypes(DefaultChickenEntity.class);
+        binaryTagMarshal.registerAdaptor(Cow.class, new DefaultCowMarshal())
+                .registerSubTypes(DefaultCowEntity.class);
+        binaryTagMarshal.registerAdaptor(Horse.class, new DefaultHorseMarshal())
+                .registerSubTypes(DefaultHorseEntity.class);
+        binaryTagMarshal.registerAdaptor(Ocelot.class, new DefaultOcelotMarshal())
+                .registerSubTypes(DefaultOcelotEntity.class);
+        binaryTagMarshal.registerAdaptor(Wolf.class, new DefaultWolfMarshal())
+                .registerSubTypes(DefaultWolfEntity.class);
+        binaryTagMarshal.registerAdaptor(Rabbit.class, new DefaultRabbitMarshal())
+                .registerSubTypes(DefaultRabbitEntity.class);
+        binaryTagMarshal.registerAdaptor(Sheep.class, new DefaultSheepMarshal())
+                .registerSubTypes(DefaultSheepEntity.class);
+        binaryTagMarshal.registerAdaptor(Villager.class, new DefaultVillagerMarshal())
+                .registerSubTypes(DefaultVillagerEntity.class);
+        binaryTagMarshal.registerAdaptor(Enderman.class, new DefaultEndermanMarshal())
+                .registerSubTypes(DefaultEndermanEntity.class);
+        binaryTagMarshal.registerAdaptor(Creeper.class, new DefaultCreeperMarshal())
+                .registerSubTypes(DefaultCreeperEntity.class);
+        binaryTagMarshal.registerAdaptor(Ghast.class, new DefaultGhastMarshal())
+                .registerSubTypes(DefaultGhastEntity.class);
+        binaryTagMarshal.registerAdaptor(Slime.class, new DefaultSlimeMarshal())
+                .registerSubTypes(DefaultSlimeEntity.class);
+        binaryTagMarshal.registerAdaptor(MagmaCube.class, new DefaultMagmaCubeMarshal())
+                .registerSubTypes(DefaultMagmaCubeEntity.class);
+        binaryTagMarshal.registerAdaptor(Skeleton.class, new DefaultSkeletonMarshal())
+                .registerSubTypes(DefaultSkeletonEntity.class);
+        binaryTagMarshal.registerAdaptor(Witch.class, new DefaultWitchMarshal())
+                .registerSubTypes(DefaultWitchEntity.class);
+        binaryTagMarshal.registerAdaptor(IronGolem.class, new DefaultIronGolemMarshal())
+                .registerSubTypes(DefaultIronGolemEntity.class);
+        binaryTagMarshal.registerAdaptor(Wither.class, new DefaultWitherMarshal())
+                .registerSubTypes(DefaultWitherEntity.class);
+        binaryTagMarshal.registerAdaptor(Guardian.class, new DefaultGuardianMarshal())
+                .registerSubTypes(DefaultGuardianEntity.class);
+        binaryTagMarshal.registerAdaptor(Boat.class, new DefaultBoatMarshal())
+                .registerSubTypes(DefaultBoatEntity.class);
+        binaryTagMarshal.registerAdaptor(Minecart.class, new DefaultMinecartMarshal())
+                .registerSubTypes(DefaultMinecartEntity.class);
+        binaryTagMarshal.registerAdaptor(FurnaceMinecart.class, new DefaultFurnaceMinecartMarshal())
+                .registerSubTypes(DefaultFurnaceMinecartEntity.class);
+        binaryTagMarshal.registerAdaptor(Item.class, new DefaultItemMarshal())
+                .registerSubTypes(DefaultItemEntity.class);
+        binaryTagMarshal.registerAdaptor(Firework.class, new DefaultFireworkMarshal())
+                .registerSubTypes(DefaultFireworkEntity.class);
+        binaryTagMarshal.registerAdaptor(ItemFrame.class, new DefaultItemFrameMarshal())
+                .registerSubTypes(DefaultItemFrameEntity.class);
+        binaryTagMarshal.registerAdaptor(EnderCrystal.class, new DefaultEnderCrystalMarshal())
+                .registerSubTypes(DefaultEnderCrystalEntity.class);
+        binaryTagMarshal.registerAdaptor(Silverfish.class, new DefaultSilverfishMarshal())
+                .registerSubTypes(DefaultSilverfishEntity.class);
+        binaryTagMarshal.registerAdaptor(GiantZombie.class, new DefaultGiantZombieMarshal())
+                .registerSubTypes(DefaultGiantZombieEntity.class);
+        binaryTagMarshal.registerAdaptor(EnderDragon.class, new DefaultEnderDragonMarshal())
+                .registerSubTypes(DefaultEnderDragonEntity.class);
+        binaryTagMarshal.registerAdaptor(Squid.class, new DefaultSquidMarshal())
+                .registerSubTypes(DefaultSquidEntity.class);
+        binaryTagMarshal.registerAdaptor(Mooshroom.class, new DefaultMooshroomMarshal())
+                .registerSubTypes(DefaultMooshroomEntity.class);
+        binaryTagMarshal.registerAdaptor(Snowman.class, new DefaultSnowmanMarshal())
+                .registerSubTypes(DefaultSnowmanEntity.class);
 
         eventLoopGroup.scheduleAtFixedRate(() ->
                 dedicatedEnderChest.getPlayers().forEach(player ->
