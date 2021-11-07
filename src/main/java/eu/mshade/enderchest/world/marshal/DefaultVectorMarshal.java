@@ -1,4 +1,4 @@
-package eu.mshade.enderchest.entity.marshal.common;
+package eu.mshade.enderchest.world.marshal;
 
 import eu.mshade.enderframe.world.Vector;
 import eu.mshade.mwork.ParameterContainer;
