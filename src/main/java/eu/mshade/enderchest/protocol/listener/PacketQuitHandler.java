@@ -4,6 +4,7 @@ import eu.mshade.enderchest.DedicatedEnderChest;
 import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
+import eu.mshade.enderframe.entity.EntityIdManager;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.packetevent.PacketQuitEvent;
 import eu.mshade.mwork.ParameterContainer;
@@ -33,6 +34,8 @@ public class PacketQuitHandler implements EventListener<PacketQuitEvent> {
             target.getEnderFrameSession().sendPlayerInfo(PlayerInfoBuilder.of(PlayerInfoType.REMOVE_PLAYER).withPlayer(player));
             target.sendMessage(String.format("%s left server", player.getGameProfile().getName()));
         });
+
+        EntityIdManager.get().flushId(player.getEntityId());
     }
 
 }
