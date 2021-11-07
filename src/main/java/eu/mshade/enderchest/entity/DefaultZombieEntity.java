@@ -22,6 +22,6 @@ public class DefaultZombieEntity extends Zombie {
 
     @Override
     public void tick() {
-        move(location.add(1, 0, 0));
+        move(location.add(0.1, 0, 0));
     }
 }

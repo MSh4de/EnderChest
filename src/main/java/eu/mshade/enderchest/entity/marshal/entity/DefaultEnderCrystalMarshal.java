@@ -38,7 +38,7 @@ public class DefaultEnderCrystalMarshal extends DefaultEntityMarshal {
                 entity.getCustomName(),
                 entity.isCustomNameVisible(),
                 entity.isSilent(),
-                entity.getUUID(),
+                entity.getUniqueId(),
                 compoundBinaryTag.getInt("health"));
     }
 }

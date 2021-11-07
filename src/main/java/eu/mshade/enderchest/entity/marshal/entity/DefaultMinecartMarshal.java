@@ -48,7 +48,7 @@ public class DefaultMinecartMarshal extends DefaultEntityMarshal {
                 entity.getCustomName(),
                 entity.isCustomNameVisible(),
                 entity.isSilent(),
-                entity.getUUID(),
+                entity.getUniqueId(),
                 EntityType.getEntityTypeByName(compoundBinaryTag.getString("entityType")),
                 compoundBinaryTag.getInt("shakingPower"),
                 compoundBinaryTag.getInt("shakingDirection"),

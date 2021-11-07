@@ -40,7 +40,7 @@ public class DefaultFurnaceMinecartMarshal extends DefaultMinecartMarshal {
                 entity.getCustomName(),
                 entity.isCustomNameVisible(),
                 entity.isSilent(),
-                entity.getUUID(),
+                entity.getUniqueId(),
                 compoundBinaryTag.getInt("shakingPower"),
                 compoundBinaryTag.getInt("shakingDirection"),
                 compoundBinaryTag.getInt("blockId"),
