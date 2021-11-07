@@ -5,7 +5,7 @@ import eu.mshade.enderchest.redstone.RedstoneSession;
 import eu.mshade.enderchest.redstone.protocol.packet.RedstonePacketInMotd;
 import eu.mshade.enderchest.redstone.protocol.packet.RedstonePacketOutMotd;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
-import eu.mshade.enderframe.event.server.ServerStatusEvent;
+import eu.mshade.enderframe.packetevent.ServerStatusEvent;
 import eu.mshade.enderframe.mojang.chat.TextComponent;
 import eu.mshade.enderframe.motd.MotdComponent;
 import eu.mshade.enderframe.motd.MotdPlayer;
@@ -18,14 +18,14 @@ import java.util.concurrent.CompletableFuture;
 
 public class ServerStatusListener implements EventListener<ServerStatusEvent> {
 
-    private Redstone redstone;
+    private final Redstone redstone;
     public ServerStatusListener(Redstone redstone) {
         this.redstone = redstone;
     }
 
     @Override
     public void onEvent(ServerStatusEvent event, ParameterContainer eventContainer) {
-        EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
+        EnderFrameSessionHandler enderFrameSessionHandler = event.getEnderFrameSessionHandler();
 
         RedstonePacketOutMotd redstonePacketOutMotd = new RedstonePacketOutMotd();
         MotdVersion motdVersion = new MotdVersion("1.8.X", 47);

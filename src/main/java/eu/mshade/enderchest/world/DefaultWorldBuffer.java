@@ -2,6 +2,7 @@ package eu.mshade.enderchest.world;
 
 import eu.mshade.enderchest.entity.DefaultPlayerEntity;
 import eu.mshade.enderchest.entity.EntityFactory;
+import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.GameMode;
@@ -9,14 +10,14 @@ import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.EntityIdManager;
 import eu.mshade.enderframe.entity.EntityType;
 import eu.mshade.enderframe.entity.Player;
-import eu.mshade.enderframe.mojang.GameProfile;
+import eu.mshade.enderframe.event.ChunkLoadEvent;
+import eu.mshade.enderframe.event.ChunkUnloadEvent;
 import eu.mshade.enderframe.world.*;
 import eu.mshade.mwork.ParameterContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.net.SocketAddress;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -25,9 +26,9 @@ public class DefaultWorldBuffer implements WorldBuffer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultWorldBuffer.class);
 
-    private WorldLevel worldLevel;
-    private File chunksFolder;
-    private File worldFolder;
+    private final WorldLevel worldLevel;
+    private final File chunksFolder;
+    private final File worldFolder;
     private ChunkGenerator chunkGenerator;
     private final Map<UUID, ChunkBuffer> chunks = new ConcurrentHashMap<>();
     private final Map<UUID, File> chunkFiles = new ConcurrentHashMap<>();
@@ -67,32 +68,55 @@ public class DefaultWorldBuffer implements WorldBuffer {
     @Override
     public void flushChunkBuffer(ChunkBuffer chunkBuffer) {
         //this.chunkFiles.computeIfAbsent(chunkBuffer.getId(), integer -> chunkBuffer.getFile());
-        worldManager.getWorldBufferIO().writeChunkBuffer(chunkBuffer);
-        this.chunks.remove(chunkBuffer.getId());
+        ChunkUnloadEvent chunkUnloadEvent = new ChunkUnloadEvent(chunkBuffer);
+        EnderFrame.get().getEnderFrameEventBus().publish(chunkUnloadEvent);
+
+        if(!chunkUnloadEvent.isCancelled()) {
+            worldManager.getWorldBufferIO().writeChunkBuffer(chunkBuffer);
+            this.chunks.remove(chunkBuffer.getId());
+            chunkBuffer.clearEntities();
+        }
     }
 
     @Override
     public ChunkBuffer getChunkBuffer(int x, int z) {
+
         final UUID id = ChunkBuffer.ofId(x, z);
         ChunkBuffer chunkBuffer = chunks.get(id);
-        if (chunkBuffer != null) return chunkBuffer;
+        if (chunkBuffer != null){
+            ChunkLoadEvent chunkLoadEvent = new ChunkLoadEvent(chunkBuffer);
+            EnderFrame.get().getEnderFrameEventBus().publish(chunkLoadEvent);
+            if(!chunkLoadEvent.isCancelled())
+                return chunkBuffer;
+        }else {
+            File file = getChunkFile(x, z);
+            WatchDogChunk watchDogChunk = this.worldManager.getWatchDogChunk();
 
-        File file = getChunkFile(x, z);
-        WatchDogChunk watchDogChunk = this.worldManager.getWatchDogChunk();
+            if (!file.exists() && !chunks.containsKey(id)) {
+                file = new File(chunksFolder, String.format("%d,%d.dat", x, z));
+                DefaultChunkBuffer buffer = new DefaultChunkBuffer(x, z, true, this, file);
+                ChunkLoadEvent chunkLoadEvent = new ChunkLoadEvent(buffer);
+                EnderFrame.get().getEnderFrameEventBus().publish(chunkLoadEvent);
+                if (!chunkLoadEvent.isCancelled()) {
+                    getChunkGenerator().generate(buffer);
+                    watchDogChunk.addChunkBuffer(buffer);
+                    chunks.put(id, buffer);
+                    return buffer;
+                }
+            }else {
+                ChunkBuffer readChunkBuffer = worldManager.getWorldBufferIO().readChunkBuffer(this, worldManager, file);
+                ChunkLoadEvent chunkLoadEvent = new ChunkLoadEvent(readChunkBuffer);
+                EnderFrame.get().getEnderFrameEventBus().publish(chunkLoadEvent);
 
-        if (!file.exists() && !chunks.containsKey(id)) {
-            file = new File(chunksFolder, String.format("%d,%d.dat", x, z));
-            DefaultChunkBuffer buffer = new DefaultChunkBuffer(x, z, true, this, file);
-            getChunkGenerator().generate(buffer);
-            watchDogChunk.addChunkBuffer(buffer);
-            chunks.put(id, buffer);
-            return buffer;
+                if (!chunkLoadEvent.isCancelled()) {
+                    watchDogChunk.addChunkBuffer(readChunkBuffer);
+                    chunks.put(id, readChunkBuffer);
+
+                    return readChunkBuffer;
+                }
+            }
         }
-        ChunkBuffer readChunkBuffer = worldManager.getWorldBufferIO().readChunkBuffer(this, worldManager, file);
-        watchDogChunk.addChunkBuffer(readChunkBuffer);
-        chunks.put(id, readChunkBuffer);
-
-        return readChunkBuffer;
+        return null;
     }
 
 
@@ -172,16 +196,20 @@ public class DefaultWorldBuffer implements WorldBuffer {
 
         EntityFactory entityFactory = EntityFactory.get();
         EntityIdManager entityIdManager = EntityIdManager.get();
+        Location entityLocation = location.clone();
+        
         try {
             int id = entityIdManager.getFreeId();
-            System.out.println("id : "+id);
             Entity entity = entityFactory.factoryEntity(entityType, ParameterContainer.of()
                     .putContainer(id)
-                    .putContainer(location));
-            System.out.println(entity);
-            System.out.println(location.getChunkBuffer());
+                    .putContainer(entityLocation));
+
             location.getChunkBuffer().addEntity(entity);
-            location.getChunkBuffer().getViewers().forEach(each -> each.getEnderFrameSessionHandler().getEnderFrameSession().sendMob(entity));
+            location.getChunkBuffer().getViewers().stream()
+                    .filter(player -> player.getLocation().distance(entityLocation) <= 64)
+                    .forEach(entity::addViewer);
+
+            return entity;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -195,11 +223,8 @@ public class DefaultWorldBuffer implements WorldBuffer {
             throw new NullPointerException("Location cannot be null when trying to spawn an entity.");
 
         try {
-            int id = EntityIdManager.get().getFreeId();
             EnderFrameSession enderFrameSession = sessionHandler.getEnderFrameSession();
-            Player player = new DefaultPlayerEntity(location, id, sessionHandler, enderFrameSession.getSocketAddress(), sessionHandler.getProtocolVersion(), GameMode.SURVIVAL, enderFrameSession.getGameProfile());
-
-            return player;
+            return new DefaultPlayerEntity(location.clone(), enderFrameSession.getEntityId(), sessionHandler, GameMode.SURVIVAL, enderFrameSession.getGameProfile());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -219,6 +244,5 @@ public class DefaultWorldBuffer implements WorldBuffer {
     public int hashCode() {
         return Objects.hash(worldLevel, chunksFolder, worldFolder, worldManager);
     }
-
 
 }

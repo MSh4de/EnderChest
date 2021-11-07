@@ -3,7 +3,7 @@ package eu.mshade.enderchest.protocol.listener;
 import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.entity.Player;
-import eu.mshade.enderframe.event.entity.PacketEntityActionEvent;
+import eu.mshade.enderframe.packetevent.PacketEntityActionEvent;
 import eu.mshade.enderframe.metadata.MetadataMeaning;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
@@ -12,7 +12,7 @@ public class PacketEntityActionHandler implements EventListener<PacketEntityActi
 
     @Override
     public void onEvent(PacketEntityActionEvent event, ParameterContainer eventContainer) {
-        EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
+        EnderFrameSessionHandler enderFrameSessionHandler = event.getPlayer().getEnderFrameSessionHandler();
         EnderFrameSession enderFrameSession = enderFrameSessionHandler.getEnderFrameSession();
 
         Player player = enderFrameSession.getPlayer();
