@@ -1,27 +1,17 @@
 package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderchest.DedicatedEnderChest;
-import eu.mshade.enderchest.FakePlayer;
 import eu.mshade.enderframe.*;
-import eu.mshade.enderframe.entity.Entity;
-import eu.mshade.enderframe.entity.EntityType;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.metadata.MetadataMeaning;
-import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
-import eu.mshade.enderframe.protocol.packet.PacketOutSpawnPosition;
-import eu.mshade.enderframe.world.BlockPosition;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.WorldBuffer;
 import eu.mshade.enderman.packet.play.PacketOutSetSlot;
-import eu.mshade.enderman.packet.play.PacketOutSpawnPlayer;
-import eu.mshade.mwork.MOptional;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.UUID;
 
 public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoinEvent> {
 
