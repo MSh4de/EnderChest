@@ -73,8 +73,8 @@ public class DefaultWorldBuffer implements WorldBuffer {
 
         if(!chunkUnloadEvent.isCancelled()) {
             worldManager.getWorldBufferIO().writeChunkBuffer(chunkBuffer);
-            chunkBuffer.clearEntities();
             this.chunks.remove(chunkBuffer.getId());
+            chunkBuffer.clearEntities();
         }
     }
 
@@ -207,9 +207,7 @@ public class DefaultWorldBuffer implements WorldBuffer {
             location.getChunkBuffer().addEntity(entity);
             location.getChunkBuffer().getViewers().stream()
                     .filter(player -> player.getLocation().distance(entityLocation) <= 64)
-                    .map(Player::getEnderFrameSessionHandler)
-                    .map(EnderFrameSessionHandler::getEnderFrameSession)
-                    .forEach(session -> session.sendEntity(entity));
+                    .forEach(entity::addViewer);
 
             return entity;
         } catch (Exception e) {
@@ -226,9 +224,7 @@ public class DefaultWorldBuffer implements WorldBuffer {
 
         try {
             EnderFrameSession enderFrameSession = sessionHandler.getEnderFrameSession();
-            Player player = new DefaultPlayerEntity(location.clone(), enderFrameSession.getEntityId(), sessionHandler, GameMode.SURVIVAL, enderFrameSession.getGameProfile());
-            enderFrameSession.sendEntity(player);
-            return player;
+            return new DefaultPlayerEntity(location.clone(), enderFrameSession.getEntityId(), sessionHandler, GameMode.SURVIVAL, enderFrameSession.getGameProfile());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -248,6 +244,5 @@ public class DefaultWorldBuffer implements WorldBuffer {
     public int hashCode() {
         return Objects.hash(worldLevel, chunksFolder, worldFolder, worldManager);
     }
-
 
 }
