@@ -52,7 +52,11 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         dedicatedEnderChest.getPlayers().forEach(target -> target.getEnderFrameSessionHandler().getEnderFrameSession().sendPlayerInfo(playerInfoBuilder));
 
 
-        enderFrameSessionHandler.sendPacket(new PacketOutSetSlot(36, new ItemStack(Material.STONE, 10, 0)));
+        enderFrameSessionHandler.sendPacket(new PacketOutSetSlot(36, new ItemStack(Material.LEATHER_HELMET, 1, 0)));
+        enderFrameSessionHandler.sendPacket(new PacketOutSetSlot(37, new ItemStack(Material.LEATHER_CHESTPLATE, 1, 0)));
+        enderFrameSessionHandler.sendPacket(new PacketOutSetSlot(38, new ItemStack(Material.LEATHER_LEGGINGS, 1, 0)));
+        enderFrameSessionHandler.sendPacket(new PacketOutSetSlot(39, new ItemStack(Material.LEATHER_BOOTS, 1, 0)));
+        enderFrameSessionHandler.sendPacket(new PacketOutSetSlot(40, new ItemStack(Material.MAGENTA_BANNER, 1, 0)));
 
 
         dedicatedEnderChest.getPlayers().forEach(target ->{
