@@ -18,7 +18,6 @@ import java.util.LinkedHashMap;
 
 public class PacketMoveHandler implements EventListener<PacketMoveEvent> {
 
-    public static final HashMap<EnderFrameSession, Integer> linkedMob = new LinkedHashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(PacketMoveHandler.class);
     private DedicatedEnderChest dedicatedEnderChest;
 
@@ -31,31 +30,12 @@ public class PacketMoveHandler implements EventListener<PacketMoveEvent> {
         EnderFrameSessionHandler enderFrameSessionHandler = parameterContainer.getContainer(EnderFrameSessionHandler.class);
         EnderFrameSession enderFrameSession = enderFrameSessionHandler.getEnderFrameSession();
         Player player = enderFrameSession.getPlayer();
-        Position position = event.getPosition();
-        Location before = player.getLocation().clone();
-        Location now = player.getLocation().clone();
-        switch (event.getPacketMoveType()) {
-            case LOOK:
-                now.setYaw(position.getYaw())
-                        .setPitch(position.getPitch());
-                break;
-            case POSITION:
-                now.setX(position.getX())
-                        .setY(position.getY())
-                        .setZ(position.getZ());
-                break;
-            case POSITION_AND_LOOK:
-                now.setX(position.getX())
-                        .setY(position.getY())
-                        .setZ(position.getZ())
-                        .setYaw(position.getYaw())
-                        .setPitch(position.getPitch());
-        }
-
-        player.setUnsafeLocation(now);
+        Location before = player.getLocation();
+        Location now = player.getLocation();
 
         if (before.getChunkX() != now.getChunkX() || before.getChunkZ() != now.getChunkZ()) {
-            enderFrameSession.sendSquareChunk(10, now.getChunkX(), now.getChunkZ(), now.getWorld());
+            int render = before.distance(now) < 5 ? 10 : 3;
+            enderFrameSession.sendSquareChunk(render, now.getChunkX(), now.getChunkZ(), now.getWorld());
         }
 
         for (Player viewer : player.getViewers()) {
