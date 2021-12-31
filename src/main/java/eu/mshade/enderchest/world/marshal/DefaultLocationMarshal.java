@@ -17,7 +17,7 @@ public class DefaultLocationMarshal implements BinaryTagMarshalBuffer<Location> 
     public BinaryTag<?> serialize(BinaryTagMarshal binaryTagMarshal, Type type, Location location, ParameterContainer parameterContainer) throws Exception {
         CompoundBinaryTag compoundBinaryTag = new CompoundBinaryTag();
 
-        compoundBinaryTag.putString("worldName", location.getWorld().getWorldLevel().getName());
+        compoundBinaryTag.putString("world", location.getWorld().getWorldLevel().getName());
         compoundBinaryTag.putDouble("x", location.getX());
         compoundBinaryTag.putDouble("y", location.getY());
         compoundBinaryTag.putDouble("z", location.getZ());
@@ -32,7 +32,7 @@ public class DefaultLocationMarshal implements BinaryTagMarshalBuffer<Location> 
         WorldManager worldManager = parameterContainer.getContainer(WorldManager.class);
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag)binaryTag;
 
-        WorldBuffer world = worldManager.getWorldBuffer(compoundBinaryTag.getString("worldName"));
+        WorldBuffer world = worldManager.getWorldBuffer(compoundBinaryTag.getString("world"));
         double x = compoundBinaryTag.getDouble("x");
         double y = compoundBinaryTag.getDouble("y");
         double z = compoundBinaryTag.getDouble("z");
