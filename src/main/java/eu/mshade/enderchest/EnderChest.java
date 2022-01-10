@@ -2,30 +2,34 @@ package eu.mshade.enderchest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import eu.mshade.enderchest.emerald.Emerald;
 import eu.mshade.enderchest.entity.*;
 import eu.mshade.enderchest.entity.marshal.common.*;
-import eu.mshade.enderchest.listener.*;
 import eu.mshade.enderchest.entity.marshal.entity.*;
+import eu.mshade.enderchest.listener.*;
 import eu.mshade.enderchest.protocol.listener.*;
-import eu.mshade.enderchest.redstone.Redstone;
-import eu.mshade.enderchest.redstone.protocol.RedstonePacketIn;
-import eu.mshade.enderchest.redstone.protocol.RedstonePacketInDeserializer;
 import eu.mshade.enderchest.world.DefaultChunkBuffer;
 import eu.mshade.enderchest.world.DefaultSectionBuffer;
-import eu.mshade.enderchest.world.marshal.*;
+import eu.mshade.enderchest.world.marshal.DefaultChunkMarshal;
+import eu.mshade.enderchest.world.marshal.DefaultLocationMarshal;
+import eu.mshade.enderchest.world.marshal.DefaultSectionMarshal;
+import eu.mshade.enderchest.world.marshal.DefaultVectorMarshal;
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.entity.*;
 import eu.mshade.enderframe.event.*;
-import eu.mshade.enderframe.packetevent.*;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.Property;
 import eu.mshade.enderframe.mojang.chat.*;
+import eu.mshade.enderframe.packetevent.*;
 import eu.mshade.enderframe.world.*;
 import eu.mshade.mwork.MWork;
 import eu.mshade.mwork.binarytag.marshal.BinaryTagMarshal;
 import eu.mshade.mwork.event.EventBus;
+import eu.mshade.mwork.event.EventFilter;
+import eu.mshade.mwork.event.EventPriority;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -38,13 +42,14 @@ import java.util.concurrent.TimeUnit;
 
 public class EnderChest {
 
-    private final EventLoopGroup eventLoopGroup;
-    private final Redstone redstone;
+    private final EventLoopGroup parentGroup = new NioEventLoopGroup();
+    private final EventLoopGroup childGroup = new NioEventLoopGroup();
     private final DedicatedEnderChest dedicatedEnderChest;
     private final Logger logger = LoggerFactory.getLogger(EnderChest.class);
-
+    private Emerald emerald;
 
     public EnderChest() {
+        long start = System.currentTimeMillis();
         System.out.println("\n" +
                 "███████╗███╗░░██╗██████╗░███████╗██████╗░░█████╗░██╗░░██╗███████╗░██████╗████████╗\n" +
                 "██╔════╝████╗░██║██╔══██╗██╔════╝██╔══██╗██╔══██╗██║░░██║██╔════╝██╔════╝╚══██╔══╝\n" +
@@ -53,37 +58,39 @@ public class EnderChest {
                 "███████╗██║░╚███║██████╔╝███████╗██║░░██║╚█████╔╝██║░░██║███████╗██████╔╝░░░██║░░░\n" +
                 "╚══════╝╚═╝░░╚══╝╚═════╝░╚══════╝╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝╚══════╝╚═════╝░░░░╚═╝░░░");
         logger.info("Starting EnderChest");
-        this.eventLoopGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors());
-        this.dedicatedEnderChest  = new DedicatedEnderChest(eventLoopGroup);
+        this.dedicatedEnderChest  = new DedicatedEnderChest(parentGroup);
 
         TextComponentSerializer textComponentSerializer = new TextComponentSerializer();
         ObjectMapper objectMapper = MWork.get().getObjectMapper();
 
         SimpleModule simpleModule = new SimpleModule();
-        simpleModule.addDeserializer(RedstonePacketIn.class, new RedstonePacketInDeserializer());
         simpleModule.addSerializer(TextComponentEntry.class, textComponentSerializer);
         simpleModule.addSerializer(TextComponent.class, textComponentSerializer);
         simpleModule.addSerializer(TextClickEvent.class, new TextClickEventSerializer());
 
         objectMapper.registerModule(simpleModule);
 
-        this.redstone = new Redstone(this);
 
         EnderFrame enderFrame = EnderFrame.get();
         EventBus<PacketEvent> packetEventBus = enderFrame.getPacketEventBus();
 
         packetEventBus.subscribe(PacketHandshakeEvent.class, new PacketHandshakeListener(dedicatedEnderChest));
         packetEventBus.subscribe(ServerPingEvent.class, new ServerPingListener());
-        packetEventBus.subscribe(ServerStatusEvent.class, new ServerStatusListener(redstone));
+        packetEventBus.subscribe(ServerStatusEvent.class, new ServerStatusListener());
         packetEventBus.subscribe(PacketLoginEvent.class, new PacketLoginHandler(dedicatedEnderChest));
         packetEventBus.subscribe(PacketEncryptionEvent.class, new PacketEncryptionHandler(dedicatedEnderChest));
         packetEventBus.subscribe(PacketKeepAliveEvent.class, new PacketKeepAliveHandler(dedicatedEnderChest));
         packetEventBus.subscribe(PacketClientSettingsEvent.class, new PacketClientSettingsHandler());
         packetEventBus.subscribe(PacketChatMessageEvent.class, new PacketChatMessageHandler(dedicatedEnderChest));
         packetEventBus.subscribe(PacketFinallyJoinEvent.class, new PacketFinallyJoinHandler(dedicatedEnderChest));
-        packetEventBus.subscribe(PacketMoveEvent.class, new PacketMoveHandler(dedicatedEnderChest));
         packetEventBus.subscribe(PacketQuitEvent.class, new PacketQuitHandler(dedicatedEnderChest));
         packetEventBus.subscribe(PacketEntityActionEvent.class, new PacketEntityActionHandler());
+        packetEventBus.subscribe(PacketMoveEvent.class, new PacketMoveHandler(this));
+        packetEventBus.subscribe(PacketLookEvent.class, new PacketLookHandler(this));
+        packetEventBus.subscribe(PacketMoveAndLookEvent.class, new PacketMoveAndLookHandler(this));
+        packetEventBus.subscribe(PacketMoveEvent.class, new PacketRequestChunkHandler(dedicatedEnderChest))
+                .withEventFilter(EventFilter.DERIVE)
+                .withEventPriority(EventPriority.LOW);
 
         EventBus<EnderFrameEvent> enderFrameEventBus = enderFrame.getEnderFrameEventBus();
 
@@ -100,6 +107,7 @@ public class EnderChest {
         enderFrameEventBus.subscribe(ChunkLoadEvent.class, new ChunkLoadHandler());
         enderFrameEventBus.subscribe(WatchdogSeeEvent.class, new WatchdogSeeHandler());
         enderFrameEventBus.subscribe(WatchdogUnseeEvent.class, new WatchdogUnseeHandler());
+
 
         BinaryTagMarshal binaryTagMarshal = MWork.get().getBinaryTagMarshal();
 
@@ -205,7 +213,8 @@ public class EnderChest {
         binaryTagMarshal.registerAdaptor(Snowman.class, new DefaultSnowmanMarshal())
                 .registerSubTypes(DefaultSnowmanEntity.class);
 
-        eventLoopGroup.scheduleAtFixedRate(() ->
+
+        parentGroup.scheduleAtFixedRate(() ->
                 dedicatedEnderChest.getPlayers().forEach(player ->
                         player.getEnderFrameSession().sendKeepAlive((int) System.currentTimeMillis())), 0, 1, TimeUnit.SECONDS);
 
@@ -214,29 +223,45 @@ public class EnderChest {
                 dedicatedEnderChest.getWorldManager().getWorldBufferIO().writeWorldLevel(worldBuffer.getWorldLevel(), new File(worldBuffer.getWorldFolder(), "level.dat"));
                 worldBuffer.getChunkBuffers().forEach(worldBuffer::flushChunkBuffer);
             });
-            eventLoopGroup.shutdownGracefully();
+            parentGroup.shutdownGracefully();
         }));
 
-        new ServerBootstrap()
-                .group(eventLoopGroup)
+        this.emerald = new Emerald(parentGroup);
+
+        ChannelFuture channelFuture = new ServerBootstrap()
+                .group(parentGroup, childGroup)
                 .channel(NioServerSocketChannel.class)
                 .childHandler(new EnderChestChannelInitializer())
                 .localAddress("0.0.0.0", 25565)
                 .childOption(ChannelOption.TCP_NODELAY, true)
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .bind();
-        logger.info("Done !");
+
+        try {
+            logger.info(String.valueOf(channelFuture.sync().channel()));
+        } catch (InterruptedException e) {
+            logger.error("", e);
+        }
+
+        logger.info(String.format("took (%d) ms", (System.currentTimeMillis() - start)));
+        logger.info("done !");
+
+
     }
 
     public static void main(String[] args) {
         new EnderChest();
     }
 
-    public EventLoopGroup getEventLoopGroup() {
-        return eventLoopGroup;
+    public EventLoopGroup getParentGroup() {
+        return parentGroup;
     }
 
     public DedicatedEnderChest getDedicatedEnderChest() {
         return dedicatedEnderChest;
     }
 
+    public Emerald getEmerald() {
+        return emerald;
+    }
 }
