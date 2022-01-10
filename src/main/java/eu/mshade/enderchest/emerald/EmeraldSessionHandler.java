@@ -3,10 +3,8 @@ package eu.mshade.enderchest.emerald;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.shulker.Shulker;
 import eu.mshade.shulker.protocol.ShulkerPacket;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import eu.mshade.shulker.protocol.ShulkerPacketContainer;
+import io.netty.channel.*;
 
 public class EmeraldSessionHandler extends ChannelInboundHandlerAdapter {
 
@@ -22,19 +20,19 @@ public class EmeraldSessionHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof ShulkerPacket) {
-            ShulkerPacket shulkerPacket = (ShulkerPacket) msg;
-            shulker.getShulkerPacketEventBus().publish(shulkerPacket, parameterContainer);
+        if (msg instanceof ShulkerPacketContainer) {
+            ShulkerPacketContainer<?> shulkerPacketContainer = (ShulkerPacketContainer) msg;
+            shulker.getShulkerPacketEventBus().publish(shulkerPacketContainer, parameterContainer);
         }
     }
 
-    public void sendPacket(ShulkerPacket shulkerPacket){
-        this.channel.writeAndFlush(shulkerPacket);
+    public void sendPacket(ShulkerPacketContainer<?> shulkerPacketContainer){
+        this.channel.writeAndFlush(shulkerPacketContainer, channel.voidPromise());
     }
 
-    public void sendPacketAndClose(ShulkerPacket shulkerPacket){
+    public void sendPacketAndClose(ShulkerPacketContainer<?> shulkerPacketContainer){
         if (isConnected())
-            channel.writeAndFlush(shulkerPacket).addListener(ChannelFutureListener.CLOSE);
+            channel.writeAndFlush(shulkerPacketContainer).addListener(ChannelFutureListener.CLOSE);
     }
 
     public void close(){
