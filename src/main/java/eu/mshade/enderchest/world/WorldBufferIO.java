@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileLock;
 
 public class WorldBufferIO {
 
@@ -59,13 +60,15 @@ public class WorldBufferIO {
     public ChunkBuffer readChunkBuffer(WorldBuffer worldBuffer, WorldManager worldManager, File file) {
         synchronized (file) {
             try {
-                FileInputStream fileInputStream = new FileInputStream(file);
-                CompoundBinaryTag compoundBinaryTag = MWork.get().getBinaryTagBufferDriver().readCompoundBinaryTag(fileInputStream);
-                ParameterContainer parameterContainer = new ParameterContainer();
-                parameterContainer.putContainer(file);
-                parameterContainer.putContainer(worldBuffer);
-                parameterContainer.putContainer(worldManager);
-                return MWork.get().getBinaryTagMarshal().unMarshal(compoundBinaryTag, ChunkBuffer.class, parameterContainer);
+                if (file.exists()) {
+                    FileInputStream fileInputStream = new FileInputStream(file);
+                    CompoundBinaryTag compoundBinaryTag = MWork.get().getBinaryTagBufferDriver().readCompoundBinaryTag(fileInputStream);
+                    ParameterContainer parameterContainer = new ParameterContainer();
+                    parameterContainer.putContainer(file);
+                    parameterContainer.putContainer(worldBuffer);
+                    parameterContainer.putContainer(worldManager);
+                    return MWork.get().getBinaryTagMarshal().unMarshal(compoundBinaryTag, ChunkBuffer.class, parameterContainer);
+                }
 
             } catch (Exception e) {
                 e.printStackTrace();
