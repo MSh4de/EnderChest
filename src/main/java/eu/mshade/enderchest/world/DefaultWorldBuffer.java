@@ -31,7 +31,6 @@ public class DefaultWorldBuffer implements WorldBuffer {
     private final File worldFolder;
     private ChunkGenerator chunkGenerator;
     private final Map<UUID, ChunkBuffer> chunks = new ConcurrentHashMap<>();
-    private final Map<UUID, File> chunkFiles = new ConcurrentHashMap<>();
     private final WorldManager worldManager;
     private final Queue<Entity> entities = new ConcurrentLinkedQueue<>();
 
@@ -41,17 +40,6 @@ public class DefaultWorldBuffer implements WorldBuffer {
         this.worldFolder = worldFolder;
         this.chunksFolder =  new File(worldFolder,"chunks");
         chunksFolder.mkdirs();
-        LOGGER.info(String.format("Indexing of chunks in the world (%s)", worldLevel.getName()));
-        /*
-        for (File file : Objects.requireNonNull(chunksFolder.listFiles())) {
-            String[] strings = file.getName().split(",");
-            int x = Integer.parseInt(strings[0]);
-            int z = Integer.parseInt(strings[1].split("\\.")[0]);
-            chunkFiles.put(ChunkBuffer.ofId(x, z), file);
-        }
-        LOGGER.info(String.format("Indexing done with %d chunks", chunkFiles.size()));
-
-         */
     }
 
 
@@ -133,20 +121,11 @@ public class DefaultWorldBuffer implements WorldBuffer {
 
 
     @Override
-    public boolean hasFileChunkBuffer(int x, int z) {
-        return chunkFiles.containsKey(ChunkBuffer.ofId(x, z));
-    }
-
-    @Override
     public File getChunkFile(int chunkX, int chunkZ) {
         return new File(getChunksFolder(), chunkX+","+chunkZ+".dat");
         //return this.getChunkFile(ChunkBuffer.ofId(chunkX, chunkZ));
     }
 
-    @Override
-    public File getChunkFile(UUID id) {
-        return this.chunkFiles.get(id);
-    }
 
     @Override
     public boolean hasChunkBuffer(int x, int z) {
