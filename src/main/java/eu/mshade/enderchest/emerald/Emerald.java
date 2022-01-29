@@ -31,7 +31,6 @@ public class Emerald {
     private ShulkerService shulkerService;
     private Channel channel;
     private Shulker shulker;
-    private BlockingQueue<ShulkerPacketContainer<ShulkerPacket>> shulkerPacketContainerQueue = new LinkedBlockingDeque<>();
 
     public Emerald(EventLoopGroup nioEventLoopGroup) {
         this.nioEventLoopGroup = nioEventLoopGroup;
@@ -40,16 +39,6 @@ public class Emerald {
         this.shulker = new Shulker(mWork);
 
 
-        nioEventLoopGroup.execute(() -> {
-            while (true){
-                try {
-                    ShulkerPacketContainer<ShulkerPacket> shulkerPacketContainer = shulkerPacketContainerQueue.take();
-                    sendPacket(shulkerPacketContainer);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
 
         ShulkerEventBus shulkerPacketEventBus = shulker.getShulkerPacketEventBus();
 
@@ -64,8 +53,10 @@ public class Emerald {
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .handler(new EmeraldChannelInitializer(shulker, mWork));
 
+        String host = (System.getProperty("remote") != null ? System.getProperty("remote") : System.getenv("remote"));
+
         try {
-            channel = bootstrap.connect("localhost", 4568).addListener(future -> {
+            channel = bootstrap.connect(host, 4568).addListener(future -> {
                 sendPacket(new ShulkerPacketLoginRequest("BFkDDhdjhrc2URsIosOiI9frFMDXJHBq3DJC3XlWhdpyjAxUSyaFrPC7X6TPixEbcGMveCMtsuUL2nD6gDGx/YRqrTFHyvytqLdgJlfY6QA="));
                 logger.info(String.valueOf(channel));
             }).channel();
@@ -76,9 +67,9 @@ public class Emerald {
     }
 
     public void sendPacket(Topic topic, ShulkerPacket shulkerPacket){
-        if (!channel.isActive() && !channel.isOpen()) return;
-                ShulkerPacketHeader shulkerPacketHeader = new ShulkerPacketHeader(this.shulker.getShulkerPacketRepository(), topic.getId(), this.shulkerService.getId(), shulkerService.getId(), topic.getShulkerPacketType());
-                shulkerPacketContainerQueue.add(new ShulkerPacketContainer<>(shulkerPacketHeader, shulkerPacket));
+        if (channel != null && !channel.isActive() && !channel.isOpen()) return;
+                ShulkerPacketHeader shulkerPacketHeader = new ShulkerPacketHeader(this.shulker.getShulkerPacketRepository(), topic.getId(), 0, 0, topic.getShulkerPacketType());
+                sendPacket(new ShulkerPacketContainer<>(shulkerPacketHeader, shulkerPacket));
                 //this.channel.writeAndFlush(new ShulkerPacketContainer<>(shulkerPacketHeader, shulkerPacket));
 
 
@@ -92,12 +83,13 @@ public class Emerald {
     }
 
 
-    public void sendPacket(ShulkerPacketContainer<ShulkerPacket> shulkerPacketShulkerPacketContainer){
+    public void sendPacket(ShulkerPacketContainer<ShulkerPacket> shulkerPacketShulkerPacketContainer) {
         this.channel.writeAndFlush(shulkerPacketShulkerPacketContainer, channel.voidPromise());
+
     }
 
     public void sendPacket(ShulkerPacket shulkerPacket){
-        if (!channel.isActive() && !channel.isOpen()) return;
+        if (channel != null && !channel.isActive() && !channel.isOpen()) return;
         ShulkerPacketType packetTypeByPacket = this.shulker.getShulkerPacketRepository().getPacketTypeByPacket(shulkerPacket);
         ShulkerPacketHeader shulkerPacketHeader = new ShulkerPacketHeader(this.shulker.getShulkerPacketRepository(), 0, 0, packetTypeByPacket);
         this.channel.writeAndFlush(new ShulkerPacketContainer<>(shulkerPacketHeader, shulkerPacket), channel.voidPromise());
