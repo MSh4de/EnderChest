@@ -24,4 +24,14 @@ public class DefaultZombieEntity extends Zombie {
     public void tick() {
         move(location.add(0.1, 0, 0));
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }

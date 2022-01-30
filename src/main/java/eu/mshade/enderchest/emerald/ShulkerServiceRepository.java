@@ -1,9 +1,9 @@
-package eu.mshade.shulker;
+package eu.mshade.enderchest.emerald;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Queue;
+import eu.mshade.shulker.ShulkerService;
+import eu.mshade.shulker.protocol.ShulkerPacketType;
+
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -11,6 +11,7 @@ public class ShulkerServiceRepository {
 
     private Queue<ShulkerService> shulkerServices = new ConcurrentLinkedQueue<>();
     private Map<Long, ShulkerService> shulkerServiceById = new ConcurrentHashMap<>();
+    private Map<ShulkerPacketType, List<ShulkerService>> subscriberPacketType = new ConcurrentHashMap<>();
 
     public void addShulkerService(ShulkerService shulkerService){
         this.shulkerServices.add(shulkerService);
@@ -31,6 +32,18 @@ public class ShulkerServiceRepository {
 
     public Queue<ShulkerService> getShulkerServices(){
         return new ConcurrentLinkedQueue<>(this.shulkerServices);
+    }
+
+    public List<ShulkerService> getSubscriber(ShulkerPacketType shulkerPacketType){
+        return this.subscriberPacketType.computeIfAbsent(shulkerPacketType, key -> new ArrayList<>());
+    }
+
+    public void addSubscriber(ShulkerService shulkerService, ShulkerPacketType shulkerPacketType){
+        this.subscriberPacketType.computeIfAbsent(shulkerPacketType, key -> new ArrayList<>()).add(shulkerService);
+    }
+
+    public void removeSubscriber(ShulkerService shulkerService, ShulkerPacketType shulkerPacketType){
+        this.subscriberPacketType.computeIfAbsent(shulkerPacketType, key -> new ArrayList<>()).remove(shulkerService);
     }
 
 

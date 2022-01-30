@@ -39,7 +39,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
 
         enderFrameSession.sendJoinGame(GameMode.CREATIVE, world.getWorldLevel().getDimension(), world.getWorldLevel().getDifficulty(), 20, world.getWorldLevel().getLevelType(), false);
-        enderFrameSession.sendAbilities(false, false, true, false, 0.2F, 0.2F);
+        enderFrameSession.sendAbilities(false, false, true, false, 0.1F, 0.1F);
 
         dedicatedEnderChest.addPlayer(player);
 
@@ -50,7 +50,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         dedicatedEnderChest.getPlayers().forEach(target -> target.getEnderFrameSessionHandler().getEnderFrameSession().sendPlayerInfo(playerInfoBuilder));
 
 
-        enderFrameSessionHandler.sendPacket(new PacketOutSetSlot());
+        //enderFrameSessionHandler.sendPacket(new PacketOutSetSlot());
 
 
         dedicatedEnderChest.getPlayers().forEach(target ->{
@@ -59,7 +59,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         //enderFrameSession.getPlayer().getEnderFrameSessionHandler().sendPacket(new PacketOutSpawnPosition(new BlockPosition(location.getBlockX(),location.getBlockY(),location.getBlockZ())));
 
-        enderFrameSession.sendPosition(location);
+        //enderFrameSession.sendPosition(location);
         enderFrameSession.sendSquareChunk(10, location.getChunkX(), location.getChunkZ(), world);
         enderFrameSession.sendPosition(location);
 

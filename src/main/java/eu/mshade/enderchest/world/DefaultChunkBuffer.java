@@ -70,7 +70,6 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
 
     @Override
     public Queue<Player> getViewers() {
-        getHealth().set(System.currentTimeMillis());
         return players;
     }
 
@@ -199,6 +198,7 @@ public  class DefaultChunkBuffer implements ChunkBuffer {
 
     @Override
     public void addEntity(Entity entity) {
+        System.out.println("REGISTER "+entity);
         getEntities().add(entity);
         getWorldBuffer().addEntity(entity);
 

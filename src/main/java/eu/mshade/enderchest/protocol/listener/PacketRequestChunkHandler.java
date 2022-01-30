@@ -31,7 +31,12 @@ public class PacketRequestChunkHandler implements EventListener<PacketMoveEvent>
 
         if (before.getChunkX() != now.getChunkX() || before.getChunkZ() != now.getChunkZ()) {
             int render = (before.distance(now) < 5 ? 10 : 3);
-            enderFrameSession.sendSquareChunk(render, now.getChunkX(), now.getChunkZ(), now.getWorld());
+
+            synchronized (this){
+                enderFrameSession.sendSquareChunk(render, now.getChunkX(), now.getChunkZ(), now.getWorld());
+            }
+
+
         }
 
     }

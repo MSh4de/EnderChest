@@ -1,7 +1,6 @@
 package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderchest.DedicatedEnderChest;
-import eu.mshade.enderchest.FakePlayer;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.entity.Entity;
@@ -41,7 +40,9 @@ public class PacketChatMessageHandler implements EventListener<PacketChatMessage
         if(event.getMessage().startsWith("/"))return;
         String[] args = event.getMessage().split(" ");
 
-        if(args[0].equalsIgnoreCase("!spawn")){
+        if (args[0].equalsIgnoreCase("!speed")){
+            player.getEnderFrameSession().sendAbilities(false, true, true, false, Float.parseFloat(args[1]), 0.2F);
+        }else if(args[0].equalsIgnoreCase("!spawn")){
             System.out.println("SPAWN ENTITY");
 
             Location location = player.getLocation();
@@ -74,7 +75,6 @@ public class PacketChatMessageHandler implements EventListener<PacketChatMessage
             System.out.println(location.getChunkBuffer().getEntities().size());
 
             chunkBuffer.getEntities().stream().filter(entity -> entity.getEntityId() == Integer.parseInt(args[1])).forEach(each ->{
-                PacketMoveHandler.linkedMob.put(enderFrameSessionHandler.getEnderFrameSession(),each.getEntityId());
             });
         }
 

@@ -2,6 +2,7 @@ package eu.mshade.enderchest.emerald;
 
 import eu.mshade.mwork.MWork;
 import eu.mshade.shulker.Shulker;
+import eu.mshade.shulker.protocol.ShulkerPacketAccuracy;
 import eu.mshade.shulker.protocol.ShulkerPacketCodec;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -23,7 +24,8 @@ public class EmeraldChannelInitializer extends ChannelInitializer<Channel> {
     protected void initChannel(Channel ch) throws Exception {
         ch.pipeline()
                 .addLast("timeout", new ReadTimeoutHandler(0, TimeUnit.MILLISECONDS))
-                .addLast("codecs", new ShulkerPacketCodec(shulker.getShulkerPacketRepository(), mWork))
+                .addLast("accuracy", new ShulkerPacketAccuracy())
+                .addLast("codecs", new ShulkerPacketCodec(mWork))
                 .addLast("handler", new EmeraldSessionHandler(ch, shulker));
 
     }
