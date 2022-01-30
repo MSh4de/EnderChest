@@ -2,24 +2,24 @@ package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderchest.DedicatedEnderChest;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
-import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.EntityType;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.Zombie;
+import eu.mshade.enderframe.item.*;
+import eu.mshade.enderframe.item.entities.BannerItemStack;
+import eu.mshade.enderframe.item.entities.LeatherArmorItemStack;
 import eu.mshade.enderframe.metadata.MetadataMeaning;
-import eu.mshade.enderframe.mojang.GameProfile;
+import eu.mshade.enderframe.mojang.Color;
 import eu.mshade.enderframe.mojang.chat.ChatColor;
 import eu.mshade.enderframe.packetevent.PacketChatMessageEvent;
 import eu.mshade.enderframe.world.ChunkBuffer;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.WorldBuffer;
-import eu.mshade.enderman.packet.play.PacketOutSpawnPlayer;
-import eu.mshade.mwork.MOptional;
+import eu.mshade.enderman.packet.play.PacketOutSetSlot;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
-import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -76,6 +76,18 @@ public class PacketChatMessageHandler implements EventListener<PacketChatMessage
 
             chunkBuffer.getEntities().stream().filter(entity -> entity.getEntityId() == Integer.parseInt(args[1])).forEach(each ->{
             });
+        }else if(args[0].equalsIgnoreCase("!setColor")){
+            Color color = Color.fromRGB(Integer.parseInt(args[1]));
+            enderFrameSessionHandler.sendPacket(new PacketOutSetSlot(36, new LeatherArmorItemStack(Material.LEATHER_HELMET,1,0).setColor(color)));
+            enderFrameSessionHandler.sendPacket(new PacketOutSetSlot(37, new LeatherArmorItemStack(Material.LEATHER_CHESTPLATE,1,0).setColor(color)));
+            enderFrameSessionHandler.sendPacket(new PacketOutSetSlot(38, new LeatherArmorItemStack(Material.LEATHER_LEGGINGS,1,0).setColor(color)));
+            enderFrameSessionHandler.sendPacket(new PacketOutSetSlot(39, new LeatherArmorItemStack(Material.LEATHER_BOOTS,1,0).setColor(color)));
+        }else if(args[0].equalsIgnoreCase("!setBanner")){
+            if(args[1].equalsIgnoreCase("pattern")){
+                enderFrameSessionHandler.sendPacket(new PacketOutSetSlot(40,new BannerItemStack(Material.MAGENTA_BANNER,1,0).addPattern(new Pattern(BannerColor.values()[Integer.parseInt(args[2])], BannerPattern.getByIdentifier(args[3])))));
+            }else{
+                enderFrameSessionHandler.sendPacket(new PacketOutSetSlot(40,new BannerItemStack(Material.MAGENTA_BANNER,1,0).setColor(BannerColor.values()[Integer.parseInt(args[1])])));
+            }
         }
 
         dedicatedEnderChest.getPlayers().forEach(each -> each.sendMessage(displayName+" : "+ChatColor.translateAlternateColorCodes('&',event.getMessage())));
