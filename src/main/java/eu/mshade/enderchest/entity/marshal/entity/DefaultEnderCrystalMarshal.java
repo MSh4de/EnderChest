@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultEnderCrystalEntity;
+import eu.mshade.enderchest.entity.DefaultEnderCrystal;
 import eu.mshade.enderframe.entity.EnderCrystal;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.mwork.ParameterContainer;
@@ -26,7 +26,7 @@ public class DefaultEnderCrystalMarshal extends DefaultEntityMarshal {
         Entity entity = super.deserialize(binaryTagMarshal, type, binaryTag, parameterContainer);
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
-        return new DefaultEnderCrystalEntity(entity.getLocation(),
+        return new DefaultEnderCrystal(entity.getLocation(),
                 entity.getVelocity(),
                 entity.getEntityId(),
                 entity.isFire(),

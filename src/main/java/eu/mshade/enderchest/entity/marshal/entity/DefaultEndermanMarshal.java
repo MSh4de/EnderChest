@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultEndermanEntity;
+import eu.mshade.enderchest.entity.DefaultEnderman;
 import eu.mshade.enderframe.entity.Enderman;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.LivingEntity;
@@ -31,7 +31,7 @@ public class DefaultEndermanMarshal extends DefaultLivingEntityMarshal {
         LivingEntity livingEntity = super.deserialize(binaryTagMarshal, type, binaryTag, parameterContainer);
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
-        return new DefaultEndermanEntity(livingEntity.getLocation(),
+        return new DefaultEnderman(livingEntity.getLocation(),
                 livingEntity.getVelocity(),
                 livingEntity.getEntityId(),
                 livingEntity.isFire(),
@@ -48,7 +48,7 @@ public class DefaultEndermanMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getPotionEffectColor(),
                 livingEntity.isPotionEffectAmbient(),
                 livingEntity.getNumberOfArrowInEntity(),
-                livingEntity.isAIDisable(),
+                livingEntity.hasAI(),
                 compoundBinaryTag.getShort("carriedBlock"),
                 compoundBinaryTag.getByte("carriedBlockData"),
                 compoundBinaryTag.getBoolean("isScreaming"));

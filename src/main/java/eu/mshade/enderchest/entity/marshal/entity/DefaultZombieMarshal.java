@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultZombieEntity;
+import eu.mshade.enderchest.entity.DefaultZombie;
 import eu.mshade.enderframe.entity.Ageable;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.LivingEntity;
@@ -33,7 +33,7 @@ public class DefaultZombieMarshal extends DefaultLivingEntityMarshal {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
         Ageable ageable = binaryTagMarshal.unMarshal(compoundBinaryTag, Ageable.class);
 
-        return new DefaultZombieEntity(livingEntity.getLocation(),
+        return new DefaultZombie(livingEntity.getLocation(),
                 livingEntity.getVelocity(),
                 livingEntity.getEntityId(),
                 livingEntity.isFire(),
@@ -50,7 +50,7 @@ public class DefaultZombieMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getPotionEffectColor(),
                 livingEntity.isPotionEffectAmbient(),
                 livingEntity.getNumberOfArrowInEntity(),
-                livingEntity.isAIDisable(),
+                livingEntity.hasAI(),
                 compoundBinaryTag.getBoolean("isVillager"),
                 compoundBinaryTag.getBoolean("isConverting"),
                 ageable.getAge(),

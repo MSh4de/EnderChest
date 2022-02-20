@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultBoatEntity;
+import eu.mshade.enderchest.entity.DefaultBoat;
 import eu.mshade.enderframe.entity.Boat;
 import eu.mshade.enderframe.entity.Damageable;
 import eu.mshade.enderframe.entity.Entity;
@@ -31,7 +31,7 @@ public class DefaultBoatMarshal extends DefaultEntityMarshal {
         Damageable damageable = binaryTagMarshal.unMarshal(binaryTag, Damageable.class);
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
-        return new DefaultBoatEntity(entity.getLocation(),
+        return new DefaultBoat(entity.getLocation(),
                 entity.getVelocity(),
                 entity.getEntityId(),
                 entity.isFire(),

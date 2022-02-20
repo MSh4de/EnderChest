@@ -2,13 +2,13 @@ package eu.mshade.enderchest.entity;
 
 import eu.mshade.enderframe.entity.Tameable;
 
-public class DefaultTameableEntity implements Tameable {
+public class DefaultTameable implements Tameable {
 
     private boolean isSitting;
     private boolean isTame;
     private final String owner;
 
-    public DefaultTameableEntity(boolean isSitting, boolean isTame, String owner) {
+    public DefaultTameable(boolean isSitting, boolean isTame, String owner) {
         this.isSitting = isSitting;
         this.isTame = isTame;
         this.owner = owner;

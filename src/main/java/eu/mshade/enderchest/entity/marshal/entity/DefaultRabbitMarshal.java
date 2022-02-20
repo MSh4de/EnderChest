@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultRabbitEntity;
+import eu.mshade.enderchest.entity.DefaultRabbit;
 import eu.mshade.enderframe.entity.Ageable;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.LivingEntity;
@@ -31,7 +31,7 @@ public class DefaultRabbitMarshal extends DefaultLivingEntityMarshal {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag)binaryTag;
         Ageable ageable = binaryTagMarshal.unMarshal(binaryTag, Ageable.class);
 
-        return new DefaultRabbitEntity(livingEntity.getLocation(),
+        return new DefaultRabbit(livingEntity.getLocation(),
                 livingEntity.getVelocity(),
                 livingEntity.getEntityId(),
                 livingEntity.isFire(),
@@ -48,7 +48,7 @@ public class DefaultRabbitMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getPotionEffectColor(),
                 livingEntity.isPotionEffectAmbient(),
                 livingEntity.getNumberOfArrowInEntity(),
-                livingEntity.isAIDisable(),
+                livingEntity.hasAI(),
                 compoundBinaryTag.getByte("rabbitType"),
                 ageable.getAge(),
                 ageable.getAgeLock());

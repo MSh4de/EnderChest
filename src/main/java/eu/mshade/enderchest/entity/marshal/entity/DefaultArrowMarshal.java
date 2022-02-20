@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultArrowEntity;
+import eu.mshade.enderchest.entity.DefaultArrow;
 import eu.mshade.enderframe.entity.Arrow;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.mwork.ParameterContainer;
@@ -27,7 +27,7 @@ public class DefaultArrowMarshal extends DefaultEntityMarshal {
         Entity entity = super.deserialize(binaryTagMarshal, type, binaryTag, parameterContainer);
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
-        return new DefaultArrowEntity(entity.getLocation(),
+        return new DefaultArrow(entity.getLocation(),
                 entity.getVelocity(),
                 entity.getEntityId(),
                 entity.isFire(),

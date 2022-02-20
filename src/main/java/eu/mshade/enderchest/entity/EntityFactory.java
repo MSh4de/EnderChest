@@ -18,83 +18,83 @@ public class EntityFactory {
         entityFactory = this;
 
         registerFactoryEntity(EntityType.SNOW_GOLEM, parameterContainer ->
-                new DefaultSnowmanEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultSnowman(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.MOOSHROOM, parameterContainer ->
-                new DefaultMooshroomEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultMooshroom(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.SQUID, parameterContainer ->
-                new DefaultSquidEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultSquid(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.ENDER_DRAGON, parameterContainer ->
-                new DefaultEnderDragonEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultEnderDragon(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.GIANT, parameterContainer ->
                 new DefaultGiantZombieEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.SILVERFISH, parameterContainer ->
-                new DefaultSilverfishEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultSilverfish(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.END_CRYSTAL, parameterContainer ->
-                new DefaultEnderCrystalEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultEnderCrystal(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.ITEM_FRAME, parameterContainer ->
                 new DefaultItemFrameEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.FIREWORK_ROCKET, parameterContainer ->
                 new DefaultFireworkEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.ARROW, parameterContainer ->
-                new DefaultArrowEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultArrow(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.ITEM, parameterContainer ->
                 new DefaultItemEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.FURNACE_MINECART, parameterContainer ->
                 new DefaultFurnaceMinecartEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.MINECART, parameterContainer ->
-                new DefaultMinecartEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultMinecart(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.BOAT, parameterContainer ->
-                new DefaultBoatEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultBoat(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.GUARDIAN, parameterContainer ->
                 new DefaultGuardianEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.WITHER, parameterContainer ->
-                new DefaultWitherEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultWither(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.IRON_GOLEM, parameterContainer ->
                 new DefaultIronGolemEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.WITCH, parameterContainer ->
-                new DefaultWitchEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultWitch(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.SKELETON, parameterContainer ->
-                new DefaultSkeletonEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultSkeleton(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.MAGMA_CUBE, parameterContainer ->
                 new DefaultMagmaCubeEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.SLIME, parameterContainer ->
-                new DefaultSlimeEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultSlime(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.GHAST, parameterContainer ->
                 new DefaultGhastEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.CREEPER, parameterContainer ->
-                new DefaultCreeperEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultCreeper(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.CAVE_SPIDER, parameterContainer ->
-                new DefaultCaveSpiderEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultCaveSpider(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.SPIDER, parameterContainer ->
-                new DefaultSpiderEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultSpider(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.PIG_ZOMBIE, parameterContainer ->
-                new DefaultZombiePigmanEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultZombiePigman(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.ENDERMAN, parameterContainer ->
-                new DefaultEndermanEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultEnderman(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.VILLAGER, parameterContainer ->
-                new DefaultVillagerEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultVillager(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.SHEEP, parameterContainer ->
-                new DefaultSheepEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultSheep(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.RABBIT, parameterContainer ->
-                new DefaultRabbitEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultRabbit(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.WOLF, parameterContainer ->
-                new DefaultWolfEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultWolf(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.OCELOT, parameterContainer ->
-                new DefaultOcelotEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultOcelot(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.BAT, parameterContainer ->
-                new DefaultBatEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultBat(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.HORSE, parameterContainer ->
                 new DefaultHorseEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.PIG, parameterContainer ->
-                new DefaultPigEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultPig(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.ARMOR_STAND, parameterContainer ->
-            new DefaultArmorStandEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+            new DefaultArmorStand(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.CHICKEN, parameterContainer ->
-                new DefaultChickenEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultChicken(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.BLAZE, parameterContainer ->
-                new DefaultBlazeEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultBlaze(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.ZOMBIE, parameterContainer ->
-                new DefaultZombieEntity(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+                new DefaultZombie(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
     }
 
     public static EntityFactory get() {

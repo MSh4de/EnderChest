@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultOcelotEntity;
+import eu.mshade.enderchest.entity.DefaultOcelot;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.LivingEntity;
 import eu.mshade.enderframe.entity.Ocelot;
@@ -31,7 +31,7 @@ public class DefaultOcelotMarshal extends DefaultLivingEntityMarshal {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag)binaryTag;
         Tameable tameable = binaryTagMarshal.unMarshal(binaryTag, Tameable.class);
 
-        return new DefaultOcelotEntity(livingEntity.getLocation(),
+        return new DefaultOcelot(livingEntity.getLocation(),
                 livingEntity.getVelocity(),
                 livingEntity.getEntityId(),
                 livingEntity.isFire(),
@@ -48,7 +48,7 @@ public class DefaultOcelotMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getPotionEffectColor(),
                 livingEntity.isPotionEffectAmbient(),
                 livingEntity.getNumberOfArrowInEntity(),
-                livingEntity.isAIDisable(),
+                livingEntity.hasAI(),
                 compoundBinaryTag.getByte("ocelotType"),
                 tameable.isSitting(),
                 tameable.isTamed(),

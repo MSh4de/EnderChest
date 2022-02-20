@@ -2,11 +2,11 @@ package eu.mshade.enderchest.entity;
 
 import eu.mshade.enderframe.entity.Rideable;
 
-public class DefaultRideableEntity implements Rideable {
+public class DefaultRideable implements Rideable {
 
     private boolean hasSaddle;
 
-    public DefaultRideableEntity(boolean hasSaddle) {
+    public DefaultRideable(boolean hasSaddle) {
         this.hasSaddle = hasSaddle;
     }
 

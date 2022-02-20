@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultSkeletonEntity;
+import eu.mshade.enderchest.entity.DefaultSkeleton;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.LivingEntity;
 import eu.mshade.enderframe.entity.Skeleton;
@@ -28,7 +28,7 @@ public class DefaultSkeletonMarshal extends DefaultLivingEntityMarshal {
         LivingEntity livingEntity =  super.deserialize(binaryTagMarshal, type, binaryTag, parameterContainer);
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
-        return new DefaultSkeletonEntity(livingEntity.getLocation(),
+        return new DefaultSkeleton(livingEntity.getLocation(),
                 livingEntity.getVelocity(),
                 livingEntity.getEntityId(),
                 livingEntity.isFire(),
@@ -45,7 +45,7 @@ public class DefaultSkeletonMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getPotionEffectColor(),
                 livingEntity.isPotionEffectAmbient(),
                 livingEntity.getNumberOfArrowInEntity(),
-                livingEntity.isAIDisable(),
+                livingEntity.hasAI(),
                 binaryTagMarshal.unMarshal(compoundBinaryTag.getBinaryTag("skeletonType"), SkeletonType.class));
     }
 }

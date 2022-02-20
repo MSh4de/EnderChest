@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultArmorStandEntity;
+import eu.mshade.enderchest.entity.DefaultArmorStand;
 import eu.mshade.enderframe.entity.ArmorStand;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.LivingEntity;
@@ -40,7 +40,7 @@ public class DefaultArmorStandMarshal extends DefaultLivingEntityMarshal {
         LivingEntity livingEntity = super.deserialize(binaryTagMarshal, type, binaryTag, parameterContainer);
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
-        return new DefaultArmorStandEntity(livingEntity.getLocation(),
+        return new DefaultArmorStand(livingEntity.getLocation(),
                 livingEntity.getVelocity(),
                 livingEntity.getEntityId(),
                 livingEntity.isFire(),
@@ -57,7 +57,7 @@ public class DefaultArmorStandMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getPotionEffectColor(),
                 livingEntity.isPotionEffectAmbient(),
                 livingEntity.getNumberOfArrowInEntity(),
-                livingEntity.isAIDisable(),
+                livingEntity.hasAI(),
                 compoundBinaryTag.getBoolean("isSmall"),
                 compoundBinaryTag.getBoolean("hasGravity"),
                 compoundBinaryTag.getBoolean("hasArms"),

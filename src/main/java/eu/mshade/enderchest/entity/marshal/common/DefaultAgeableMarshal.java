@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.common;
 
-import eu.mshade.enderchest.entity.DefaultAgeableEntity;
+import eu.mshade.enderchest.entity.DefaultAgeable;
 import eu.mshade.enderframe.entity.Ageable;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.binarytag.BinaryTag;
@@ -26,7 +26,7 @@ public class DefaultAgeableMarshal implements BinaryTagMarshalBuffer<Ageable> {
     public Ageable deserialize(BinaryTagMarshal binaryTagMarshal, Type type, BinaryTag<?> binaryTag, ParameterContainer parameterContainer) throws Exception {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
-        return new DefaultAgeableEntity(compoundBinaryTag.getInt("age"),
+        return new DefaultAgeable(compoundBinaryTag.getInt("age"),
                 compoundBinaryTag.getBoolean("ageLock"));
     }
 }

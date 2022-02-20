@@ -21,7 +21,7 @@ public class DefaultLivingEntityMarshal extends DefaultEntityMarshal {
         compoundBinaryTag.putInt("potionEffectColor", livingEntity.getPotionEffectColor());
         compoundBinaryTag.putBoolean("isPotionEffectAmbient", livingEntity.isPotionEffectAmbient());
         compoundBinaryTag.putByte("numberOfArrowInEntity", livingEntity.getNumberOfArrowInEntity());
-        compoundBinaryTag.putBoolean("isAIDisable", livingEntity.isAIDisable());
+        compoundBinaryTag.putBoolean("hasAI", livingEntity.hasAI());
         return compoundBinaryTag;
     }
 
@@ -42,11 +42,11 @@ public class DefaultLivingEntityMarshal extends DefaultEntityMarshal {
                 entity.isCustomNameVisible(),
                 entity.isSilent(),
                 entity.getUniqueId(),
-                entity.getType(),
+                entity.getEntityType(),
                 compoundBinaryTag.getFloat("health"),
                 compoundBinaryTag.getInt("potionEffectColor"),
                 compoundBinaryTag.getBoolean("isPotionEffectAmbient"),
                 compoundBinaryTag.getByte("numberOfArrowInEntity"),
-                compoundBinaryTag.getBoolean("isAIDisable"));
+                compoundBinaryTag.getBoolean("hasIA"));
     }
 }

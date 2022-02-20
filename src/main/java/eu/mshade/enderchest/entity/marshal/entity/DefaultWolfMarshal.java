@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultWolfEntity;
+import eu.mshade.enderchest.entity.DefaultWolf;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.LivingEntity;
 import eu.mshade.enderframe.entity.Tameable;
@@ -33,7 +33,7 @@ public class DefaultWolfMarshal extends DefaultLivingEntityMarshal {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag)binaryTag;
         Tameable tameable = binaryTagMarshal.unMarshal(binaryTag, Tameable.class);
 
-        return new DefaultWolfEntity(livingEntity.getLocation(),
+        return new DefaultWolf(livingEntity.getLocation(),
                 livingEntity.getVelocity(),
                 livingEntity.getEntityId(),
                 livingEntity.isFire(),
@@ -50,7 +50,7 @@ public class DefaultWolfMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getPotionEffectColor(),
                 livingEntity.isPotionEffectAmbient(),
                 livingEntity.getNumberOfArrowInEntity(),
-                livingEntity.isAIDisable(),
+                livingEntity.hasAI(),
                 compoundBinaryTag.getBoolean("isAngry"),
                 compoundBinaryTag.getBoolean("isBegging"),
                 compoundBinaryTag.getBoolean("isCollarColor"),

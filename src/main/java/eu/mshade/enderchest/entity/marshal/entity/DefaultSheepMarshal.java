@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultSheepEntity;
+import eu.mshade.enderchest.entity.DefaultSheep;
 import eu.mshade.enderframe.entity.*;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.binarytag.BinaryTag;
@@ -29,7 +29,7 @@ public class DefaultSheepMarshal extends DefaultLivingEntityMarshal {
         Ageable ageable = binaryTagMarshal.unMarshal(binaryTag, Ageable.class);
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
-        return new DefaultSheepEntity(livingEntity.getLocation(),
+        return new DefaultSheep(livingEntity.getLocation(),
                 livingEntity.getVelocity(),
                 livingEntity.getEntityId(),
                 livingEntity.isFire(),
@@ -46,7 +46,7 @@ public class DefaultSheepMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getPotionEffectColor(),
                 livingEntity.isPotionEffectAmbient(),
                 livingEntity.getNumberOfArrowInEntity(),
-                livingEntity.isAIDisable(),
+                livingEntity.hasAI(),
                 binaryTagMarshal.unMarshal(binaryTag, SheepColor.class),
                 compoundBinaryTag.getBoolean("isSheared"),
                 ageable.getAge(),

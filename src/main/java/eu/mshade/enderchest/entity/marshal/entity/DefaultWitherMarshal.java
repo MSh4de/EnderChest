@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultWitherEntity;
+import eu.mshade.enderchest.entity.DefaultWither;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.LivingEntity;
 import eu.mshade.enderframe.entity.Wither;
@@ -29,7 +29,7 @@ public class DefaultWitherMarshal extends DefaultLivingEntityMarshal {
         LivingEntity livingEntity =  super.deserialize(binaryTagMarshal, type, binaryTag, parameterContainer);
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
-        return new DefaultWitherEntity(livingEntity.getLocation(),
+        return new DefaultWither(livingEntity.getLocation(),
                 livingEntity.getVelocity(),
                 livingEntity.getEntityId(),
                 livingEntity.isFire(),
@@ -46,7 +46,7 @@ public class DefaultWitherMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getPotionEffectColor(),
                 livingEntity.isPotionEffectAmbient(),
                 livingEntity.getNumberOfArrowInEntity(),
-                livingEntity.isAIDisable(),
+                livingEntity.hasAI(),
                 compoundBinaryTag.getInt("watchedTarget"),
                 compoundBinaryTag.getInt("invulnerableTime"));
     }

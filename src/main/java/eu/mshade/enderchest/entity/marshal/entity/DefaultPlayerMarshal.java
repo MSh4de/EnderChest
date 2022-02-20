@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultPlayerEntity;
+import eu.mshade.enderchest.entity.DefaultPlayer;
 import eu.mshade.enderframe.EnderFrameSessionHandler;
 import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.entity.Entity;
@@ -36,7 +36,7 @@ public class DefaultPlayerMarshal extends DefaultLivingEntityMarshal {
         EnderFrameSessionHandler enderFrameSessionHandler = parameterContainer.getContainer(EnderFrameSessionHandler.class);
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
-        return new DefaultPlayerEntity(livingEntity.getLocation(),
+        return new DefaultPlayer(livingEntity.getLocation(),
                 livingEntity.getVelocity(),
                 livingEntity.getEntityId(),
                 livingEntity.isFire(),

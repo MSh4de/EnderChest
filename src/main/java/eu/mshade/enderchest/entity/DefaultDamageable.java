@@ -2,11 +2,11 @@ package eu.mshade.enderchest.entity;
 
 import eu.mshade.enderframe.entity.Damageable;
 
-public class DefaultDamageableEntity implements Damageable {
+public class DefaultDamageable implements Damageable {
 
     private float damageTaken;
 
-    public DefaultDamageableEntity(float damageTaken) {
+    public DefaultDamageable(float damageTaken) {
         this.damageTaken = damageTaken;
     }
 

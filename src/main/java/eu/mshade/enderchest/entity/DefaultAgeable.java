@@ -2,12 +2,12 @@ package eu.mshade.enderchest.entity;
 
 import eu.mshade.enderframe.entity.Ageable;
 
-public class DefaultAgeableEntity implements Ageable {
+public class DefaultAgeable implements Ageable {
 
     private int age;
     private boolean ageLocked;
 
-    public DefaultAgeableEntity(int age, boolean ageLocked) {
+    public DefaultAgeable(int age, boolean ageLocked) {
         this.age = age;
         this.ageLocked = ageLocked;
     }
@@ -51,14 +51,4 @@ public class DefaultAgeableEntity implements Ageable {
         return this.getAge() >= 0;
     }
 
-    @Override
-    public boolean canBreed() {
-        return this.getAge() == 0;
-    }
-
-    @Override
-    public void setBreed(boolean isBreedable) {
-        if (isBreedable) this.setAge(0);
-        else this.setAge(6000);
-    }
 }

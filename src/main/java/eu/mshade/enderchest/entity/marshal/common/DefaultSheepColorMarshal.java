@@ -1,6 +1,5 @@
 package eu.mshade.enderchest.entity.marshal.common;
 
-import eu.mshade.enderframe.entity.SheepColor;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.binarytag.BinaryTag;
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;

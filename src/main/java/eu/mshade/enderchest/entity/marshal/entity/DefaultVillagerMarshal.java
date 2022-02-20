@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultVillagerEntity;
+import eu.mshade.enderchest.entity.DefaultVillager;
 import eu.mshade.enderframe.entity.*;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.binarytag.BinaryTag;
@@ -27,9 +27,8 @@ public class DefaultVillagerMarshal extends DefaultLivingEntityMarshal {
     public LivingEntity deserialize(BinaryTagMarshal binaryTagMarshal, Type type, BinaryTag<?> binaryTag, ParameterContainer parameterContainer) throws Exception {
         LivingEntity livingEntity = super.deserialize(binaryTagMarshal, type, binaryTag, parameterContainer);
         Ageable ageable = binaryTagMarshal.unMarshal(binaryTag, Ageable.class);
-        CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
-        return new DefaultVillagerEntity(livingEntity.getLocation(),
+        return new DefaultVillager(livingEntity.getLocation(),
                 livingEntity.getVelocity(),
                 livingEntity.getEntityId(),
                 livingEntity.isFire(),
@@ -46,7 +45,7 @@ public class DefaultVillagerMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getPotionEffectColor(),
                 livingEntity.isPotionEffectAmbient(),
                 livingEntity.getNumberOfArrowInEntity(),
-                livingEntity.isAIDisable(),
+                livingEntity.hasAI(),
                 binaryTagMarshal.unMarshal(binaryTag, VillagerType.class),
                 ageable.getAge(),
                 ageable.getAgeLock());

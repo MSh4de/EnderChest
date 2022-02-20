@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultCreeperEntity;
+import eu.mshade.enderchest.entity.DefaultCreeper;
 import eu.mshade.enderframe.entity.Creeper;
 import eu.mshade.enderframe.entity.CreeperState;
 import eu.mshade.enderframe.entity.Entity;
@@ -31,7 +31,7 @@ public class DefaultCreeperMarshal extends DefaultLivingEntityMarshal {
         LivingEntity livingEntity = super.deserialize(binaryTagMarshal, type, binaryTag, parameterContainer);
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
-        return new DefaultCreeperEntity(livingEntity.getLocation(),
+        return new DefaultCreeper(livingEntity.getLocation(),
                 livingEntity.getVelocity(),
                 livingEntity.getEntityId(),
                 livingEntity.isFire(),
@@ -48,7 +48,7 @@ public class DefaultCreeperMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getPotionEffectColor(),
                 livingEntity.isPotionEffectAmbient(),
                 livingEntity.getNumberOfArrowInEntity(),
-                livingEntity.isAIDisable(),
+                livingEntity.hasAI(),
                 binaryTagMarshal.unMarshal(binaryTag, CreeperState.class),
                 compoundBinaryTag.getBoolean("isPowered"));
     }

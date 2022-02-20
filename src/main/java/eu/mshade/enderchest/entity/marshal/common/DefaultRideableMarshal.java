@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.common;
 
-import eu.mshade.enderchest.entity.DefaultRideableEntity;
+import eu.mshade.enderchest.entity.DefaultRideable;
 import eu.mshade.enderframe.entity.Rideable;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.binarytag.BinaryTag;
@@ -23,6 +23,6 @@ public class DefaultRideableMarshal implements BinaryTagMarshalBuffer<Rideable> 
     @Override
     public Rideable deserialize(BinaryTagMarshal binaryTagMarshal, Type type, BinaryTag<?> binaryTag, ParameterContainer parameterContainer) throws Exception {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
-        return new DefaultRideableEntity(compoundBinaryTag.getBoolean("hasSaddle"));
+        return new DefaultRideable(compoundBinaryTag.getBoolean("hasSaddle"));
     }
 }

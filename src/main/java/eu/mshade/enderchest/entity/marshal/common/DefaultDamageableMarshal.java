@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.common;
 
-import eu.mshade.enderchest.entity.DefaultDamageableEntity;
+import eu.mshade.enderchest.entity.DefaultDamageable;
 import eu.mshade.enderframe.entity.Damageable;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.binarytag.BinaryTag;
@@ -23,6 +23,6 @@ public class DefaultDamageableMarshal implements BinaryTagMarshalBuffer<Damageab
     @Override
     public Damageable deserialize(BinaryTagMarshal binaryTagMarshal, Type type, BinaryTag<?> binaryTag, ParameterContainer parameterContainer) throws Exception {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
-        return new DefaultDamageableEntity(compoundBinaryTag.getFloat("damageTaken"));
+        return new DefaultDamageable(compoundBinaryTag.getFloat("damageTaken"));
     }
 }

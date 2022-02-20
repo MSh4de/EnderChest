@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.common;
 
-import eu.mshade.enderchest.entity.DefaultTameableEntity;
+import eu.mshade.enderchest.entity.DefaultTameable;
 import eu.mshade.enderframe.entity.Tameable;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.binarytag.BinaryTag;
@@ -26,7 +26,7 @@ public class DefaultTameableMarshal implements BinaryTagMarshalBuffer<Tameable> 
     @Override
     public Tameable deserialize(BinaryTagMarshal binaryTagMarshal, Type type, BinaryTag<?> binaryTag, ParameterContainer parameterContainer) throws Exception {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
-        return new DefaultTameableEntity(compoundBinaryTag.getBoolean("isTame"),
+        return new DefaultTameable(compoundBinaryTag.getBoolean("isTame"),
                 compoundBinaryTag.getBoolean("isSitting"),
                 compoundBinaryTag.getString("owner"));
     }

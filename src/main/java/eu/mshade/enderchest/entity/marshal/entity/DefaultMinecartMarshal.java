@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultMinecartEntity;
+import eu.mshade.enderchest.entity.DefaultMinecart;
 import eu.mshade.enderframe.entity.Damageable;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.EntityType;
@@ -19,7 +19,7 @@ public class DefaultMinecartMarshal extends DefaultEntityMarshal {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) super.serialize(binaryTagMarshal, type, entity, parameterContainer);
         Minecart minecart = (Minecart) entity;
 
-        compoundBinaryTag.putString("entityType", entity.getType().name());
+        compoundBinaryTag.putString("entityType", entity.getEntityType().name());
         compoundBinaryTag.putInt("shakingPower", minecart.getShakingPower());
         compoundBinaryTag.putInt("shakingDirection", minecart.getShakingDirection());
         compoundBinaryTag.putInt("blockId", minecart.getBlockId());
@@ -36,7 +36,7 @@ public class DefaultMinecartMarshal extends DefaultEntityMarshal {
         Damageable damageable = binaryTagMarshal.unMarshal(binaryTag, Damageable.class);
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
-        return new DefaultMinecartEntity(entity.getLocation(),
+        return new DefaultMinecart(entity.getLocation(),
                 entity.getVelocity(),
                 entity.getEntityId(),
                 entity.isFire(),

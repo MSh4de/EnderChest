@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultChickenEntity;
+import eu.mshade.enderchest.entity.DefaultChicken;
 import eu.mshade.enderframe.entity.Ageable;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.LivingEntity;
@@ -27,7 +27,7 @@ public class DefaultChickenMarshal extends DefaultLivingEntityMarshal {
         LivingEntity livingEntity = super.deserialize(binaryTagMarshal, type, binaryTag, parameterContainer);
         Ageable ageable = binaryTagMarshal.unMarshal(binaryTag, Ageable.class);
 
-        return new DefaultChickenEntity(livingEntity.getLocation(),
+        return new DefaultChicken(livingEntity.getLocation(),
                 livingEntity.getVelocity(),
                 livingEntity.getEntityId(),
                 livingEntity.isFire(),
@@ -44,7 +44,7 @@ public class DefaultChickenMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getPotionEffectColor(),
                 livingEntity.isPotionEffectAmbient(),
                 livingEntity.getNumberOfArrowInEntity(),
-                livingEntity.isAIDisable(),
+                livingEntity.hasAI(),
                 ageable.getAge(),
                 ageable.getAgeLock());
     }

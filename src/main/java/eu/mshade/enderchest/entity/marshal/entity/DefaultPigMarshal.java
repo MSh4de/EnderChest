@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.entity.marshal.entity;
 
-import eu.mshade.enderchest.entity.DefaultPigEntity;
+import eu.mshade.enderchest.entity.DefaultPig;
 import eu.mshade.enderframe.entity.*;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.binarytag.BinaryTag;
@@ -27,9 +27,8 @@ public class DefaultPigMarshal extends DefaultLivingEntityMarshal {
         Ageable ageable = binaryTagMarshal.unMarshal(binaryTag, Ageable.class);
         Rideable rideable = binaryTagMarshal.unMarshal(binaryTag, Rideable.class);
 
-        CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
 
-        return new DefaultPigEntity(livingEntity.getLocation(),
+        return new DefaultPig(livingEntity.getLocation(),
                 livingEntity.getVelocity(),
                 livingEntity.getEntityId(),
                 livingEntity.isFire(),
@@ -46,7 +45,7 @@ public class DefaultPigMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getPotionEffectColor(),
                 livingEntity.isPotionEffectAmbient(),
                 livingEntity.getNumberOfArrowInEntity(),
-                livingEntity.isAIDisable(),
+                livingEntity.hasAI(),
                 ageable.getAge(),
                 ageable.getAgeLock(),
                 rideable.hasSaddle());

@@ -47,7 +47,7 @@ public class DefaultGuardianMarshal extends DefaultLivingEntityMarshal {
                 livingEntity.getPotionEffectColor(),
                 livingEntity.isPotionEffectAmbient(),
                 livingEntity.getNumberOfArrowInEntity(),
-                livingEntity.isAIDisable(),
+                livingEntity.hasAI(),
                 compoundBinaryTag.getBoolean("isEldery"),
                 compoundBinaryTag.getBoolean("isRetractingSpikes"),
                 compoundBinaryTag.getInt("targetEntityId"));

@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.world;
 
-import eu.mshade.enderchest.entity.DefaultPlayerEntity;
+import eu.mshade.enderchest.entity.DefaultPlayer;
 import eu.mshade.enderchest.entity.EntityFactory;
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.EnderFrameSession;
@@ -203,7 +203,7 @@ public class DefaultWorldBuffer implements WorldBuffer {
 
         try {
             EnderFrameSession enderFrameSession = sessionHandler.getEnderFrameSession();
-            return new DefaultPlayerEntity(location.clone(), enderFrameSession.getEntityId(), sessionHandler, GameMode.SURVIVAL, enderFrameSession.getGameProfile());
+            return new DefaultPlayer(location.clone(), enderFrameSession.getEntityId(), sessionHandler, GameMode.SURVIVAL, enderFrameSession.getGameProfile());
         } catch (Exception e) {
             e.printStackTrace();
         }
