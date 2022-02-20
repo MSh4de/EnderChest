@@ -1,7 +1,6 @@
 package eu.mshade.enderchest.entity;
 
 import eu.mshade.enderframe.entity.Sheep;
-import eu.mshade.enderframe.entity.SheepColor;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Vector;
 
