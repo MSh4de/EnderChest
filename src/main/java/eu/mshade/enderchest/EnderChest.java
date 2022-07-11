@@ -2,29 +2,40 @@ package eu.mshade.enderchest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import eu.mshade.enderchest.emerald.Emerald;
-import eu.mshade.enderchest.entity.*;
-import eu.mshade.enderchest.entity.marshal.common.*;
-import eu.mshade.enderchest.entity.marshal.entity.*;
 import eu.mshade.enderchest.listener.*;
+import eu.mshade.enderchest.marshal.common.*;
+import eu.mshade.enderchest.marshal.metadata.MetadataKeyValueBinaryTagMarshal;
+import eu.mshade.enderchest.marshal.metadata.WorldMetadataKeyValueBucket;
+import eu.mshade.enderchest.marshal.world.*;
+import eu.mshade.enderchest.protocol.ProtocolRepository;
 import eu.mshade.enderchest.protocol.listener.*;
-import eu.mshade.enderchest.world.DefaultChunkBuffer;
-import eu.mshade.enderchest.world.DefaultSectionBuffer;
-import eu.mshade.enderchest.world.marshal.DefaultChunkMarshal;
-import eu.mshade.enderchest.world.marshal.DefaultLocationMarshal;
-import eu.mshade.enderchest.world.marshal.DefaultSectionMarshal;
-import eu.mshade.enderchest.world.marshal.DefaultVectorMarshal;
+import eu.mshade.enderchest.world.DefaultChunkGenerator;
+import eu.mshade.enderchest.world.WorldManager;
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.GameMode;
-import eu.mshade.enderframe.entity.*;
+import eu.mshade.enderframe.entity.CreeperState;
+import eu.mshade.enderframe.entity.Player;
+import eu.mshade.enderframe.entity.VillagerType;
 import eu.mshade.enderframe.event.*;
+import eu.mshade.enderframe.metadata.world.WorldMetadataType;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.Property;
 import eu.mshade.enderframe.mojang.chat.*;
 import eu.mshade.enderframe.packetevent.*;
+import eu.mshade.enderframe.protocol.MinecraftEncryption;
+import eu.mshade.enderframe.tick.TickBus;
 import eu.mshade.enderframe.world.*;
+import eu.mshade.enderframe.world.metadata.DifficultyWorldMetadata;
+import eu.mshade.enderframe.world.metadata.DimensionWorldMetadata;
+import eu.mshade.enderframe.world.metadata.LevelTypeWorldMetadata;
+import eu.mshade.enderframe.world.metadata.SeedWorldMetadata;
+import eu.mshade.enderman.EndermanProtocol;
 import eu.mshade.mwork.MWork;
-import eu.mshade.mwork.binarytag.marshal.BinaryTagMarshal;
+import eu.mshade.mwork.binarytag.BinaryTagDriver;
 import eu.mshade.mwork.event.EventBus;
 import eu.mshade.mwork.event.EventFilter;
 import eu.mshade.mwork.event.EventPriority;
@@ -37,15 +48,20 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
-public class EnderChest {
+public class EnderChest extends AbstractModule {
 
+    private final Logger logger = LoggerFactory.getLogger(EnderChest.class);
     private final EventLoopGroup parentGroup = new NioEventLoopGroup();
     private final EventLoopGroup childGroup = new NioEventLoopGroup();
-    private final DedicatedEnderChest dedicatedEnderChest;
-    private final Logger logger = LoggerFactory.getLogger(EnderChest.class);
+    private final Queue<Player> players = new ConcurrentLinkedQueue<>();
+    private final MinecraftEncryption minecraftEncryption = new MinecraftEncryption();
+    private final ProtocolRepository protocolRepository = new ProtocolRepository();
+    private final WorldManager worldManager;
+    private final TickBus tickBus = new TickBus(20);
     private Emerald emerald;
 
     public EnderChest() {
@@ -58,7 +74,14 @@ public class EnderChest {
                 "███████╗██║░╚███║██████╔╝███████╗██║░░██║╚█████╔╝██║░░██║███████╗██████╔╝░░░██║░░░\n" +
                 "╚══════╝╚═╝░░╚══╝╚═════╝░╚══════╝╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝╚══════╝╚═════╝░░░░╚═╝░░░");
         logger.info("Starting EnderChest");
-        this.dedicatedEnderChest  = new DedicatedEnderChest(parentGroup);
+
+        BinaryTagDriver binaryTagDriver = MWork.get().getBinaryTagDriver();
+
+        this.protocolRepository.register(new EndermanProtocol());
+
+
+
+        Injector injector = Guice.createInjector(this);
 
         TextComponentSerializer textComponentSerializer = new TextComponentSerializer();
         ObjectMapper objectMapper = MWork.get().getObjectMapper();
@@ -70,27 +93,29 @@ public class EnderChest {
 
         objectMapper.registerModule(simpleModule);
 
-
         EnderFrame enderFrame = EnderFrame.get();
         EventBus<PacketEvent> packetEventBus = enderFrame.getPacketEventBus();
 
-        packetEventBus.subscribe(PacketHandshakeEvent.class, new PacketHandshakeListener(dedicatedEnderChest));
-        packetEventBus.subscribe(ServerPingEvent.class, new ServerPingListener());
-        packetEventBus.subscribe(ServerStatusEvent.class, new ServerStatusListener());
-        packetEventBus.subscribe(PacketLoginEvent.class, new PacketLoginHandler(dedicatedEnderChest));
-        packetEventBus.subscribe(PacketEncryptionEvent.class, new PacketEncryptionHandler(dedicatedEnderChest));
-        packetEventBus.subscribe(PacketKeepAliveEvent.class, new PacketKeepAliveHandler(dedicatedEnderChest));
-        packetEventBus.subscribe(PacketClientSettingsEvent.class, new PacketClientSettingsHandler());
-        packetEventBus.subscribe(PacketChatMessageEvent.class, new PacketChatMessageHandler(dedicatedEnderChest));
-        packetEventBus.subscribe(PacketFinallyJoinEvent.class, new PacketFinallyJoinHandler(dedicatedEnderChest));
-        packetEventBus.subscribe(PacketQuitEvent.class, new PacketQuitHandler(dedicatedEnderChest));
-        packetEventBus.subscribe(PacketEntityActionEvent.class, new PacketEntityActionHandler());
-        packetEventBus.subscribe(PacketMoveEvent.class, new PacketMoveHandler(this));
-        packetEventBus.subscribe(PacketLookEvent.class, new PacketLookHandler(this));
-        packetEventBus.subscribe(PacketMoveAndLookEvent.class, new PacketMoveAndLookHandler(this));
-        packetEventBus.subscribe(PacketMoveEvent.class, new PacketRequestChunkHandler(dedicatedEnderChest))
+        packetEventBus.subscribe(PacketHandshakeEvent.class, injector.getInstance(PacketHandshakeListener.class));
+        packetEventBus.subscribe(ServerPingEvent.class, injector.getInstance(ServerPingListener.class));
+        packetEventBus.subscribe(ServerStatusEvent.class, injector.getInstance(ServerStatusListener.class));
+        packetEventBus.subscribe(PacketLoginEvent.class, injector.getInstance(PacketLoginHandler.class));
+        packetEventBus.subscribe(PacketEncryptionEvent.class, injector.getInstance(PacketEncryptionHandler.class));
+        packetEventBus.subscribe(PacketKeepAliveEvent.class, injector.getInstance(PacketKeepAliveHandler.class));
+        packetEventBus.subscribe(PacketClientSettingsEvent.class, injector.getInstance(PacketClientSettingsHandler.class));
+        packetEventBus.subscribe(PacketChatMessageEvent.class, injector.getInstance(PacketChatMessageHandler.class));
+        packetEventBus.subscribe(PacketFinallyJoinEvent.class, injector.getInstance(PacketFinallyJoinHandler.class));
+        packetEventBus.subscribe(PacketEntityActionEvent.class,injector.getInstance(PacketEntityActionHandler.class));
+        packetEventBus.subscribe(PacketMoveEvent.class, injector.getInstance(PacketMoveHandler.class));
+        packetEventBus.subscribe(PacketLookEvent.class, injector.getInstance(PacketLookHandler.class));
+        packetEventBus.subscribe(PacketMoveAndLookEvent.class, injector.getInstance(PacketMoveAndLookHandler.class));
+        packetEventBus.subscribe(PacketMoveEvent.class,injector.getInstance(PacketRequestChunkHandler.class))
                 .withEventFilter(EventFilter.DERIVE)
                 .withEventPriority(EventPriority.LOW);
+
+        packetEventBus.subscribe(PacketToggleFlyingEvent.class, new PacketToggleFlyingListener());
+        packetEventBus.subscribe(PacketBlockPlaceEvent.class, new PacketBlockPlaceListener());
+        packetEventBus.subscribe(PacketPlayerDiggingEvent.class, new PacketPlayerDiggingListener());
 
         EventBus<EnderFrameEvent> enderFrameEventBus = enderFrame.getEnderFrameEventBus();
 
@@ -108,125 +133,73 @@ public class EnderChest {
         enderFrameEventBus.subscribe(WatchdogSeeEvent.class, new WatchdogSeeHandler());
         enderFrameEventBus.subscribe(WatchdogUnseeEvent.class, new WatchdogUnseeHandler());
 
-
-        BinaryTagMarshal binaryTagMarshal = MWork.get().getBinaryTagMarshal();
-
-        binaryTagMarshal.registerAdaptor(GameMode.class, new DefaultGameModeMarshal());
-        binaryTagMarshal.registerAdaptor(GameProfile.class, new DefaultGameProfileMarshal());
-        binaryTagMarshal.registerAdaptor(Property.class, new DefaultPropertyMarshal());
-        binaryTagMarshal.registerAdaptor(VillagerType.class, new DefaultVillagerTypeMarshal());
-        binaryTagMarshal.registerAdaptor(Rotation.class, new DefaultRotationMarshal());
-        binaryTagMarshal.registerAdaptor(Vector.class, new DefaultVectorMarshal());
-        binaryTagMarshal.registerAdaptor(Location.class, new DefaultLocationMarshal());
-        binaryTagMarshal.registerAdaptor(SkeletonType.class, new DefaultSkeletonMarshal());
-        binaryTagMarshal.registerAdaptor(SheepColor.class, new DefaultSheepColorMarshal());
-        binaryTagMarshal.registerAdaptor(CreeperState.class, new DefaultCreeperStateMarshal());
-
-        binaryTagMarshal.registerAdaptor(SectionBuffer.class, new DefaultSectionMarshal())
-                .registerSubTypes(DefaultSectionBuffer.class);
-        binaryTagMarshal.registerAdaptor(ChunkBuffer.class, new DefaultChunkMarshal())
-                .registerSubTypes(DefaultChunkBuffer.class);
-        binaryTagMarshal.registerAdaptor(Zombie.class, new DefaultZombieMarshal())
-                .registerSubTypes(DefaultZombieEntity.class);
-        binaryTagMarshal.registerAdaptor(Player.class, new DefaultPlayerMarshal())
-                .registerSubTypes(DefaultPlayerEntity.class);
-        binaryTagMarshal.registerAdaptor(Blaze.class, new DefaultBlazeMarshal())
-                .registerSubTypes(DefaultBlazeEntity.class);
-        binaryTagMarshal.registerAdaptor(ArmorStand.class, new DefaultArmorStandMarshal())
-                .registerSubTypes(DefaultArmorStandEntity.class);
-        binaryTagMarshal.registerAdaptor(Arrow.class, new DefaultArrowMarshal())
-                .registerSubTypes(DefaultArrowEntity.class);
-        binaryTagMarshal.registerAdaptor(Ageable.class, new DefaultAgeableMarshal())
-                .registerSubTypes(DefaultAgeableEntity.class);
-        binaryTagMarshal.registerAdaptor(Rideable.class, new DefaultRideableMarshal())
-                .registerSubTypes(DefaultRideableEntity.class);
-        binaryTagMarshal.registerAdaptor(Pig.class, new DefaultPigMarshal())
-                .registerSubTypes(DefaultPigEntity.class);
-        binaryTagMarshal.registerAdaptor(Bat.class, new DefaultBatMarshal())
-                .registerSubTypes(DefaultBatEntity.class);
-        binaryTagMarshal.registerAdaptor(Spider.class, new DefaultSpiderMarshal())
-                .registerSubTypes(DefaultSpiderEntity.class);
-        binaryTagMarshal.registerAdaptor(CaveSpider.class, new DefaultCaveSpiderMarshal())
-                .registerSubTypes(DefaultCaveSpiderEntity.class);
-        binaryTagMarshal.registerAdaptor(Tameable.class, new DefaultTameableMarshal())
-                .registerSubTypes(DefaultTameableEntity.class);
-        binaryTagMarshal.registerAdaptor(Chicken.class, new DefaultChickenMarshal())
-                .registerSubTypes(DefaultChickenEntity.class);
-        binaryTagMarshal.registerAdaptor(Cow.class, new DefaultCowMarshal())
-                .registerSubTypes(DefaultCowEntity.class);
-        binaryTagMarshal.registerAdaptor(Horse.class, new DefaultHorseMarshal())
-                .registerSubTypes(DefaultHorseEntity.class);
-        binaryTagMarshal.registerAdaptor(Ocelot.class, new DefaultOcelotMarshal())
-                .registerSubTypes(DefaultOcelotEntity.class);
-        binaryTagMarshal.registerAdaptor(Wolf.class, new DefaultWolfMarshal())
-                .registerSubTypes(DefaultWolfEntity.class);
-        binaryTagMarshal.registerAdaptor(Rabbit.class, new DefaultRabbitMarshal())
-                .registerSubTypes(DefaultRabbitEntity.class);
-        binaryTagMarshal.registerAdaptor(Sheep.class, new DefaultSheepMarshal())
-                .registerSubTypes(DefaultSheepEntity.class);
-        binaryTagMarshal.registerAdaptor(Villager.class, new DefaultVillagerMarshal())
-                .registerSubTypes(DefaultVillagerEntity.class);
-        binaryTagMarshal.registerAdaptor(Enderman.class, new DefaultEndermanMarshal())
-                .registerSubTypes(DefaultEndermanEntity.class);
-        binaryTagMarshal.registerAdaptor(Creeper.class, new DefaultCreeperMarshal())
-                .registerSubTypes(DefaultCreeperEntity.class);
-        binaryTagMarshal.registerAdaptor(Ghast.class, new DefaultGhastMarshal())
-                .registerSubTypes(DefaultGhastEntity.class);
-        binaryTagMarshal.registerAdaptor(Slime.class, new DefaultSlimeMarshal())
-                .registerSubTypes(DefaultSlimeEntity.class);
-        binaryTagMarshal.registerAdaptor(MagmaCube.class, new DefaultMagmaCubeMarshal())
-                .registerSubTypes(DefaultMagmaCubeEntity.class);
-        binaryTagMarshal.registerAdaptor(Skeleton.class, new DefaultSkeletonMarshal())
-                .registerSubTypes(DefaultSkeletonEntity.class);
-        binaryTagMarshal.registerAdaptor(Witch.class, new DefaultWitchMarshal())
-                .registerSubTypes(DefaultWitchEntity.class);
-        binaryTagMarshal.registerAdaptor(IronGolem.class, new DefaultIronGolemMarshal())
-                .registerSubTypes(DefaultIronGolemEntity.class);
-        binaryTagMarshal.registerAdaptor(Wither.class, new DefaultWitherMarshal())
-                .registerSubTypes(DefaultWitherEntity.class);
-        binaryTagMarshal.registerAdaptor(Guardian.class, new DefaultGuardianMarshal())
-                .registerSubTypes(DefaultGuardianEntity.class);
-        binaryTagMarshal.registerAdaptor(Boat.class, new DefaultBoatMarshal())
-                .registerSubTypes(DefaultBoatEntity.class);
-        binaryTagMarshal.registerAdaptor(Minecart.class, new DefaultMinecartMarshal())
-                .registerSubTypes(DefaultMinecartEntity.class);
-        binaryTagMarshal.registerAdaptor(FurnaceMinecart.class, new DefaultFurnaceMinecartMarshal())
-                .registerSubTypes(DefaultFurnaceMinecartEntity.class);
-        binaryTagMarshal.registerAdaptor(Item.class, new DefaultItemMarshal())
-                .registerSubTypes(DefaultItemEntity.class);
-        binaryTagMarshal.registerAdaptor(Firework.class, new DefaultFireworkMarshal())
-                .registerSubTypes(DefaultFireworkEntity.class);
-        binaryTagMarshal.registerAdaptor(ItemFrame.class, new DefaultItemFrameMarshal())
-                .registerSubTypes(DefaultItemFrameEntity.class);
-        binaryTagMarshal.registerAdaptor(EnderCrystal.class, new DefaultEnderCrystalMarshal())
-                .registerSubTypes(DefaultEnderCrystalEntity.class);
-        binaryTagMarshal.registerAdaptor(Silverfish.class, new DefaultSilverfishMarshal())
-                .registerSubTypes(DefaultSilverfishEntity.class);
-        binaryTagMarshal.registerAdaptor(GiantZombie.class, new DefaultGiantZombieMarshal())
-                .registerSubTypes(DefaultGiantZombieEntity.class);
-        binaryTagMarshal.registerAdaptor(EnderDragon.class, new DefaultEnderDragonMarshal())
-                .registerSubTypes(DefaultEnderDragonEntity.class);
-        binaryTagMarshal.registerAdaptor(Squid.class, new DefaultSquidMarshal())
-                .registerSubTypes(DefaultSquidEntity.class);
-        binaryTagMarshal.registerAdaptor(Mooshroom.class, new DefaultMooshroomMarshal())
-                .registerSubTypes(DefaultMooshroomEntity.class);
-        binaryTagMarshal.registerAdaptor(Snowman.class, new DefaultSnowmanMarshal())
-                .registerSubTypes(DefaultSnowmanEntity.class);
+        enderFrameEventBus.subscribe(PlayerQuitEvent.class, injector.getInstance(PlayerQuitHandler.class));
 
 
-        parentGroup.scheduleAtFixedRate(() ->
-                dedicatedEnderChest.getPlayers().forEach(player ->
-                        player.getEnderFrameSession().sendKeepAlive((int) System.currentTimeMillis())), 0, 1, TimeUnit.SECONDS);
+
+        binaryTagDriver.registerMarshal(GameMode.class, new DefaultGameModeMarshal());
+        binaryTagDriver.registerMarshal(GameProfile.class, new DefaultGameProfileMarshal());
+        binaryTagDriver.registerMarshal(Property.class, new DefaultPropertyMarshal());
+        binaryTagDriver.registerMarshal(VillagerType.class, new DefaultVillagerTypeMarshal());
+        binaryTagDriver.registerMarshal(Rotation.class, new DefaultRotationMarshal());
+        binaryTagDriver.registerMarshal(CreeperState.class, new DefaultCreeperStateMarshal());
+        binaryTagDriver.registerMarshal(Difficulty.class, new DifficultyBinaryTagMarshal());
+        binaryTagDriver.registerMarshal(Dimension.class, new DimensionBinaryTagMarshal());
+        binaryTagDriver.registerMarshal(LevelType.class, new LevelTypeBinaryTagMarshal());
+
+
+        binaryTagDriver.registerDynamicMarshal(new WorldBinaryTagMarshal());
+        binaryTagDriver.registerDynamicMarshal(new SectionBinaryTagMarshal());
+        binaryTagDriver.registerDynamicMarshal(new ChunkBinaryTagMarshal());
+        binaryTagDriver.registerDynamicMarshal(new DefaultVectorMarshal());
+        binaryTagDriver.registerDynamicMarshal(new LocationBinaryTagMarshal());
+
+        MetadataKeyValueBinaryTagMarshal metadataKeyValueBinaryTagMarshal = new MetadataKeyValueBinaryTagMarshal();
+        metadataKeyValueBinaryTagMarshal.registerMetadataKeValueBucketManager(WorldMetadataType.class, new WorldMetadataKeyValueBucket());
+
+        binaryTagDriver.registerDynamicMarshal(metadataKeyValueBinaryTagMarshal);
+
+        this.worldManager = new WorldManager(binaryTagDriver, this);
+
+        World world = this.worldManager.createWorld("world", metadataKeyValueBucket -> {
+            metadataKeyValueBucket.setMetadataKeyValue(new SeedWorldMetadata(-4975988339999789512L));
+            metadataKeyValueBucket.setMetadataKeyValue(new LevelTypeWorldMetadata(LevelType.DEFAULT));
+            metadataKeyValueBucket.setMetadataKeyValue(new DimensionWorldMetadata(Dimension.OVERWORLD));
+            metadataKeyValueBucket.setMetadataKeyValue(new DifficultyWorldMetadata(Difficulty.NORMAL));
+        });
+        world.setChunkGenerator(new DefaultChunkGenerator(world));
+
+        Thread thread = new Thread(tickBus, "TickBus");
+        thread.start();
+        // parentGroup.scheduleAtFixedRate(tickBus, 0, 1000/200, TimeUnit.MILLISECONDS);
+        logger.info("starting TickBus");
+
+
+
+
+
+
+
+
+
+
+
+
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            dedicatedEnderChest.getWorldManager().getWorlds().forEach(worldBuffer -> {
-                dedicatedEnderChest.getWorldManager().getWorldBufferIO().writeWorldLevel(worldBuffer.getWorldLevel(), new File(worldBuffer.getWorldFolder(), "level.dat"));
-                worldBuffer.getChunkBuffers().forEach(worldBuffer::flushChunkBuffer);
+            worldManager.getWorlds().forEach(worldBuffer -> {
+                //worldManager.getWorldBufferIO().writeWorldLevel(worldBuffer.getWorldLevel(), new File(worldBuffer.getWorldFolder(), "level.dat"));
+                worldBuffer.getChunks().forEach(worldBuffer::flushChunk);
+                worldBuffer.getRegionBinaryTagPoets().forEach(binaryTagPoet -> {
+                    if (binaryTagPoet.getCompoundSectionIndex().consume()) {
+                        binaryTagPoet.writeCompoundSectionIndex();
+                    }
+                });
             });
             parentGroup.shutdownGracefully();
         }));
 
-        this.emerald = new Emerald(parentGroup);
+        //this.emerald = new Emerald(parentGroup);
 
         ChannelFuture channelFuture = new ServerBootstrap()
                 .group(parentGroup, childGroup)
@@ -237,14 +210,37 @@ public class EnderChest {
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .bind();
 
+
         try {
             logger.info(String.valueOf(channelFuture.sync().channel()));
         } catch (InterruptedException e) {
             logger.error("", e);
         }
 
+
+
         logger.info(String.format("took (%d) ms", (System.currentTimeMillis() - start)));
         logger.info("done !");
+
+        /*
+        parentGroup.scheduleAtFixedRate(()->{
+            System.out.println(String.valueOf(tickBus.getTPS()).replace(".", ","));
+        }, 0, 1, TimeUnit.SECONDS);
+
+         */
+
+        /**
+        parentGroup.execute(()->{
+            long startGenMap = System.currentTimeMillis();
+            for (int x = 0; x < 1000; x++) {
+                for (int z = 0; z < 1000; z++) {
+                    world.getChunkBuffer(x, z);
+                }
+            }
+
+            System.out.println("Done GenMap in "+(System.currentTimeMillis()-startGenMap)+" ms");
+        });
+         **/
 
 
     }
@@ -253,15 +249,44 @@ public class EnderChest {
         new EnderChest();
     }
 
+    @Override
+    protected void configure() {
+        bind(EnderChest.class).toInstance(this);
+    }
+
     public EventLoopGroup getParentGroup() {
         return parentGroup;
     }
 
-    public DedicatedEnderChest getDedicatedEnderChest() {
-        return dedicatedEnderChest;
+    public void addPlayer(Player player){
+        this.players.add(player);
+    }
+
+    public void removePlayer(Player player){
+        this.players.remove(player);
+    }
+
+    public Queue<Player> getPlayers() {
+        return players;
+    }
+
+    public ProtocolRepository getProtocolRepository() {
+        return protocolRepository;
+    }
+
+    public MinecraftEncryption getMinecraftEncryption() {
+        return minecraftEncryption;
+    }
+
+    public WorldManager getWorldManager() {
+        return worldManager;
     }
 
     public Emerald getEmerald() {
         return emerald;
+    }
+
+    public TickBus getTickBus() {
+        return tickBus;
     }
 }

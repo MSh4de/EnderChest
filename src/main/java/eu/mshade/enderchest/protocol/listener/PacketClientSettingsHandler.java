@@ -9,6 +9,5 @@ public class PacketClientSettingsHandler implements EventListener<PacketClientSe
 
     @Override
     public void onEvent(PacketClientSettingsEvent event, ParameterContainer eventContainer) {
-        Player player = event.getPlayer();
     }
 }

@@ -1,30 +1,34 @@
 package eu.mshade.enderchest;
 
-import eu.mshade.enderchest.protocol.FramingHandler;
+import eu.mshade.enderchest.protocol.PacketAccuracy;
 import eu.mshade.enderchest.protocol.VoidHandler;
-import eu.mshade.enderframe.EnderFrameSessionHandler;
+import eu.mshade.enderframe.protocol.PacketChannelInboundHandlerAdapter;
 import eu.mshade.enderframe.protocol.PacketCodec;
+import eu.mshade.enderframe.protocol.Protocol;
+import eu.mshade.enderframe.protocol.ProtocolPipeline;
+import eu.mshade.enderframe.protocol.temp.TempProtocol;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
-import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
-
-import java.util.concurrent.TimeUnit;
 
 
 public class EnderChestChannelInitializer extends ChannelInitializer<Channel> {
 
+    private final ProtocolPipeline protocolPipeline = ProtocolPipeline.get();
+    private final Protocol tempProtocol = TempProtocol.getInstance();
     @Override
     protected void initChannel(Channel ch) throws Exception {
+        protocolPipeline.setProtocol(ch, tempProtocol);
+        protocolPipeline.setSessionWrapper(ch, tempProtocol.getSessionWrapper(ch));
         ch.pipeline()
                 //.addLast("legacy_ping", new LegacyPingHandler())
                 .addLast("encryption", VoidHandler.INSTANCE)
-                .addLast("framing", new FramingHandler())
+                .addLast("accuracy", new PacketAccuracy())
                 .addLast("compression", VoidHandler.INSTANCE)
                 .addLast("codecs", new PacketCodec())
                 .addLast("readtimeout", new ReadTimeoutHandler(20))
                 //.addLast("writeidletimeout", new IdleStateHandler(0, 15, 0))
-                .addLast("handler", new EnderFrameSessionHandler(ch));
+                .addLast("handler", new PacketChannelInboundHandlerAdapter(ch));
         /*
         pipeline.addLast("timeout", new ReadTimeoutHandler(0, TimeUnit.MILLISECONDS));
         pipeline.addLast("frame_decoder", new VarIntFrameDecoder());

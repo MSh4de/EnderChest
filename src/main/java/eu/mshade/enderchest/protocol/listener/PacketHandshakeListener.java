@@ -1,46 +1,51 @@
 package eu.mshade.enderchest.protocol.listener;
 
-import eu.mshade.enderchest.DedicatedEnderChest;
-import eu.mshade.enderframe.EnderFrameSessionHandler;
+import com.google.inject.Inject;
+import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderframe.mojang.chat.TextComponent;
 import eu.mshade.enderframe.packetevent.PacketHandshakeEvent;
-import eu.mshade.enderframe.protocol.Handshake;
-import eu.mshade.enderframe.protocol.HandshakeStatus;
-import eu.mshade.enderframe.protocol.ProtocolStatus;
-import eu.mshade.enderframe.protocol.ProtocolVersion;
+import eu.mshade.enderframe.protocol.*;
 import eu.mshade.enderframe.protocol.packet.PacketOutDisconnect;
+import eu.mshade.mwork.MOptional;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
+import io.netty.channel.Channel;
+
 
 public class PacketHandshakeListener implements EventListener<PacketHandshakeEvent> {
 
-    private final DedicatedEnderChest dedicatedEnderChest;
 
-    public PacketHandshakeListener(DedicatedEnderChest dedicatedEnderChest) {
-        this.dedicatedEnderChest = dedicatedEnderChest;
-    }
+    @Inject
+    private EnderChest enderChest;
 
     @Override
-    public void onEvent(PacketHandshakeEvent event, ParameterContainer eventContainer) {
-        EnderFrameSessionHandler enderFrameSessionHandler = eventContainer.getContainer(EnderFrameSessionHandler.class);
+    public void onEvent(PacketHandshakeEvent event, ParameterContainer parameterContainer) {
+        ProtocolPipeline protocolPipeline = ProtocolPipeline.get();
+        Channel channel = parameterContainer.getContainer(Channel.class);
+        SessionWrapper sessionWrapper = protocolPipeline.getSessionWrapper(channel);
         Handshake handshake = event.getHandshake();
         HandshakeStatus handshakeStatus = handshake.getHandshakeStatus();
-        ProtocolVersion protocolVersion = handshake.getVersion();
+        MinecraftProtocolVersion minecraftProtocolVersion = handshake.getVersion();
 
-        enderFrameSessionHandler.setHandshake(handshake);
         if (handshakeStatus == HandshakeStatus.STATUS){
-            enderFrameSessionHandler.toggleProtocolStatus(ProtocolStatus.STATUS);
+            sessionWrapper.toggleProtocolStatus(ProtocolStatus.STATUS);
         }else {
-            enderFrameSessionHandler.toggleProtocolStatus(ProtocolStatus.LOGIN);
-            if (protocolVersion != ProtocolVersion.UNKNOWN) {
-                dedicatedEnderChest.getProtocolRepository().getProtocolFrameByVersion(protocolVersion)
-                        .ifPresent(enderFrameSessionHandler::toggleEnderFrameProtocol)
-                        .ifNotPresent(unused -> {
-                            enderFrameSessionHandler.sendPacketAndClose(new PacketOutDisconnect(TextComponent.of("You version has not supported by MShade")));
-                        });
+            sessionWrapper.toggleProtocolStatus(ProtocolStatus.LOGIN);
+            if (minecraftProtocolVersion != MinecraftProtocolVersion.UNKNOWN) {
+                MOptional<Protocol> protocolFrameByVersion = enderChest.getProtocolRepository().getProtocolFrameByVersion(minecraftProtocolVersion);
+                if (protocolFrameByVersion.isPresent()) {
+                    Protocol protocol = protocolFrameByVersion.get();
+                    sessionWrapper = protocol.getSessionWrapper(channel);
+                    protocolPipeline.setSessionWrapper(channel, sessionWrapper);
+                    sessionWrapper.toggleProtocol(protocol);
+                    sessionWrapper.toggleProtocolStatus(ProtocolStatus.LOGIN);
+                }else {
+                    sessionWrapper.sendPacketAndClose(new PacketOutDisconnect(TextComponent.of("You version has not supported by MShade")));
+                }
             } else {
-                enderFrameSessionHandler.sendPacketAndClose(new PacketOutDisconnect(TextComponent.of("You version has not supported by MShade")));
+                sessionWrapper.sendPacketAndClose(new PacketOutDisconnect(TextComponent.of("You version has not supported by MShade")));
             }
         }
+        sessionWrapper.setHandshake(handshake);
     }
 }

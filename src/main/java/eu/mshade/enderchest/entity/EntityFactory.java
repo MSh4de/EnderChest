@@ -2,7 +2,6 @@ package eu.mshade.enderchest.entity;
 
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.EntityType;
-import eu.mshade.enderframe.world.Location;
 import eu.mshade.mwork.MFunction;
 import eu.mshade.mwork.ParameterContainer;
 
@@ -16,8 +15,8 @@ public class EntityFactory {
 
     private EntityFactory() {
         entityFactory = this;
-
-        registerFactoryEntity(EntityType.SNOW_GOLEM, parameterContainer ->
+        /*
+        registerFactoryEntity(EntityType.SNOWMAN, parameterContainer ->
                 new DefaultSnowman(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.MOOSHROOM, parameterContainer ->
                 new DefaultMooshroom(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
@@ -95,6 +94,9 @@ public class EntityFactory {
                 new DefaultBlaze(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
         registerFactoryEntity(EntityType.ZOMBIE, parameterContainer ->
                 new DefaultZombie(parameterContainer.getContainer(Location.class), parameterContainer.getContainer(Integer.class)));
+
+
+         */
     }
 
     public static EntityFactory get() {

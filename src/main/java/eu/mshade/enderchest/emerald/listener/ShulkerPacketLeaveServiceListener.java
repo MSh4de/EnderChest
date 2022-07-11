@@ -1,10 +1,10 @@
 package eu.mshade.enderchest.emerald.listener;
 
 import eu.mshade.enderchest.emerald.Emerald;
+import eu.mshade.enderchest.emerald.ShulkerServiceRepository;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 import eu.mshade.shulker.ShulkerService;
-import eu.mshade.enderchest.emerald.ShulkerServiceRepository;
 import eu.mshade.shulker.packet.ShulkerPacketLeaveService;
 import eu.mshade.shulker.protocol.ShulkerPacketContainer;
 import org.slf4j.Logger;

@@ -1,76 +1,64 @@
 package eu.mshade.enderchest.world;
 
-import eu.mshade.enderchest.DedicatedEnderChest;
-import eu.mshade.enderframe.world.WorldBuffer;
-import eu.mshade.enderframe.world.WorldLevel;
+import eu.mshade.enderchest.EnderChest;
+import eu.mshade.enderchest.marshal.world.WorldBinaryTagMarshal;
+import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
+import eu.mshade.enderframe.metadata.world.WorldMetadataType;
+import eu.mshade.enderframe.world.World;
+import eu.mshade.enderframe.world.metadata.NameWorldMetadata;
+import eu.mshade.mwork.binarytag.BinaryTagDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public class WorldManager {
 
+    private static Logger logger = LoggerFactory.getLogger(WorldManager.class);
     private File worldsFolder = new File(System.getProperty("user.dir"), "worlds");
-    private Map<String, WorldBuffer> worlds = new ConcurrentHashMap<>();
-    private WatchDogChunk watchDogChunk;
-    private DedicatedEnderChest dedicatedEnderChest;
-    private WorldBufferIO worldBufferIO;
+    private Map<String, World> worlds = new ConcurrentHashMap<>();
+    private EnderChest enderChest;
 
-    public WorldManager(DedicatedEnderChest dedicatedEnderChest) {
-        this.dedicatedEnderChest = dedicatedEnderChest;
-        this.worldBufferIO = new WorldBufferIO();
-        this.watchDogChunk = new WatchDogChunk(dedicatedEnderChest);
+    public WorldManager(BinaryTagDriver binaryTagDriver, EnderChest enderChest) {
+        this.enderChest = enderChest;
         this.worldsFolder.mkdir();
+
+        WorldBinaryTagMarshal worldBinaryTagMarshal = binaryTagDriver.getDynamicMarshal(WorldBinaryTagMarshal.class);
+
         for (File file : Objects.requireNonNull(this.worldsFolder.listFiles())) {
-            WorldLevel worldLevel = worldBufferIO.readWorldLevel(new File(file, "level.dat"));
-            DefaultWorldBuffer worldBuffer = new DefaultWorldBuffer(this, worldLevel, file);
-            worlds.put(worldLevel.getName(), worldBuffer);
+            World world = worldBinaryTagMarshal.read(binaryTagDriver, file, this);
+            world.joinTickBus(enderChest.getTickBus());
+            worlds.put(world.getName(), world);
         }
+
     }
 
-    public WorldBuffer createWorld(WorldLevel worldLevel){
-        if (!this.worlds.containsKey(worldLevel.getName())) {
-            File file = new File(worldsFolder, worldLevel.getName());
+    public World createWorld(String name, Consumer<MetadataKeyValueBucket<WorldMetadataType>> bucketConsumer){
+        if (!this.worlds.containsKey(name)) {
+            File file = new File(worldsFolder, name);
             file.mkdir();
-            DefaultWorldBuffer defaultWorldBuffer = new DefaultWorldBuffer(this, worldLevel, file);
-            worlds.put(worldLevel.getName(), defaultWorldBuffer);
-            return defaultWorldBuffer;
+            DefaultWorld world = new DefaultWorld(this, file);
+            MetadataKeyValueBucket<WorldMetadataType> metadataKeyValueBucket = world.getMetadataKeyValueBucket();
+            metadataKeyValueBucket.setMetadataKeyValue(new NameWorldMetadata(name));
+            bucketConsumer.accept(metadataKeyValueBucket);
+            world.joinTickBus(enderChest.getTickBus());
+            worlds.put(name, world);
+            return world;
         }
-        return getWorldBuffer(worldLevel.getName());
+        return getWorld(name);
     }
 
-    public Collection<WorldBuffer> getWorlds() {
+    public Collection<World> getWorlds() {
         return worlds.values();
     }
 
-    public WorldBuffer getWorldBuffer(String name){
+    public World getWorld(String name){
         return this.worlds.get(name);
     }
 
-    public DedicatedEnderChest getDedicatedEnderChest() {
-        return dedicatedEnderChest;
-    }
-
-    public WatchDogChunk getWatchDogChunk() {
-        return watchDogChunk;
-    }
-
-    public WorldBufferIO getWorldBufferIO() {
-        return worldBufferIO;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        WorldManager that = (WorldManager) o;
-        return Objects.equals(worldsFolder, that.worldsFolder) && Objects.equals(watchDogChunk, that.watchDogChunk) && Objects.equals(worldBufferIO, that.worldBufferIO);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(worldsFolder, watchDogChunk, worldBufferIO);
-    }
 }

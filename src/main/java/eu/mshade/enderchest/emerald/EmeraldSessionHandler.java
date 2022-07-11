@@ -2,9 +2,11 @@ package eu.mshade.enderchest.emerald;
 
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.shulker.Shulker;
-import eu.mshade.shulker.protocol.ShulkerPacket;
 import eu.mshade.shulker.protocol.ShulkerPacketContainer;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 
 public class EmeraldSessionHandler extends ChannelInboundHandlerAdapter {
 
