@@ -2,9 +2,6 @@ package eu.mshade.enderchest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import eu.mshade.enderchest.emerald.Emerald;
 import eu.mshade.enderchest.listener.*;
 import eu.mshade.enderchest.marshal.common.*;
@@ -52,7 +49,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
-public class EnderChest extends AbstractModule {
+public class EnderChest {
 
     private final Logger logger = LoggerFactory.getLogger(EnderChest.class);
     private final EventLoopGroup parentGroup = new NioEventLoopGroup();
@@ -79,10 +76,6 @@ public class EnderChest extends AbstractModule {
 
         this.protocolRepository.register(new EndermanProtocol());
 
-
-
-        Injector injector = Guice.createInjector(this);
-
         TextComponentSerializer textComponentSerializer = new TextComponentSerializer();
         ObjectMapper objectMapper = MWork.get().getObjectMapper();
 
@@ -96,20 +89,20 @@ public class EnderChest extends AbstractModule {
         EnderFrame enderFrame = EnderFrame.get();
         EventBus<PacketEvent> packetEventBus = enderFrame.getPacketEventBus();
 
-        packetEventBus.subscribe(PacketHandshakeEvent.class, injector.getInstance(PacketHandshakeListener.class));
-        packetEventBus.subscribe(ServerPingEvent.class, injector.getInstance(ServerPingListener.class));
-        packetEventBus.subscribe(ServerStatusEvent.class, injector.getInstance(ServerStatusListener.class));
-        packetEventBus.subscribe(PacketLoginEvent.class, injector.getInstance(PacketLoginHandler.class));
-        packetEventBus.subscribe(PacketEncryptionEvent.class, injector.getInstance(PacketEncryptionHandler.class));
-        packetEventBus.subscribe(PacketKeepAliveEvent.class, injector.getInstance(PacketKeepAliveHandler.class));
-        packetEventBus.subscribe(PacketClientSettingsEvent.class, injector.getInstance(PacketClientSettingsHandler.class));
-        packetEventBus.subscribe(PacketChatMessageEvent.class, injector.getInstance(PacketChatMessageHandler.class));
-        packetEventBus.subscribe(PacketFinallyJoinEvent.class, injector.getInstance(PacketFinallyJoinHandler.class));
-        packetEventBus.subscribe(PacketEntityActionEvent.class,injector.getInstance(PacketEntityActionHandler.class));
-        packetEventBus.subscribe(PacketMoveEvent.class, injector.getInstance(PacketMoveHandler.class));
-        packetEventBus.subscribe(PacketLookEvent.class, injector.getInstance(PacketLookHandler.class));
-        packetEventBus.subscribe(PacketMoveAndLookEvent.class, injector.getInstance(PacketMoveAndLookHandler.class));
-        packetEventBus.subscribe(PacketMoveEvent.class,injector.getInstance(PacketRequestChunkHandler.class))
+        packetEventBus.subscribe(PacketHandshakeEvent.class, new PacketHandshakeListener(this));
+        packetEventBus.subscribe(ServerPingEvent.class, new ServerPingListener());
+        packetEventBus.subscribe(ServerStatusEvent.class, new ServerStatusListener());
+        packetEventBus.subscribe(PacketLoginEvent.class, new PacketLoginHandler(this));
+        packetEventBus.subscribe(PacketEncryptionEvent.class, new PacketEncryptionHandler(this));
+        packetEventBus.subscribe(PacketKeepAliveEvent.class, new PacketKeepAliveHandler(this));
+        packetEventBus.subscribe(PacketClientSettingsEvent.class, new PacketClientSettingsHandler());
+        packetEventBus.subscribe(PacketChatMessageEvent.class, new PacketChatMessageHandler(this));
+        packetEventBus.subscribe(PacketFinallyJoinEvent.class, new PacketFinallyJoinHandler(this));
+        packetEventBus.subscribe(PacketEntityActionEvent.class, new PacketEntityActionHandler());
+        packetEventBus.subscribe(PacketMoveEvent.class, new PacketMoveHandler());
+        packetEventBus.subscribe(PacketLookEvent.class, new PacketLookHandler());
+        packetEventBus.subscribe(PacketMoveAndLookEvent.class, new PacketMoveAndLookHandler());
+        packetEventBus.subscribe(PacketMoveEvent.class, new PacketRequestChunkHandler())
                 .withEventFilter(EventFilter.DERIVE)
                 .withEventPriority(EventPriority.LOW);
 
@@ -133,7 +126,7 @@ public class EnderChest extends AbstractModule {
         enderFrameEventBus.subscribe(WatchdogSeeEvent.class, new WatchdogSeeHandler());
         enderFrameEventBus.subscribe(WatchdogUnseeEvent.class, new WatchdogUnseeHandler());
 
-        enderFrameEventBus.subscribe(PlayerQuitEvent.class, injector.getInstance(PlayerQuitHandler.class));
+        enderFrameEventBus.subscribe(PlayerQuitEvent.class, new PlayerQuitHandler(this));
 
 
 
@@ -171,15 +164,7 @@ public class EnderChest extends AbstractModule {
 
         Thread thread = new Thread(tickBus, "TickBus");
         thread.start();
-        // parentGroup.scheduleAtFixedRate(tickBus, 0, 1000/200, TimeUnit.MILLISECONDS);
-        logger.info("starting TickBus");
-
-
-
-
-
-
-
+        logger.info("Starting "+thread);
 
 
 
@@ -247,11 +232,6 @@ public class EnderChest extends AbstractModule {
 
     public static void main(String[] args) {
         new EnderChest();
-    }
-
-    @Override
-    protected void configure() {
-        bind(EnderChest.class).toInstance(this);
     }
 
     public EventLoopGroup getParentGroup() {

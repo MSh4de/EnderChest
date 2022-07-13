@@ -1,6 +1,5 @@
 package eu.mshade.enderchest.protocol.listener;
 
-import com.google.inject.Inject;
 import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.mojang.GameProfile;
@@ -32,10 +31,11 @@ public class PacketEncryptionHandler implements EventListener<PacketEncryptionEv
     private final static Logger LOGGER = LoggerFactory.getLogger(PacketEncryptionHandler.class);
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
-    @Inject
     private EnderChest enderChest;
 
-
+    public PacketEncryptionHandler(EnderChest enderChest) {
+        this.enderChest = enderChest;
+    }
 
     @Override
     public void onEvent(PacketEncryptionEvent event, ParameterContainer parameterContainer) {

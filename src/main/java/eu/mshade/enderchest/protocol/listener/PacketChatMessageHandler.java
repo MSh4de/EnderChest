@@ -1,6 +1,5 @@
 package eu.mshade.enderchest.protocol.listener;
 
-import com.google.inject.Inject;
 import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.mojang.chat.ChatColor;
@@ -12,8 +11,12 @@ import io.netty.channel.Channel;
 
 public class PacketChatMessageHandler implements EventListener<PacketChatMessageEvent> {
 
-    @Inject
+
     private EnderChest enderChest;
+
+    public PacketChatMessageHandler(EnderChest enderChest) {
+        this.enderChest = enderChest;
+    }
 
     @Override
     public void onEvent(PacketChatMessageEvent event, ParameterContainer parameterContainer) {

@@ -1,6 +1,5 @@
 package eu.mshade.enderchest.protocol.listener;
 
-import com.google.inject.Inject;
 import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderchest.entity.DefaultPlayer;
 import eu.mshade.enderframe.GameMode;
@@ -37,8 +36,11 @@ import java.util.UUID;
 public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoinEvent> {
 
     private static final Logger logger = LoggerFactory.getLogger(PacketFinallyJoinHandler.class);
-    @Inject
     private EnderChest enderChest;
+
+    public PacketFinallyJoinHandler(EnderChest enderChest) {
+        this.enderChest = enderChest;
+    }
 
     @Override
     public void onEvent(PacketFinallyJoinEvent event, ParameterContainer parameterContainer) {

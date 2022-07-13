@@ -1,6 +1,5 @@
 package eu.mshade.enderchest.protocol.listener;
 
-import com.google.inject.Inject;
 import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.packetevent.PacketLoginEvent;
@@ -12,8 +11,11 @@ import io.netty.channel.Channel;
 
 public class PacketLoginHandler implements EventListener<PacketLoginEvent> {
 
-    @Inject
     private EnderChest enderChest;
+
+    public PacketLoginHandler(EnderChest enderChest) {
+        this.enderChest = enderChest;
+    }
 
     @Override
     public void onEvent(PacketLoginEvent event, ParameterContainer parameterContainer) {

@@ -1,6 +1,5 @@
 package eu.mshade.enderchest.protocol.listener;
 
-import com.google.inject.Inject;
 import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderframe.mojang.chat.TextComponent;
 import eu.mshade.enderframe.packetevent.PacketHandshakeEvent;
@@ -15,8 +14,11 @@ import io.netty.channel.Channel;
 public class PacketHandshakeListener implements EventListener<PacketHandshakeEvent> {
 
 
-    @Inject
     private EnderChest enderChest;
+
+    public PacketHandshakeListener(EnderChest enderChest) {
+        this.enderChest = enderChest;
+    }
 
     @Override
     public void onEvent(PacketHandshakeEvent event, ParameterContainer parameterContainer) {

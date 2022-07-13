@@ -1,6 +1,5 @@
 package eu.mshade.enderchest.protocol.listener;
 
-import com.google.inject.Inject;
 import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
@@ -14,8 +13,12 @@ import io.netty.channel.Channel;
 
 public class PacketKeepAliveHandler implements EventListener<PacketKeepAliveEvent> {
 
-    @Inject
     private EnderChest enderChest;
+
+    public PacketKeepAliveHandler(EnderChest enderChest) {
+        this.enderChest = enderChest;
+    }
+
     @Override
     public void onEvent(PacketKeepAliveEvent event, ParameterContainer parameterContainer) {
         Channel channel = parameterContainer.getContainer(Channel.class);

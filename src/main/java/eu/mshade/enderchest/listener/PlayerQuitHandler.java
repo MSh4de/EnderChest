@@ -1,6 +1,5 @@
 package eu.mshade.enderchest.listener;
 
-import com.google.inject.Inject;
 import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.event.PlayerQuitEvent;
@@ -16,8 +15,11 @@ public class PlayerQuitHandler implements EventListener<PlayerQuitEvent> {
 
     private static final Logger logger = LoggerFactory.getLogger(PlayerQuitHandler.class);
 
-    @Inject
     private EnderChest enderChest;
+
+    public PlayerQuitHandler(EnderChest enderChest) {
+        this.enderChest = enderChest;
+    }
 
     @Override
     public void onEvent(PlayerQuitEvent event, ParameterContainer eventContainer) {
