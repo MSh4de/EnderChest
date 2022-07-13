@@ -5,7 +5,6 @@ import eu.mshade.enderchest.emerald.listener.ShulkerPacketLeaveServiceListener;
 import eu.mshade.enderchest.emerald.listener.ShulkerPacketLoginResponseListener;
 import eu.mshade.enderchest.emerald.listener.ShulkerPacketSubscribeListener;
 import eu.mshade.mwork.MWork;
-import eu.mshade.mwork.event.EventBus;
 import eu.mshade.shulker.Shulker;
 import eu.mshade.shulker.ShulkerService;
 import eu.mshade.shulker.event.ShulkerEventBus;
@@ -18,9 +17,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Queue;
-import java.util.concurrent.*;
 
 public class Emerald {
 

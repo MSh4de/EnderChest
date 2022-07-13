@@ -4,7 +4,6 @@ import eu.mshade.enderchest.emerald.Emerald;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 import eu.mshade.shulker.packet.ShulkerPacketLoginResponse;
-import eu.mshade.shulker.protocol.ShulkerPacket;
 import eu.mshade.shulker.protocol.ShulkerPacketContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

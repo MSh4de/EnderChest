@@ -1,6 +1,5 @@
 package eu.mshade.enderchest.listener;
 
-import eu.mshade.enderframe.EnderFrameSession;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.event.EntitySeeEvent;

@@ -1,27 +1,25 @@
 package eu.mshade.enderchest.protocol.listener;
 
-import eu.mshade.enderchest.DedicatedEnderChest;
-import eu.mshade.enderframe.EnderFrameSession;
-import eu.mshade.enderframe.EnderFrameSessionHandler;
+import com.google.inject.Inject;
+import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.packetevent.PacketLoginEvent;
+import eu.mshade.enderframe.protocol.ProtocolPipeline;
+import eu.mshade.enderframe.protocol.SessionWrapper;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
+import io.netty.channel.Channel;
 
 public class PacketLoginHandler implements EventListener<PacketLoginEvent> {
 
-    private final DedicatedEnderChest dedicatedEnderChest;
-
-    public PacketLoginHandler(DedicatedEnderChest dedicatedEnderChest) {
-        this.dedicatedEnderChest = dedicatedEnderChest;
-    }
+    @Inject
+    private EnderChest enderChest;
 
     @Override
-    public void onEvent(PacketLoginEvent event, ParameterContainer eventContainer) {
-        EnderFrameSessionHandler enderFrameSessionHandler = event.getEnderFrameSessionHandler();
-        EnderFrameSession enderFrameSession = enderFrameSessionHandler.getEnderFrameProtocol().getEnderFrameSession(enderFrameSessionHandler);
-        enderFrameSessionHandler.setEnderFrameSession(enderFrameSession);
-        enderFrameSession.setGameProfile(new GameProfile(event.getName()));
-        enderFrameSession.sendEncryption(dedicatedEnderChest.getMinecraftEncryption().getKeyPair().getPublic());
+    public void onEvent(PacketLoginEvent event, ParameterContainer parameterContainer) {
+        Channel channel = parameterContainer.getContainer(Channel.class);
+        SessionWrapper sessionWrapper = ProtocolPipeline.get().getSessionWrapper(channel);
+        sessionWrapper.setGameProfile(new GameProfile(event.getName()));
+        sessionWrapper.sendEncryption(enderChest.getMinecraftEncryption().getKeyPair().getPublic());
     }
 }
