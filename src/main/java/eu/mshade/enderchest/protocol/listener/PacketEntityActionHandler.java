@@ -16,7 +16,7 @@ public class PacketEntityActionHandler implements EventListener<PacketEntityActi
     public void onEvent(PacketEntityActionEvent event, ParameterContainer parameterContainer) {
         Channel channel = parameterContainer.getContainer(Channel.class);
         Player player = ProtocolPipeline.get().getPlayer(channel);
-        MetadataKeyValueBucket<EntityMetadataKey> metadataKeyValueBucket = player.getMetadataKeyValueBucket();
+        MetadataKeyValueBucket metadataKeyValueBucket = player.getMetadataKeyValueBucket();
 
 
         switch (event.getActionType()){

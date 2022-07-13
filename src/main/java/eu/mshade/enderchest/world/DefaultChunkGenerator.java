@@ -23,10 +23,17 @@ public class DefaultChunkGenerator implements ChunkGenerator {
     public void generate(Chunk chunk) {
         for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
+                    for (int i = 0; i < 4; i++) {
+                        chunk.setBlock(x, i, z, Material.GRASS);
+
+                    }
+                    /*
                     int height = (int) (simplexOctaveGenerator.noise(chunk.getX() * 16 + x, chunk.getZ() * 16 + z, 0.5D, 0.5D) * 15D + 50D);
                     for (int i = 0; i < (Math.min(height, 255)); i++) {
                         chunk.setBlock(x, i, z, Material.GRASS);
                     }
+
+                     */
 
             }
         }

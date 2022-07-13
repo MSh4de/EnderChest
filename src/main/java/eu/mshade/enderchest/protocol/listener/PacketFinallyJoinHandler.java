@@ -7,8 +7,15 @@ import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
 import eu.mshade.enderframe.entity.metadata.SkinPartEntityMetadata;
+import eu.mshade.enderframe.item.ItemFlag;
+import eu.mshade.enderframe.item.ItemStack;
+import eu.mshade.enderframe.item.Material;
+import eu.mshade.enderframe.item.metadata.*;
+import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
 import eu.mshade.enderframe.metadata.entity.EntityMetadataKey;
+import eu.mshade.enderframe.mojang.Color;
 import eu.mshade.enderframe.mojang.GameProfile;
+import eu.mshade.enderframe.mojang.Property;
 import eu.mshade.enderframe.mojang.SkinPart;
 import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.protocol.ProtocolPipeline;
@@ -16,11 +23,16 @@ import eu.mshade.enderframe.protocol.SessionWrapper;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.World;
 import eu.mshade.enderman.packet.play.PacketOutChangeGameState;
+import eu.mshade.enderman.packet.play.PacketOutSetSlot;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoinEvent> {
 
@@ -69,8 +81,21 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
 
         player.joinTickBus(enderChest.getTickBus());
+
+        ItemStack itemStack = new ItemStack(Material.PLAYER_SKULL, 64, 0);
+        MetadataKeyValueBucket metadataKeyValueBucket = itemStack.getMetadataKeyValueBucket();
+        metadataKeyValueBucket.setMetadataKeyValue(new NameItemStackMetadata("Petit test de mort"));
+        metadataKeyValueBucket.setMetadataKeyValue(new LoreItemStackMetadata(List.of("Ca fonctionne ?", "ALORS", "Es que ça fonctionne ?", "Du coup ?", "Oui ça fonctionne pd")));
+        metadataKeyValueBucket.setMetadataKeyValue(new UnbreakableItemStackMetadata(true));
+        //metadataKeyValueBucket.setMetadataKeyValue(new CanPlaceOnItemStackMetadata(List.of(Material.GRANITE)));
+        metadataKeyValueBucket.setMetadataKeyValue(new CanDestroyItemStackMetadata(List.of(Material.GRASS)));
+        metadataKeyValueBucket.setMetadataKeyValue(new HideFlagsItemStackMetadata(Set.of(ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_DESTROYS)));
+        metadataKeyValueBucket.setMetadataKeyValue(new ColorItemStackMetadata(Color.BLUE));
+        metadataKeyValueBucket.setMetadataKeyValue(new SkullOwnerItemStackMetadata(new GameProfile(UUID.randomUUID(),"okok", List.of(new Property("textures", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTkxYTc3OThkZDBhNDZiNmIzZjE3YmIwMzBhNmFkZjZlNDkwNjRjNGI5M2QxZDlkNTYzNDc4OWM4OTQ5In19fQ==")))));
+
+        sessionWrapper.sendPacket(new PacketOutSetSlot(36, itemStack));
         /*
-        sessionWrapper.sendPacket(new PacketOutSetSlot(36, new ItemStack(Material.LEATHER_HELMET, 1, 0)));
+
         sessionWrapper.sendPacket(new PacketOutSetSlot(37, new ItemStack(Material.LEATHER_CHESTPLATE, 1, 0)));
         sessionWrapper.sendPacket(new PacketOutSetSlot(38, new ItemStack(Material.LEATHER_LEGGINGS, 1, 0)));
         sessionWrapper.sendPacket(new PacketOutSetSlot(39, new ItemStack(Material.LEATHER_BOOTS, 1, 0)));

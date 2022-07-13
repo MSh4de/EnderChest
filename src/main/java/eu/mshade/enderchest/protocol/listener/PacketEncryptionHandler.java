@@ -70,7 +70,7 @@ public class PacketEncryptionHandler implements EventListener<PacketEncryptionEv
                 JSONObject propJson = (JSONObject) obj;
                 String name = propJson.getString("name");
                 String value = propJson.getString("value");
-                MOptional<String> signature = (propJson.has("signature") ? MOptional.of(propJson.getString("signature")) : MOptional.empty());
+                String signature = (propJson.has("signature") ? propJson.getString("signature") : null);
                 properties.add(new Property(name, value, signature));
             }
 

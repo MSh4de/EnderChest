@@ -13,7 +13,7 @@ public class MetadataKeyValueBinaryTagMarshal implements BinaryTagDynamicMarshal
 
     private final Map<Class<? extends MetadataKey>, MetadataKeValueBucketManager> metadataKeValueBucketManagerByMetadataKey = new HashMap<>();
 
-    public <T extends MetadataKey> CompoundBinaryTag serialize(Class<T> type, MetadataKeyValueBucket<T> metadataKeyValueBucket){
+    public <T extends MetadataKey> CompoundBinaryTag serialize(Class<T> type, MetadataKeyValueBucket metadataKeyValueBucket){
         MetadataKeValueBucketManager metadataKeValueBucketManager = this.metadataKeValueBucketManagerByMetadataKey.get(type);
         CompoundBinaryTag compoundBinaryTag = new CompoundBinaryTag();
 
@@ -24,12 +24,12 @@ public class MetadataKeyValueBinaryTagMarshal implements BinaryTagDynamicMarshal
         return compoundBinaryTag;
     }
 
-    public <K extends MetadataKey> MetadataKeyValueBucket<K> deserialize(Class<K> type, CompoundBinaryTag compoundBinaryTag){
+    public MetadataKeyValueBucket deserialize(Class<?> type, CompoundBinaryTag compoundBinaryTag){
         MetadataKeValueBucketManager metadataKeValueBucketManager = this.metadataKeValueBucketManagerByMetadataKey.get(type);
-        MetadataKeyValueBucket<K> metadataKeyValueBucket = new MetadataKeyValueBucket<>();
+        MetadataKeyValueBucket metadataKeyValueBucket = new MetadataKeyValueBucket();
 
         compoundBinaryTag.getValue().forEach((s, binaryTag) -> {
-            metadataKeyValueBucket.setMetadataKeyValue((MetadataKeyValue<K, ?>) metadataKeValueBucketManager.getMetadataKeyValue(s, binaryTag));
+            metadataKeyValueBucket.setMetadataKeyValue((MetadataKeyValue<MetadataKey, ?>) metadataKeValueBucketManager.getMetadataKeyValue(s, binaryTag));
         });
 
         return metadataKeyValueBucket;

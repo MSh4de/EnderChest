@@ -38,12 +38,12 @@ public class WorldManager {
 
     }
 
-    public World createWorld(String name, Consumer<MetadataKeyValueBucket<WorldMetadataType>> bucketConsumer){
+    public World createWorld(String name, Consumer<MetadataKeyValueBucket> bucketConsumer){
         if (!this.worlds.containsKey(name)) {
             File file = new File(worldsFolder, name);
             file.mkdir();
             DefaultWorld world = new DefaultWorld(this, file);
-            MetadataKeyValueBucket<WorldMetadataType> metadataKeyValueBucket = world.getMetadataKeyValueBucket();
+            MetadataKeyValueBucket metadataKeyValueBucket = world.getMetadataKeyValueBucket();
             metadataKeyValueBucket.setMetadataKeyValue(new NameWorldMetadata(name));
             bucketConsumer.accept(metadataKeyValueBucket);
             world.joinTickBus(enderChest.getTickBus());

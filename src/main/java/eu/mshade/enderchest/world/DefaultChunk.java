@@ -7,11 +7,9 @@ import eu.mshade.enderframe.item.MaterialKey;
 import eu.mshade.enderframe.world.Chunk;
 import eu.mshade.enderframe.world.Section;
 import eu.mshade.enderframe.world.World;
-import eu.mshade.mwork.binarytag.poet.BinaryTagPoet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.UUID;
@@ -123,7 +121,7 @@ public  class DefaultChunk implements Chunk {
         hasChange.set(true);
         int index = getIndex(x, y, z);
         section.getBlocks()[index] = materialKey.getId();
-        section.getData().set(index, (byte) materialKey.getData());
+        section.getData().set(index, (byte) materialKey.getMetadata());
     }
 
     @Override

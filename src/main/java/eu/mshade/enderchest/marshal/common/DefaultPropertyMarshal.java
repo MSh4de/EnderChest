@@ -17,7 +17,7 @@ public class DefaultPropertyMarshal implements BinaryTagMarshal<Property> {
 
         compoundBinaryTag.putString("name", property.getName());
         compoundBinaryTag.putString("value", property.getValue());
-        property.getSignature().ifPresent(s -> compoundBinaryTag.putString("signature", s));
+        if (property.getSignature() != null) compoundBinaryTag.putString("signature", property.getSignature());
 
         return compoundBinaryTag;
     }
@@ -25,7 +25,7 @@ public class DefaultPropertyMarshal implements BinaryTagMarshal<Property> {
     @Override
     public Property deserialize(BinaryTagDriver binaryTagDriver, BinaryTag<?> binaryTag) {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
-        MOptional<String> signature = compoundBinaryTag.containsKey("signature") ? MOptional.of(compoundBinaryTag.getString("signature")) : MOptional.empty();
+        String signature = compoundBinaryTag.containsKey("signature") ? compoundBinaryTag.getString("signature") : null;
 
         return new Property(compoundBinaryTag.getString("name"),
                 compoundBinaryTag.getString("value"),

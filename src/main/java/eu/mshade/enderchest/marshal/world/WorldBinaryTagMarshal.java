@@ -24,7 +24,7 @@ public class WorldBinaryTagMarshal implements BinaryTagDynamicMarshal {
 
     public World deserialize(BinaryTagDriver binaryTagDriver, BinaryTag<?> binaryTag, WorldManager worldManager, File worldFolder){
         MetadataKeyValueBinaryTagMarshal metadataKeyValueBinaryTagMarshal = binaryTagDriver.getDynamicMarshal(MetadataKeyValueBinaryTagMarshal.class);
-        MetadataKeyValueBucket<WorldMetadataType> metadataKeyValueBucket = metadataKeyValueBinaryTagMarshal.deserialize(WorldMetadataType.class, (CompoundBinaryTag) binaryTag);
+        MetadataKeyValueBucket metadataKeyValueBucket = metadataKeyValueBinaryTagMarshal.deserialize(WorldMetadataType.class, (CompoundBinaryTag) binaryTag);
         return new DefaultWorld(worldManager, worldFolder, metadataKeyValueBucket);
     }
 

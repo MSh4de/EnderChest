@@ -103,7 +103,6 @@ public class DefaultPlayer extends Player {
 
                 World world = location.getWorld();
                 Queue<Chunk> result = new ConcurrentLinkedQueue<>();
-                Queue<Chunk> chunksLoad = new ConcurrentLinkedQueue<>();
 
                 int rSquared = radius * radius;
                 this.lastServerChunkLocation = this.getLocation().clone();
@@ -115,21 +114,19 @@ public class DefaultPlayer extends Player {
                  * get des chunks en async
                  */
 
+
                 for (int x = chunkX - radius; x <= chunkX + radius; x++) {
                     for (int z = chunkZ - radius; z <= chunkZ + radius; z++) {
                         if ((chunkX - x) * (chunkX - x) + (chunkZ - z) * (chunkZ - z) <= rSquared) {
                             Chunk chunk = world.getChunk(x, z);
                             if (chunk != null) {
                                 result.add(chunk);
-                                if (!this.hasLookAtChunk(chunk)) {
-                                    chunksLoad.add(chunk);
-                                }
                             }
                         }
                     }
                 }
 
-                chunksLoad.forEach(chunk -> {
+                result.stream().filter(chunk -> !hasLookAtChunk(chunk)).forEach(chunk -> {
                     this.getLookAtChunks().add(chunk);
                     this.getSessionWrapper().sendChunk(chunk);
                     chunk.getViewers().add(this);

@@ -39,7 +39,7 @@ public class DefaultWorld extends World {
     private ChunkBinaryTagMarshal chunkBinaryTagMarshal;
     private WorldBinaryTagMarshal worldBinaryTagMarshal;
 
-    public DefaultWorld(WorldManager worldManager, File worldFolder, MetadataKeyValueBucket<WorldMetadataType> metadataKeyValueBucket){
+    public DefaultWorld(WorldManager worldManager, File worldFolder, MetadataKeyValueBucket metadataKeyValueBucket){
         super(worldFolder, metadataKeyValueBucket);
         this.worldManager = worldManager;
         this.regionFolder.mkdirs();
@@ -49,7 +49,7 @@ public class DefaultWorld extends World {
 
     }
     public DefaultWorld(WorldManager worldManager, File worldFolder) {
-        this(worldManager, worldFolder, new MetadataKeyValueBucket<>());
+        this(worldManager, worldFolder, new MetadataKeyValueBucket());
     }
 
 

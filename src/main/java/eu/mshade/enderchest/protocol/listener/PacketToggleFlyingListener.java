@@ -17,7 +17,7 @@ public class PacketToggleFlyingListener implements EventListener<PacketToggleFly
         Channel channel = eventContainer.getContainer(Channel.class);
         Player player = ProtocolPipeline.get().getPlayer(channel);
 
-        MetadataKeyValueBucket<EntityMetadataKey> metadataKeyValueBucket = player.getMetadataKeyValueBucket();
+        MetadataKeyValueBucket metadataKeyValueBucket = player.getMetadataKeyValueBucket();
         metadataKeyValueBucket.setMetadataKeyValue(new FlyingEntityMetadata(event.isFlying()));
     }
 }
