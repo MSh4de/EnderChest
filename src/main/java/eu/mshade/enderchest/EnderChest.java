@@ -6,7 +6,6 @@ import eu.mshade.enderchest.emerald.Emerald;
 import eu.mshade.enderchest.listener.*;
 import eu.mshade.enderchest.marshal.common.*;
 import eu.mshade.enderchest.marshal.metadata.MetadataKeyValueBinaryTagMarshal;
-import eu.mshade.enderchest.marshal.metadata.WorldMetadataKeyValueBucket;
 import eu.mshade.enderchest.marshal.world.*;
 import eu.mshade.enderchest.protocol.ProtocolRepository;
 import eu.mshade.enderchest.protocol.listener.*;
@@ -52,8 +51,8 @@ import java.util.concurrent.TimeUnit;
 public class EnderChest {
 
     private final Logger logger = LoggerFactory.getLogger(EnderChest.class);
-    private final EventLoopGroup parentGroup = new NioEventLoopGroup();
-    private final EventLoopGroup childGroup = new NioEventLoopGroup();
+    private final EventLoopGroup parentGroup;
+    private final EventLoopGroup childGroup;
     private final Queue<Player> players = new ConcurrentLinkedQueue<>();
     private final MinecraftEncryption minecraftEncryption = new MinecraftEncryption();
     private final ProtocolRepository protocolRepository = new ProtocolRepository();
@@ -73,6 +72,9 @@ public class EnderChest {
         logger.info("Starting EnderChest");
 
         BinaryTagDriver binaryTagDriver = MWork.get().getBinaryTagDriver();
+
+        parentGroup = new NioEventLoopGroup();
+        childGroup = new NioEventLoopGroup();
 
         this.protocolRepository.register(new EndermanProtocol());
 
@@ -147,10 +149,9 @@ public class EnderChest {
         binaryTagDriver.registerDynamicMarshal(new DefaultVectorMarshal());
         binaryTagDriver.registerDynamicMarshal(new LocationBinaryTagMarshal());
 
-        MetadataKeyValueBinaryTagMarshal metadataKeyValueBinaryTagMarshal = new MetadataKeyValueBinaryTagMarshal();
-        metadataKeyValueBinaryTagMarshal.registerMetadataKeValueBucketManager(WorldMetadataType.class, new WorldMetadataKeyValueBucket());
 
-        binaryTagDriver.registerDynamicMarshal(metadataKeyValueBinaryTagMarshal);
+
+        binaryTagDriver.registerDynamicMarshal(new MetadataKeyValueBinaryTagMarshal(binaryTagDriver));
 
         this.worldManager = new WorldManager(binaryTagDriver, this);
 
@@ -168,12 +169,8 @@ public class EnderChest {
 
 
 
-
-
-
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             worldManager.getWorlds().forEach(worldBuffer -> {
-                //worldManager.getWorldBufferIO().writeWorldLevel(worldBuffer.getWorldLevel(), new File(worldBuffer.getWorldFolder(), "level.dat"));
                 worldBuffer.getChunks().forEach(worldBuffer::flushChunk);
                 worldBuffer.getRegionBinaryTagPoets().forEach(binaryTagPoet -> {
                     if (binaryTagPoet.getCompoundSectionIndex().consume()) {
@@ -203,9 +200,7 @@ public class EnderChest {
         }
 
 
-
-        logger.info(String.format("took (%d) ms", (System.currentTimeMillis() - start)));
-        logger.info("done !");
+        logger.info("Done in {} ms !", (System.currentTimeMillis() - start));
 
         /*
         parentGroup.scheduleAtFixedRate(()->{

@@ -19,12 +19,12 @@ public class WorldBinaryTagMarshal implements BinaryTagDynamicMarshal {
 
     public CompoundBinaryTag serialize(BinaryTagDriver binaryTagDriver, World world){
         MetadataKeyValueBinaryTagMarshal metadataKeyValueBinaryTagMarshal = binaryTagDriver.getDynamicMarshal(MetadataKeyValueBinaryTagMarshal.class);
-        return metadataKeyValueBinaryTagMarshal.serialize(WorldMetadataType.class, world.getMetadataKeyValueBucket());
+        return metadataKeyValueBinaryTagMarshal.serialize(world.getMetadataKeyValueBucket());
     }
 
     public World deserialize(BinaryTagDriver binaryTagDriver, BinaryTag<?> binaryTag, WorldManager worldManager, File worldFolder){
         MetadataKeyValueBinaryTagMarshal metadataKeyValueBinaryTagMarshal = binaryTagDriver.getDynamicMarshal(MetadataKeyValueBinaryTagMarshal.class);
-        MetadataKeyValueBucket metadataKeyValueBucket = metadataKeyValueBinaryTagMarshal.deserialize(WorldMetadataType.class, (CompoundBinaryTag) binaryTag);
+        MetadataKeyValueBucket metadataKeyValueBucket = metadataKeyValueBinaryTagMarshal.deserialize((CompoundBinaryTag) binaryTag);
         return new DefaultWorld(worldManager, worldFolder, metadataKeyValueBucket);
     }
 
