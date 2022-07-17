@@ -65,6 +65,7 @@ public class DefaultPlayer extends Player {
 
     @Override
     public void tick() {
+
         if (isPeriod(1)) {
             long now = System.currentTimeMillis();
             speed = this.getBeforeServerLocation().distanceXZ(getServerLocation()) / ((now - lastElapsedTick) * 1E-3);
@@ -76,7 +77,6 @@ public class DefaultPlayer extends Player {
                 getSessionWrapper().sendUpdateLocation(entity, entity.getBeforeServerLocation(), entity.getServerLocation());
             });
 
-            //if(lastServerChunkLocation != null) System.out.println(!(this.lastServerChunkLocation.getChunkX() == this.getLocation().getChunkX() && this.lastServerChunkLocation.getChunkZ() == this.getLocation().getChunkZ() && lastSpeed >= speed));
 
             boolean sprinting = this.getMetadataKeyValueBucket().getMetadataKeyValueOrDefault(EntityMetadataKey.SPRINTING, SprintingEntityMetadata.DEFAULT).getMetadataValue();
             double vMax = this.getMetadataKeyValueBucket().getMetadataKeyValueOrDefault(EntityMetadataKey.FLYING, FlyingEntityMetadata.DEFAULT).getMetadataValue() ? (sprinting ? 78.40 : 39.20) : (sprinting ? 20.20 : 15.54);
@@ -109,10 +109,6 @@ public class DefaultPlayer extends Player {
 
                 int chunkX = location.getChunkX();
                 int chunkZ = location.getChunkZ();
-
-                /**
-                 * get des chunks en async
-                 */
 
 
                 for (int x = chunkX - radius; x <= chunkX + radius; x++) {
@@ -170,6 +166,9 @@ public class DefaultPlayer extends Player {
             }
 
         }
+
+
+
 
         if (isPeriod(20)){
             this.getSessionWrapper().sendKeepAlive((int) System.currentTimeMillis());

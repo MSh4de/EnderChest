@@ -32,6 +32,8 @@ public class PlayerQuitHandler implements EventListener<PlayerQuitEvent> {
         player.getLookAtChunks().clear();
         enderChest.removePlayer(player);
 
+        logger.info("{} leave server", player.getName());
+
         /*
         EnderFrameSession enderFrameSession = event.getEnderFrameSession();
         Player player = enderFrameSession.getPlayer();
