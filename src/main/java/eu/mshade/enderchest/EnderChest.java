@@ -111,6 +111,7 @@ public class EnderChest {
         packetEventBus.subscribe(PacketToggleFlyingEvent.class, new PacketToggleFlyingListener());
         packetEventBus.subscribe(PacketBlockPlaceEvent.class, new PacketBlockPlaceListener());
         packetEventBus.subscribe(PacketPlayerDiggingEvent.class, new PacketPlayerDiggingListener());
+        packetEventBus.subscribe(PacketCloseInventoryEvent.class, new PacketCloseInventoryHandler());
 
         EventBus<EnderFrameEvent> enderFrameEventBus = enderFrame.getEnderFrameEventBus();
 
