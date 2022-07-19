@@ -1,6 +1,8 @@
 package eu.mshade.enderchest.listener;
 
 import eu.mshade.enderchest.EnderChest;
+import eu.mshade.enderframe.PlayerInfoBuilder;
+import eu.mshade.enderframe.PlayerInfoType;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.event.PlayerQuitEvent;
 import eu.mshade.enderframe.protocol.ProtocolPipeline;
@@ -31,6 +33,12 @@ public class PlayerQuitHandler implements EventListener<PlayerQuitEvent> {
         }
         player.getLookAtChunks().clear();
         enderChest.removePlayer(player);
+
+        PlayerInfoBuilder playerInfoBuilder = PlayerInfoBuilder.of(PlayerInfoType.REMOVE_PLAYER)
+                .withPlayer(player);
+        enderChest.getPlayers().forEach(target -> {
+            target.getSessionWrapper().sendPlayerInfo(playerInfoBuilder);
+        });
 
         logger.info("{} leave server", player.getName());
 
