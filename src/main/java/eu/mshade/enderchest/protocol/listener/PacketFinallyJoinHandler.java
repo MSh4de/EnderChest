@@ -5,12 +5,11 @@ import eu.mshade.enderchest.entity.DefaultPlayer;
 import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
-import eu.mshade.enderframe.entity.ArmorStand;
-import eu.mshade.enderframe.entity.Blaze;
-import eu.mshade.enderframe.entity.Zombie;
 import eu.mshade.enderframe.entity.metadata.SkinPartEntityMetadata;
+import eu.mshade.enderframe.inventory.EquipmentSlot;
 import eu.mshade.enderframe.inventory.Inventory;
 import eu.mshade.enderframe.inventory.InventoryType;
+import eu.mshade.enderframe.inventory.PlayerInventory;
 import eu.mshade.enderframe.item.*;
 import eu.mshade.enderframe.item.metadata.*;
 import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
@@ -22,16 +21,12 @@ import eu.mshade.enderframe.mojang.Color;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.Property;
 import eu.mshade.enderframe.mojang.SkinPart;
-import eu.mshade.enderframe.mojang.chat.TextComponent;
 import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.protocol.SessionWrapper;
-import eu.mshade.enderframe.protocol.packet.PacketOutDisconnect;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.World;
 import eu.mshade.enderman.packet.play.PacketOutChangeGameState;
-import eu.mshade.enderman.packet.play.PacketOutRespawn;
-import eu.mshade.enderman.packet.play.PacketOutSetSlot;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 import io.netty.channel.Channel;
@@ -41,10 +36,8 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoinEvent> {
 
@@ -113,7 +106,27 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         metadataKeyValueBucket.setMetadataKeyValue(new AttributeModifiersItemStackMetadata(List.of(new ItemStackAttributeModifier(Attribute.MAX_HEALTH, "test", EquipmentSlot.MAIN_HAND, new AttributeModifier(UUID.randomUUID(), 10, AttributeOperation.ADD_NUMBER)))));
 
-        sessionWrapper.sendPacket(new PacketOutSetSlot(36, itemStack));
+        Inventory playerInventory = player.getPlayerInventory();
+
+        playerInventory.setItemStack(0, itemStack);
+        playerInventory.setItemStack(36, itemStack);
+        playerInventory.setItemStack(37, itemStack);
+        playerInventory.setItemStack(38, itemStack);
+        playerInventory.setItemStack(39, itemStack);
+        playerInventory.setItemStack(40, new ItemStack(Material.OAK_WOOD));
+        playerInventory.setItemStack(41, new ItemStack(Material.OAK_WOOD));
+        playerInventory.setItemStack(42, new ItemStack(Material.OAK_WOOD));
+        playerInventory.setItemStack(43, new ItemStack(Material.OAK_WOOD));
+        playerInventory.setItemStack(44, new ItemStack(Material.OAK_WOOD_PLANKS));
+        playerInventory.setItemStack(1, new ItemStack(Material.OAK_WOOD_PLANKS, 64));
+        playerInventory.setItemStack(2, new ItemStack(Material.OAK_WOOD_PLANKS, 32));
+
+        sessionWrapper.sendItemStacks(player.getPlayerInventory());
+
+        //sessionWrapper.sendItemStack();
+
+
+        //sessionWrapper.sendPacket(new PacketOutSetItemStack(36, 0, itemStack));
 
 
         //enderFrameSession.getPlayer().getEnderFrameSessionHandler().sendPacket(new PacketOutSpawnPosition(new BlockPosition(location.getBlockX(),location.getBlockY(),location.getBlockZ())));
@@ -130,13 +143,20 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         Inventory inventory = new Inventory("test", InventoryType.CHEST);
         int slot = 0;
+
         for (MaterialKey materialKey : Material.getRegisteredMaterials()) {
             inventory.setItemStack(slot++, new ItemStack(materialKey));
         }
 
 
+        /*
         sessionWrapper.sendOpenInventory(inventory);
         sessionWrapper.sendItemStacks(inventory);
+
+         */
+
+
+
 
 
     }
