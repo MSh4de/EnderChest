@@ -5,8 +5,7 @@ import eu.mshade.enderchest.entity.DefaultPlayer;
 import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
-import eu.mshade.enderframe.entity.ArmorStand;
-import eu.mshade.enderframe.entity.Blaze;
+import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.Zombie;
 import eu.mshade.enderframe.entity.metadata.SkinPartEntityMetadata;
 import eu.mshade.enderframe.inventory.Inventory;
@@ -22,15 +21,18 @@ import eu.mshade.enderframe.mojang.Color;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.Property;
 import eu.mshade.enderframe.mojang.SkinPart;
+import eu.mshade.enderframe.mojang.chat.ChatColor;
 import eu.mshade.enderframe.mojang.chat.TextComponent;
 import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.protocol.SessionWrapper;
-import eu.mshade.enderframe.protocol.packet.PacketOutDisconnect;
+import eu.mshade.enderframe.scoreboard.EntityScoreboard;
+import eu.mshade.enderframe.scoreboard.Scoreboard;
+import eu.mshade.enderframe.scoreboard.ScoreboardPosition;
+import eu.mshade.enderframe.scoreboard.ScoreboardType;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.World;
 import eu.mshade.enderman.packet.play.PacketOutChangeGameState;
-import eu.mshade.enderman.packet.play.PacketOutRespawn;
 import eu.mshade.enderman.packet.play.PacketOutSetSlot;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
@@ -41,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -125,7 +126,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         logger.info(String.format("%s join server", player.getGameProfile().getName()));
 
         sessionWrapper.sendMessage("Welcome to project MShade");
-        sessionWrapper.sendHeadAndFooter("Hey this is test", "and this is test");
+        sessionWrapper.sendHeaderAndFooter("Hey this is test", "and this is test");
 
 
         Inventory inventory = new Inventory("test", InventoryType.CHEST);
@@ -134,12 +135,14 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
             inventory.setItemStack(slot++, new ItemStack(materialKey));
         }
 
-
         sessionWrapper.sendOpenInventory(inventory);
         sessionWrapper.sendItemStacks(inventory);
 
-
+        Scoreboard<String> scoreboard = new Scoreboard<String>(TextComponent.of(ChatColor.BLUE + "Scoreboard"))
+                .setScoreboardPosition(ScoreboardPosition.SIDEBAR)
+                .setScoreboardType(ScoreboardType.INTEGER)
+                .addObjective("TokyFR", 59)
+                .addObjective("RealAlpha", 70);
+        scoreboard.showScoreboard(player);
     }
-
-
 }
