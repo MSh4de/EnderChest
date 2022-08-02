@@ -1,16 +1,17 @@
 package eu.mshade.enderchest.world;
 
 import eu.mshade.enderchest.entity.EntityFactory;
+import eu.mshade.enderchest.execptions.ChunkNotReadableError;
 import eu.mshade.enderchest.marshal.world.ChunkBinaryTagMarshal;
 import eu.mshade.enderchest.marshal.world.WorldBinaryTagMarshal;
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.EntityIdManager;
 import eu.mshade.enderframe.entity.EntityType;
+import eu.mshade.enderframe.event.ChunkCreateEvent;
 import eu.mshade.enderframe.event.ChunkLoadEvent;
 import eu.mshade.enderframe.item.MaterialKey;
 import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
-import eu.mshade.enderframe.metadata.world.WorldMetadataType;
 import eu.mshade.enderframe.world.*;
 import eu.mshade.mwork.MWork;
 import eu.mshade.mwork.ParameterContainer;
@@ -21,8 +22,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 public class DefaultWorld extends World {
 
@@ -67,84 +70,96 @@ public class DefaultWorld extends World {
         }
 
          */
+
         BinaryTagPoet binaryTagPoet = getBinaryTagPoet(binaryTagDriver, this, chunk);
         if (save && chunk.hasChange()) {
             chunkBinaryTagMarshal.write(binaryTagDriver, binaryTagPoet, chunk);
             this.lastUsageRegion.put(binaryTagPoet, System.currentTimeMillis());
         }
-
         this.chunksByRegion.get(binaryTagPoet).remove(chunk);
+        this.chunks.remove(this.chunkById.remove(chunk.getId()));
 
-        this.chunks.remove(chunk.getId());
-        chunk.clearEntities();
+
+        //chunk.clearEntities();
 
     }
 
     @Override
-    public Chunk getChunk(int x, int z) {
+    public  CompletableFuture<Chunk> getChunk(int x, int z) {
 
         final UUID id = Chunk.ofId(x, z);
-        Chunk chunk = chunks.get(id);
-        if (chunk != null) {
-            ChunkLoadEvent chunkLoadEvent = new ChunkLoadEvent(chunk);
-            EnderFrame.get().getEnderFrameEventBus().publish(chunkLoadEvent);
-            if (!chunkLoadEvent.isCancelled()) {
-                return chunk;
-            }
+         CompletableFuture<Chunk> chunkCompletableFuture = chunkById.get(id);
+        if (chunkCompletableFuture != null) {
+            return chunkCompletableFuture;
         }
 
         BinaryTagPoet binaryTagPoet = getBinaryTagPoet(binaryTagDriver, this, x, z);
 
-        if (!containsChunk(binaryTagDriver, this, x, z) && !chunks.containsKey(id)) {
-            chunk = new DefaultChunk(x, z, true, this);
-            ChunkLoadEvent chunkLoadEvent = new ChunkLoadEvent(chunk);
-            EnderFrame.get().getEnderFrameEventBus().publish(chunkLoadEvent);
-            if (!chunkLoadEvent.isCancelled()) {
-                getChunkGenerator().generate(chunk);
-                chunks.put(id, chunk);
-                return chunk;
-            }
-        } else {
-            try {
-                chunk = chunkBinaryTagMarshal.read(binaryTagDriver, binaryTagPoet, this, x, z);
-                this.chunksByRegion.get(binaryTagPoet).add(chunk);
-                this.lastUsageRegion.put(binaryTagPoet, System.currentTimeMillis());
-                //chunk = worldManager.getWorldBufferIO().readChunkBuffer(this, worldManager, file);
-                ChunkLoadEvent chunkLoadEvent = new ChunkLoadEvent(chunk);
-                EnderFrame.get().getEnderFrameEventBus().publish(chunkLoadEvent);
-
-                if (!chunkLoadEvent.isCancelled()) {
-                    chunks.put(id, chunk);
-
+        if (!containsChunk(binaryTagDriver, this, x, z) && !chunkById.containsKey(id)) {
+            CompletableFuture<Chunk> completableFuture = new CompletableFuture<>();
+            completableFuture.completeAsync(() -> {
+                DefaultChunk chunk = new DefaultChunk(x, z, true, this);
+                ChunkCreateEvent chunkCreateEvent = new ChunkCreateEvent(chunk);
+                EnderFrame.get().getEnderFrameEventBus().publish(chunkCreateEvent);
+                if (!chunkCreateEvent.isCancelled()) {
+                    getChunkGenerator().generate(chunk);
+                    chunk.setChunkStatus(ChunkStatus.LOADED);
+                    chunkById.put(id, completableFuture);
+                    chunks.add(completableFuture);
                     return chunk;
+                }
+                return new EmptyChunk(x, z, id, this);
+            });
 
+            return completableFuture;
+        } else {
+            CompletableFuture<Chunk> completableFuture = new CompletableFuture<>();
+            completableFuture.completeAsync(() -> {
+
+                Chunk chunk;
+                try {
+                    chunk = chunkBinaryTagMarshal.read(binaryTagDriver, binaryTagPoet, this, x, z);
+                    chunk.setChunkStatus(ChunkStatus.LOADED);
+                    ChunkLoadEvent chunkLoadEvent = new ChunkLoadEvent(completableFuture);
+                    EnderFrame.get().getEnderFrameEventBus().publish(chunkLoadEvent);
+
+                    if (!chunkLoadEvent.isCancelled()) {
+                        chunkById.put(id, completableFuture);
+                        this.chunksByRegion.computeIfAbsent(binaryTagPoet, k -> new ConcurrentLinkedQueue<>()).add(chunk);
+                        this.lastUsageRegion.put(binaryTagPoet, System.currentTimeMillis());
+                        chunks.add(completableFuture);
+                        return chunk;
+
+                    }
+                } catch (Exception e) {
+                    LOGGER.info("Can't read chunk x=" + x + ", z=" + z);
                 }
 
-            }catch (Exception e) {
-                System.out.println("ERROR, CHUNK CORRUPTED, "+x+", "+z);
-                //binaryTagPoet.getCompoundSectionIndex().removeSectionIndices(chunkId(x, z));
-            }
+
+
+
+                    return new EmptyChunk(x, z, id, this);
+            });
+            return completableFuture;
+            //chunk = worldManager.getWorldBufferIO().readChunkBuffer(this, worldManager, file);
+
+
         }
 
-        return null;
     }
 
 
     @Override
-    public Chunk getChunk(UUID id) {
-        return chunks.get(id);
+    public CompletableFuture<Chunk> getChunk(UUID id) {
+        return chunkById.get(id);
     }
 
-    @Override
-    public void addChunkBuffer(Chunk chunk) {
-        this.chunks.put(chunk.getId(), chunk);
-    }
 
 
 
     @Override
     public boolean hasChunkBuffer(int x, int z) {
-        return chunks.containsKey(Chunk.ofId(x, z));
+        return chunkById.containsKey(Chunk.ofId(x, z));
     }
 
 
@@ -201,19 +216,32 @@ public class DefaultWorld extends World {
         int chunkX = x >> 4;
         int chunkZ = z >> 4;
 
-        Chunk chunk = getChunk(chunkX, chunkZ);
-        chunk.setBlock(x, y, z, materialKey);
+        getChunk(chunkX, chunkZ).thenAccept(chunk -> {
+            chunk.setBlock(x, y, z, materialKey);
+        });
     }
 
     @Override
     public void tick() {
-        if (this.isPeriod(10)) {
-            for (Chunk chunk : this.getChunks()) {
-                long delay = System.currentTimeMillis() - chunk.getHealth().get();
-                if (delay > 2000 && chunk.getViewers().isEmpty()){
-                    this.flushChunk(chunk, true);
+        if (this.isPeriod(20)) {
+            for (CompletableFuture<Chunk> chunkCompletableFuture : this.getChunks()) {
+                Chunk chunk = chunkCompletableFuture.join();
+                if (chunk == null) continue;
+
+                if (chunk.getViewers().isEmpty() && chunk.getChunkStatus() != ChunkStatus.PREPARE_TO_UNLOAD){
+                    chunk.getLastInteract().set(System.currentTimeMillis());
+                    chunk.setChunkStatus(ChunkStatus.PREPARE_TO_UNLOAD);
+                    continue;
+                }
+
+                long delay = System.currentTimeMillis() - chunk.getLastInteract().get();
+                if (chunk.getViewers().isEmpty() && chunk.getChunkStatus() == ChunkStatus.PREPARE_TO_UNLOAD && delay > 2000) {
+                    //CompletableFuture.runAsync(() -> this.flushChunk(chunk));
+                    this.flushChunk(chunk);
                 }
             }
+
+            //LOGGER.info("Chunks into server {}", chunkById.values().size());
         }
 
         if (isPeriod(20)){
@@ -222,16 +250,17 @@ public class DefaultWorld extends World {
 
                 long delay = System.currentTimeMillis() - this.lastUsageRegion.get(binaryTagPoet);
                 if (delay > 5000 && this.chunksByRegion.get(binaryTagPoet).isEmpty()){
-                    if (binaryTagPoet.getCompoundSectionIndex().consume()) {
-                        binaryTagPoet.writeCompoundSectionIndex();
-                    }
                     this.lastUsageRegion.remove(binaryTagPoet);
                     this.chunksByRegion.remove(binaryTagPoet);
                     this.binaryTagPoetByRegion.remove(regionByBinaryTagPoet.remove(binaryTagPoet));
-
+                    if (binaryTagPoet.getCompoundSectionIndex().consume()) {
+                        binaryTagPoet.writeCompoundSectionIndex();
+                    }
                 }
 
             }
+
+
 
             worldBinaryTagMarshal.write(binaryTagDriver, this);
         }
@@ -242,7 +271,7 @@ public class DefaultWorld extends World {
     }
 
     private String regionId(int chunkX, int chunkZ){
-        return (chunkX >> 5) +","+(chunkZ >> 5);
+        return (chunkX >> 4) +","+(chunkZ >> 4);
     }
 
     private String chunkId(Chunk chunk){
@@ -261,8 +290,8 @@ public class DefaultWorld extends World {
         String regionId = regionId(x, z);
         return binaryTagPoetByRegion.computeIfAbsent(regionId, s -> {
             BinaryTagPoet binaryTagPoet = new BinaryTagPoet(new File(world.getIndicesFolder(), regionId + ".dat"), new File(world.getRegionFolder(), regionId + ".dat"), binaryTagDriver);
-            this.regionByBinaryTagPoet.put(binaryTagPoet, s);
             this.chunksByRegion.put(binaryTagPoet, new ConcurrentLinkedQueue<>());
+            this.regionByBinaryTagPoet.put(binaryTagPoet, s);
             this.lastUsageRegion.put(binaryTagPoet, System.currentTimeMillis());
             return binaryTagPoet;
         });
