@@ -16,7 +16,6 @@ public class SectionBinaryTagMarshal implements BinaryTagDynamicMarshal {
         compoundBinaryTag.putInt("y", section.getY());
         compoundBinaryTag.putInt("realBlock", section.getRealBlock());
         compoundBinaryTag.putIntArray("blocks", section.getBlocks());
-        compoundBinaryTag.putByteArray("data", section.getData().getRawData());
         compoundBinaryTag.putByteArray("blockLight", section.getBlockLight().getRawData());
         compoundBinaryTag.putByteArray("skyLight", section.getSkyLight().getRawData());
 
@@ -30,7 +29,6 @@ public class SectionBinaryTagMarshal implements BinaryTagDynamicMarshal {
                 compoundBinaryTag.getInt("y"),
                 compoundBinaryTag.getInt("realBlock"),
                 compoundBinaryTag.getIntArray("blocks"),
-                new NibbleArray(compoundBinaryTag.getByteArray("data")),
                 new NibbleArray(compoundBinaryTag.getByteArray("blockLight")),
                 new NibbleArray(compoundBinaryTag.getByteArray("skyLight")));
     }
