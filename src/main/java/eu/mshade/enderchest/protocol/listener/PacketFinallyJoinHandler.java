@@ -24,6 +24,7 @@ import eu.mshade.enderframe.mojang.SkinPart;
 import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.protocol.SessionWrapper;
+import eu.mshade.enderframe.world.Chunk;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.World;
 import eu.mshade.enderman.packet.play.PacketOutChangeGameState;
@@ -36,12 +37,14 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoinEvent> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PacketFinallyJoinHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PacketFinallyJoinHandler.class);
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private EnderChest enderChest;
 
@@ -62,7 +65,13 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         World world = enderChest.getWorldManager().getWorld("world");
         Location location = new Location(world, 7, 0, 7);
-        int highest = location.getChunk().getHighest(location.getBlockX(), location.getBlockZ());
+        int highest = 0;
+        try {
+            Chunk chunk = location.getChunk().get();
+            highest = chunk.getHighest(location.getBlockX(), location.getBlockZ());
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.info("");
+        }
         location.setY(highest + 1);
 
         DefaultPlayer player = new DefaultPlayer(location, gameProfile.getId().hashCode(), sessionWrapper);
@@ -76,7 +85,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         sessionWrapper.sendPluginMessage("MC|Brand", protocolBuffer -> protocolBuffer.writeString("Enderchest"));
         //default value of flying speed as 0.05
-        sessionWrapper.sendAbilities(false, false, true, false, 0.05F, 0.1F);
+        sessionWrapper.sendAbilities(false, false, true, false, 2F, 0.1F);
         sessionWrapper.sendPacket(new PacketOutChangeGameState(3, player.getGameMode().getId()));
 
         enderChest.addPlayer(player);
@@ -93,6 +102,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         player.joinTickBus(enderChest.getTickBus());
 
         ItemStack itemStack = new ItemStack(Material.WOODEN_PICKAXE, 1);
+        /*
         MetadataKeyValueBucket metadataKeyValueBucket = itemStack.getMetadataKeyValueBucket();
         metadataKeyValueBucket.setMetadataKeyValue(new NameItemStackMetadata("Petit test de mort"));
         metadataKeyValueBucket.setMetadataKeyValue(new LoreItemStackMetadata(List.of("Ca fonctionne ?", "ALORS", "Es que ça fonctionne ?", "Du coup ?", "Oui ça fonctionne pd")));
@@ -106,9 +116,10 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         metadataKeyValueBucket.setMetadataKeyValue(new AttributeModifiersItemStackMetadata(List.of(new ItemStackAttributeModifier(Attribute.MAX_HEALTH, "test", EquipmentSlot.MAIN_HAND, new AttributeModifier(UUID.randomUUID(), 10, AttributeOperation.ADD_NUMBER)))));
 
+
+         */
         Inventory playerInventory = player.getPlayerInventory();
 
-        playerInventory.setItemStack(0, itemStack);
         playerInventory.setItemStack(36, itemStack);
         playerInventory.setItemStack(37, itemStack);
         playerInventory.setItemStack(38, itemStack);
@@ -118,8 +129,11 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         playerInventory.setItemStack(42, new ItemStack(Material.OAK_WOOD));
         playerInventory.setItemStack(43, new ItemStack(Material.OAK_WOOD));
         playerInventory.setItemStack(44, new ItemStack(Material.OAK_WOOD_PLANKS));
+        playerInventory.setItemStack(0, itemStack);
         playerInventory.setItemStack(1, new ItemStack(Material.OAK_WOOD_PLANKS, 64));
         playerInventory.setItemStack(2, new ItemStack(Material.OAK_WOOD_PLANKS, 32));
+        playerInventory.setItemStack(3, new ItemStack(Material.OAK_WOOD_PLANKS, 64));
+        playerInventory.setItemStack(4, new ItemStack(Material.OAK_WOOD_PLANKS, 64));
 
         sessionWrapper.sendItemStacks(player.getPlayerInventory());
 
@@ -135,7 +149,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         //sessionWrapper.sendSquareChunk(10, location.getChunkX(), location.getChunkZ(), world);
 
 
-        logger.info(String.format("%s join server", player.getGameProfile().getName()));
+        LOGGER.info(String.format("%s join server", player.getGameProfile().getName()));
 
         sessionWrapper.sendMessage("Welcome to project MShade");
         sessionWrapper.sendHeadAndFooter("Hey this is test", "and this is test");
@@ -149,11 +163,21 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         }
 
 
-        /*
+
+
         sessionWrapper.sendOpenInventory(inventory);
         sessionWrapper.sendItemStacks(inventory);
 
+        /*
+        executorService.schedule(() -> {
+            sessionWrapper.sendOpenInventory(new Inventory("test4", InventoryType.HOPPER));
+        }, 10, TimeUnit.SECONDS);
+
          */
+
+
+
+
 
 
 
