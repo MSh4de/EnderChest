@@ -28,11 +28,11 @@ public class PacketBlockPlaceListener implements EventListener<PacketBlockPlaceE
         ItemStack itemStack = event.getItemStack();
         MaterialKey material = itemStack.getMaterial();
 
-        if (material.equals(Material.AIR)) return;
+        if (material == null || material.equals(Material.AIR)) return;
 
         world.setBlock(blockPosition.getBlockX(), blockPosition.getBlockY(), blockPosition.getBlockZ(), material);
 
-        for (Player viewer : player.getLocation().getChunk().getViewers()) {
+        for (Player viewer : player.getLocation().getChunk().join().getViewers()) {
             viewer.getSessionWrapper().sendBlockChange(blockPosition, material);
         }
 
