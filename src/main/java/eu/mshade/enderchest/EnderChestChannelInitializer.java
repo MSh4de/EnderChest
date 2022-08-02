@@ -9,6 +9,7 @@ import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.protocol.temp.TempProtocol;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 
 
@@ -26,8 +27,8 @@ public class EnderChestChannelInitializer extends ChannelInitializer<Channel> {
                 .addLast("accuracy", new PacketAccuracy())
                 .addLast("compression", VoidHandler.INSTANCE)
                 .addLast("codecs", new PacketCodec())
-                .addLast("readtimeout", new ReadTimeoutHandler(20))
-                //.addLast("writeidletimeout", new IdleStateHandler(0, 15, 0))
+                //.addLast("readtimeout", new ReadTimeoutHandler(20))
+                .addLast("writeidletimeout", new IdleStateHandler(0, 15, 0))
                 .addLast("handler", new PacketChannelInboundHandlerAdapter(ch));
         /*
         pipeline.addLast("timeout", new ReadTimeoutHandler(0, TimeUnit.MILLISECONDS));
