@@ -9,7 +9,6 @@ public class ChunkLoadHandler implements EventListener<ChunkLoadEvent> {
 
     @Override
     public void onEvent(ChunkLoadEvent event, ParameterContainer eventContainer) {
-        Chunk chunk = event.getChunkBuffer();
 
 
     }
