@@ -1,7 +1,9 @@
 package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderchest.EnderChest;
+import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.mojang.GameProfile;
+import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.packetevent.PacketLoginEvent;
 import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.protocol.SessionWrapper;
@@ -23,5 +25,6 @@ public class PacketLoginHandler implements EventListener<PacketLoginEvent> {
         SessionWrapper sessionWrapper = ProtocolPipeline.get().getSessionWrapper(channel);
         sessionWrapper.setGameProfile(new GameProfile(event.getName()));
         sessionWrapper.sendEncryption(enderChest.getMinecraftEncryption().getKeyPair().getPublic());
+        //EnderFrame.get().getPacketEventBus().publish(new PacketFinallyJoinEvent(), parameterContainer);
     }
 }
