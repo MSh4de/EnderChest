@@ -14,11 +14,10 @@ import eu.mshade.enderframe.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Queue;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class DefaultPlayer extends Player {
@@ -84,10 +83,11 @@ public class DefaultPlayer extends Player {
             boolean hasChangeChunk =  lastServerChunkLocation == null || (this.lastServerChunkLocation.getChunkX() != this.getLocation().getChunkX() || this.lastServerChunkLocation.getChunkZ() != this.getLocation().getChunkZ());
             boolean hasChangeSpeedInChunk = lastServerChunkLocation == null || (this.lastServerChunkLocation.getChunkX() == this.getLocation().getChunkX() && this.lastServerChunkLocation.getChunkZ() == this.getLocation().getChunkZ() && !updateChunkBySpeed && lastUpdateByChangeChunk && (lastSpeedInChunk >= speed));
 
-            if (hasChangeChunk || hasChangeSpeedInChunk) {
+            if (hasChangeChunk) {
                 Location location = this.getLocation();
 
-                int radius = (int) Math.max(3, Math.round(10 - (speed / vMax)));
+                int radius = 10;
+                //int radius = (int) Math.max(3, Math.round(10 - (speed / vMax)));
 
                 if (hasChangeChunk) {
                     lastUpdateByChangeChunk = true;
@@ -100,9 +100,9 @@ public class DefaultPlayer extends Player {
                     lastSpeedInChunk = speed;
                 }
 
-
+                long start = System.currentTimeMillis();
                 World world = location.getWorld();
-                Queue<Chunk> result = new ConcurrentLinkedQueue<>();
+                Queue<CompletableFuture<Chunk>> askChunks = new ConcurrentLinkedQueue<>();
 
                 int rSquared = radius * radius;
                 this.lastServerChunkLocation = this.getLocation().clone();
@@ -114,29 +114,50 @@ public class DefaultPlayer extends Player {
                 for (int x = chunkX - radius; x <= chunkX + radius; x++) {
                     for (int z = chunkZ - radius; z <= chunkZ + radius; z++) {
                         if ((chunkX - x) * (chunkX - x) + (chunkZ - z) * (chunkZ - z) <= rSquared) {
-                            Chunk chunk = world.getChunk(x, z);
-                            if (chunk != null) {
-                                result.add(chunk);
-                            }
+                            CompletableFuture<Chunk> chunk = world.getChunk(x, z);
+                            askChunks.add(chunk);
                         }
                     }
                 }
 
-                result.stream().filter(chunk -> !hasLookAtChunk(chunk)).forEach(chunk -> {
-                    this.getLookAtChunks().add(chunk);
-                    this.getSessionWrapper().sendChunk(chunk);
-                    chunk.getViewers().add(this);
-                });
+                try {
+                    Void waitingAskChunk = CompletableFuture.allOf(askChunks.toArray(new CompletableFuture[0])).get();
 
-                for (Chunk chunk : this.getLookAtChunks()) {
-                    if (!result.contains(chunk)) {
-                        this.getLookAtChunks().remove(chunk);
-                        this.getSessionWrapper().sendUnloadChunk(chunk);
-                        chunk.getViewers().remove(this);
+                    Queue<Chunk> result = askChunks.stream().map(CompletableFuture::join).distinct().collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
+
+                    for (Chunk chunk : this.getLookAtChunks()) {
+                        if (!result.contains(chunk)) {
+                            this.getLookAtChunks().remove(chunk);
+                            this.getSessionWrapper().sendUnloadChunk(chunk);
+                            chunk.removeViewer(this);
+                        }
                     }
+                    Queue<Chunk> newChunks = new ConcurrentLinkedQueue<>();
+                    result.stream().filter(chunk -> !hasLookAtChunk(chunk)).forEach(chunk -> {
+                        this.getLookAtChunks().add(chunk);
+                        chunk.addViewer(this);
+                        newChunks.add(chunk);
+                    });
+
+                    List<CompletableFuture<Void>> sendingChunk = new ArrayList<>();
+                    newChunks.forEach(chunk -> {
+                        CompletableFuture<Void> runnableCompletableFuture = new CompletableFuture<>();
+                        sendingChunk.add(runnableCompletableFuture);
+                        runnableCompletableFuture.completeAsync(() -> {
+                            this.getSessionWrapper().sendChunk(chunk);
+                            return null;
+                        });
+                    });
+
+                    Void waitingSendingChunk = CompletableFuture.allOf(sendingChunk.toArray(new CompletableFuture[0])).get();
+
+                    //LOGGER.info("get chunks in {} ms", System.currentTimeMillis() - start);
+                } catch (InterruptedException | ExecutionException e) {
+                    LOGGER.error("", e);
                 }
 
 
+                /*
                 Set<Entity> entities = new HashSet<>();
 
                 for (int x = chunkX - 5; x <= chunkX + 5; x++) {
@@ -163,6 +184,8 @@ public class DefaultPlayer extends Player {
                     this.removeLookAtEntity(entity);
                     getSessionWrapper().removeEntity(entity);
                 });
+
+                 */
             }
 
         }
@@ -176,4 +199,10 @@ public class DefaultPlayer extends Player {
         }
     }
 
+    @Override
+    public String toString() {
+        return "DefaultPlayer{" +
+                "sessionWrapper=" + sessionWrapper +
+                '}';
+    }
 }
