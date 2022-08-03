@@ -5,8 +5,10 @@ import eu.mshade.enderframe.entity.EntityIdManager;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.item.MaterialKey;
 import eu.mshade.enderframe.world.Chunk;
+import eu.mshade.enderframe.world.ChunkStatus;
 import eu.mshade.enderframe.world.Section;
 import eu.mshade.enderframe.world.World;
+import eu.mshade.mwork.mediator.Mediator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +19,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-public  class DefaultChunk implements Chunk {
+public class DefaultChunk implements Chunk {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultChunk.class);
 
@@ -27,11 +29,13 @@ public  class DefaultChunk implements Chunk {
     private final int z;
     private final UUID id;
     private final AtomicBoolean hasChange;
-    private final AtomicLong health = new AtomicLong(System.currentTimeMillis());
+    private final AtomicLong lastInteract = new AtomicLong(System.currentTimeMillis());
     private final Queue<Player> players = new ConcurrentLinkedQueue<>();
     private final World world;
     private final Section[] sections = new Section[16];
     private final Queue<Entity> entities = new ConcurrentLinkedQueue<>();
+    private Mediator<Chunk> chunkMediator = ChunkMediator.CHUNK_MEDIATOR;
+    private ChunkStatus chunkStatus = ChunkStatus.PREPARE_TO_LOAD;
 
     private int age;
     //private final AtomicReference<ChunkBufferStatus> chunkBufferStatus
@@ -52,48 +56,103 @@ public  class DefaultChunk implements Chunk {
 
     @Override
     public int getX() {
-        getHealth().set(System.currentTimeMillis());
-        return x;
+        return chunkMediator.notify(this, () -> x, "getX", new Object[0]);
+        //getHealth().set(System.currentTimeMillis());
     }
 
     @Override
     public int getZ() {
+        return chunkMediator.notify(this, () -> z, "getZ", new Object[0]);
+        /*
         getHealth().set(System.currentTimeMillis());
         return z;
+
+         */
     }
 
     @Override
     public UUID getId() {
+        return chunkMediator.notify(this, () -> id, "getId", new Object[0]);
+        /*
         getHealth().set(System.currentTimeMillis());
         return id;
+
+         */
     }
 
     @Override
     public Queue<Player> getViewers() {
-        return players;
+        return chunkMediator.notify(this, () -> players, "getViewers", new Object[0]);
+    }
+
+    @Override
+    public void addViewer(Player player) {
+        this.chunkMediator.notify(this, () -> {
+            this.players.add(player);
+            if(getChunkStatus() == ChunkStatus.PREPARE_TO_UNLOAD) setChunkStatus(ChunkStatus.LOADED);
+        }, "addViewer", new Object[]{player});
+    }
+
+    @Override
+    public void removeViewer(Player player) {
+        this.chunkMediator.notify(this, () -> {
+            this.players.remove(player);
+        }, "removeViewer", new Object[]{player});
     }
 
     @Override
     public World getWorld() {
+        return chunkMediator.notify(this, () -> world, "getWorld", new Object[0]);
+        /*
         getHealth().set(System.currentTimeMillis());
         return world;
+
+         */
     }
 
     @Override
     public Section[] getSections() {
+        return chunkMediator.notify(this, () -> sections, "getSections", new Object[0]);
+        /*
         getHealth().set(System.currentTimeMillis());
         return sections;
+
+         */
     }
 
     @Override
-    public AtomicLong getHealth() {
-        return health;
+    public AtomicLong getLastInteract() {
+        return chunkMediator.notify(this, () -> lastInteract, "getLastInteract", new Object[0]);
+        /*
+        return lastInteract;
+
+         */
+    }
+
+    @Override
+    public ChunkStatus getChunkStatus() {
+        return this.chunkStatus;
+    }
+
+    @Override
+    public void setChunkStatus(ChunkStatus chunkStatus) {
+        this.chunkStatus = chunkStatus;
     }
 
 
     @Override
     public int getBitMask() {
-        getHealth().set(System.currentTimeMillis());
+        return chunkMediator.notify(this, () -> {
+            int sectionBitmask = 0;
+            for (int i = 0; i < sections.length; i++) {
+                if (sections[i] != null && sections[i].getRealBlock() != 0) {
+                    sectionBitmask |= 1 << i;
+                }
+            }
+            return sectionBitmask;
+        }, "getBitMask", new Object[0]);
+        /*
+        getLastInteract().set(System.currentTimeMillis());
         int sectionBitmask = 0;
         for (int i = 0; i < sections.length; i++) {
             if (sections[i] != null && sections[i].getRealBlock() != 0) {
@@ -101,18 +160,41 @@ public  class DefaultChunk implements Chunk {
             }
         }
         return sectionBitmask;
+
+         */
     }
 
     @Override
     public int getBlock(int x, int y, int z) {
-        getHealth().set(System.currentTimeMillis());
+        return chunkMediator.notify(this, () -> {
+            Section section = getSectionBuffer(y);
+            return section.getBlocks()[getIndex(x, y, z)];
+        }, "getBlock", new Object[]{x, y, z});
+        /*
+        getLastInteract().set(System.currentTimeMillis());
         Section section = getSectionBuffer(y);
         return section.getBlocks()[getIndex(x, y, z)];
+
+         */
     }
 
     @Override
     public void setBlock(int x, int y, int z, MaterialKey materialKey) {
-        getHealth().set(System.currentTimeMillis());
+
+         chunkMediator.notify(this, () -> {
+            Section section = getSectionBuffer(y);
+
+            if (materialKey.getId() == 0){
+                int i = section.getRealBlock() - 1;
+                section.setRealBlock(Math.max(i, 0));
+            }else section.setRealBlock(section.getRealBlock() + 1);
+            hasChange.set(true);
+            int index = getIndex(x, y, z);
+            section.getBlocks()[index] = materialKey.getId();
+
+         }, "setBlock", new Object[]{x, y, z, materialKey});
+        /*
+        getLastInteract().set(System.currentTimeMillis());
         Section section = getSectionBuffer(y);
         if (materialKey.getId() == 0){
             int i = section.getRealBlock() - 1;
@@ -121,56 +203,100 @@ public  class DefaultChunk implements Chunk {
         hasChange.set(true);
         int index = getIndex(x, y, z);
         section.getBlocks()[index] = materialKey.getId();
-        section.getData().set(index, (byte) materialKey.getMetadata());
+
+         */
     }
 
     @Override
     public byte getBlockLight(int x, int y, int z) {
-        getHealth().set(System.currentTimeMillis());
+        return chunkMediator.notify(this, () -> {
+            Section section = getSectionBuffer(y);
+            return section.getBlockLight().get(getIndex(x, y, z));
+        }, "getBlockLight", new Object[]{x, y, z});
+        /*
+        getLastInteract().set(System.currentTimeMillis());
         Section section = getSectionBuffer(y);
         return section.getBlockLight().get(getIndex(x, y, z));
+
+         */
     }
 
     @Override
     public void setBlockLight(int x, int y, int z, byte light) {
-        getHealth().set(System.currentTimeMillis());
+        chunkMediator.notify(this, () -> {
+            Section section = getSectionBuffer(y);
+            section.getBlockLight().set(getIndex(x, y, z), light);
+        }, "setBlockLight", new Object[]{x, y, z, light});
+        /*
+        getLastInteract().set(System.currentTimeMillis());
         Section section = getSectionBuffer(y);
         section.getBlockLight().set(getIndex(x, y, z), light);
         hasChange.set(true);
+
+         */
     }
 
     @Override
     public byte getSkyLight(int x, int y, int z) {
-        getHealth().set(System.currentTimeMillis());
+        return chunkMediator.notify(this, () -> {
+            Section section = getSectionBuffer(y);
+            return section.getSkyLight().get(getIndex(x, y, z));
+        }, "getSkyLight", new Object[]{x, y, z});
+        /*
+        getLastInteract().set(System.currentTimeMillis());
         Section section = getSectionBuffer(y);
         return section.getSkyLight().get(getIndex(x, y, z));
+
+         */
     }
 
     @Override
     public void setSkyLight(int x, int y, int z, byte light) {
-        getHealth().set(System.currentTimeMillis());
+        chunkMediator.notify(this, () -> {
+            Section section = getSectionBuffer(y);
+            section.getSkyLight().set(getIndex(x, y, z), light);
+        }, "setSkyLight", new Object[]{x, y, z, light});
+        /*
+        getLastInteract().set(System.currentTimeMillis());
         Section section = getSectionBuffer(y);
         section.getSkyLight().set(getIndex(x, y, z), light);
         hasChange.set(true);
+
+         */
     }
 
     @Override
     public void setBiome(int x, int z, int biome) {
-        getHealth().set(System.currentTimeMillis());
+        chunkMediator.notify(this, () -> {
+            hasChange.set(true);
+            biomes[(z & 0xF) * WIDTH + (x & 0xF)] = (byte) biome;
+        }, "setBiome", new Object[]{x, z, biome});
+        /*
+        getLastInteract().set(System.currentTimeMillis());
         hasChange.set(true);
         biomes[(z & 0xF) * WIDTH + (x & 0xF)] = (byte) biome;
+
+         */
     }
 
     @Override
     public int getBiome(int x, int z) {
-        getHealth().set(System.currentTimeMillis());
+        return chunkMediator.notify(this, () -> biomes[(z & 0xF) * WIDTH + (x & 0xF)] & 0xFF, "getBiome", new Object[]{x, z});
+        /*
+        getLastInteract().set(System.currentTimeMillis());
         return biomes[(z & 0xF) * WIDTH + (x & 0xF)] & 0xFF;
+
+         */
     }
 
     @Override
     public byte[] getBiomes() {
-        getHealth().set(System.currentTimeMillis());
+        return chunkMediator.notify(this, () -> biomes, "getBiomes", new Object[0]);
+        /*
+        getLastInteract().set(System.currentTimeMillis());
         return biomes;
+
+         */
     }
 
     @Override
@@ -238,14 +364,13 @@ public  class DefaultChunk implements Chunk {
 
     @Override
     public String toString() {
-        return "DefaultChunkBuffer{" +
+        return "DefaultChunk{" +
                 "x=" + x +
                 ", z=" + z +
-                ", worldBuffer=" + world +
+                ", players=" + players +
+                ", world=" + world +
                 '}';
     }
-
-
 
     @Override
     public boolean equals(Object o) {
