@@ -17,7 +17,6 @@ import eu.mshade.enderframe.entity.CreeperState;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.VillagerType;
 import eu.mshade.enderframe.event.*;
-import eu.mshade.enderframe.metadata.world.WorldMetadataType;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.Property;
 import eu.mshade.enderframe.mojang.chat.*;
@@ -46,7 +45,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
 
 public class EnderChest {
 
@@ -112,6 +110,7 @@ public class EnderChest {
         packetEventBus.subscribe(PacketBlockPlaceEvent.class, new PacketBlockPlaceListener());
         packetEventBus.subscribe(PacketPlayerDiggingEvent.class, new PacketPlayerDiggingListener());
         packetEventBus.subscribe(PacketCloseInventoryEvent.class, new PacketCloseInventoryHandler());
+        packetEventBus.subscribe(PacketClickInventoryEvent.class, new PacketClickInventoryHandler());
 
         EventBus<EnderFrameEvent> enderFrameEventBus = enderFrame.getEnderFrameEventBus();
 
@@ -172,7 +171,7 @@ public class EnderChest {
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             worldManager.getWorlds().forEach(worldBuffer -> {
-                worldBuffer.getChunks().forEach(worldBuffer::flushChunk);
+                worldBuffer.getChunks().forEach(chunkCompletableFuture -> worldBuffer.flushChunk(chunkCompletableFuture.join()));
                 worldBuffer.getRegionBinaryTagPoets().forEach(binaryTagPoet -> {
                     if (binaryTagPoet.getCompoundSectionIndex().consume()) {
                         binaryTagPoet.writeCompoundSectionIndex();
@@ -183,6 +182,8 @@ public class EnderChest {
         }));
 
         //this.emerald = new Emerald(parentGroup);
+
+
 
         ChannelFuture channelFuture = new ServerBootstrap()
                 .group(parentGroup, childGroup)
@@ -207,21 +208,37 @@ public class EnderChest {
         parentGroup.scheduleAtFixedRate(()->{
             System.out.println(String.valueOf(tickBus.getTPS()).replace(".", ","));
         }, 0, 1, TimeUnit.SECONDS);
+        
+         */
+
+
+
+
+        /*
+        parentGroup.execute(()->{
+            long startGenMap = System.currentTimeMillis();
+            List<CompletableFuture<Chunk>> ask = new ArrayList<>();
+            for (int x = 0; x < 200; x++) {
+                for (int z = 0; z < 200; z++) {
+                    ask.add(world.getChunk(x, z));
+
+                }
+            }
+            try {
+                Void unused = CompletableFuture.allOf(ask.toArray(new CompletableFuture[0])).get();
+                logger.info("Done GenMap in {} ms", (System.currentTimeMillis()-startGenMap));
+            } catch (InterruptedException | ExecutionException e) {
+                logger.error("", e);
+            }
+
+        });
 
          */
 
-        /**
-        parentGroup.execute(()->{
-            long startGenMap = System.currentTimeMillis();
-            for (int x = 0; x < 1000; x++) {
-                for (int z = 0; z < 1000; z++) {
-                    world.getChunkBuffer(x, z);
-                }
-            }
 
-            System.out.println("Done GenMap in "+(System.currentTimeMillis()-startGenMap)+" ms");
-        });
-         **/
+
+
+
 
 
     }
