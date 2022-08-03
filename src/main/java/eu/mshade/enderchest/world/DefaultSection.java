@@ -10,22 +10,20 @@ public class DefaultSection implements Section {
     private int y;
     private int realBlock;
     private int[] blocks;
-    private NibbleArray data;
     private NibbleArray blockLight;
     private NibbleArray skyLight;
 
     public DefaultSection(Chunk chunk, int y, int realBlock) {
-        this(chunk, y, realBlock, new int[4096], NibbleArray.allocate(4096), NibbleArray.allocate(4096), NibbleArray.allocate(4096));
+        this(chunk, y, realBlock, new int[4096], NibbleArray.allocate(4096), NibbleArray.allocate(4096));
         skyLight.fill((byte) 15);
         blockLight.fill((byte) 15);
     }
 
-    public DefaultSection(Chunk chunk, int y, int realBlock, int[] blocks, NibbleArray data, NibbleArray blocksLight, NibbleArray skyLight) {
+    public DefaultSection(Chunk chunk, int y, int realBlock, int[] blocks, NibbleArray blocksLight, NibbleArray skyLight) {
         this.chunk = chunk;
         this.y = y;
         this.realBlock = realBlock;
         this.blocks = blocks;
-        this.data = data;
         this.blockLight = blocksLight;
         this.skyLight = skyLight;
     }
@@ -53,11 +51,6 @@ public class DefaultSection implements Section {
     @Override
     public int[] getBlocks() {
         return blocks;
-    }
-
-    @Override
-    public NibbleArray getData() {
-        return data;
     }
 
     @Override
