@@ -29,6 +29,8 @@ import eu.mshade.enderframe.protocol.SessionWrapper;
 import eu.mshade.enderframe.protocol.packet.PacketOutDisconnect;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.World;
+import eu.mshade.enderframe.world.border.WorldBorder;
+import eu.mshade.enderframe.world.border.WorldBorderCenter;
 import eu.mshade.enderman.packet.play.PacketOutChangeGameState;
 import eu.mshade.enderman.packet.play.PacketOutRespawn;
 import eu.mshade.enderman.packet.play.PacketOutSetSlot;
@@ -138,8 +140,20 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         sessionWrapper.sendOpenInventory(inventory);
         sessionWrapper.sendItemStacks(inventory);
 
+        WorldBorder worldBorder = new WorldBorder()
+                .setWorldBorderCenter(new WorldBorderCenter(7d, 7d))
+                .setRadius(20d)
+                .setWarningBlocks(20 - 1)
+                .setWarningTime(2)
+                .setPortalTeleportLimit(29999984);
+
+        worldBorder.createWorldBorder(player);
+
+        executorService.schedule(() -> worldBorder.modifyRadius(2000L, radius -> {
+            System.out.println(radius);
+            System.out.println(radius + 20);
+            return radius + 20;
+        }), 3, TimeUnit.SECONDS);
 
     }
-
-
 }
