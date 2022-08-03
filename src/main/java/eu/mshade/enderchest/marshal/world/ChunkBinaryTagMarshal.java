@@ -9,10 +9,6 @@ import eu.mshade.mwork.binarytag.entity.*;
 import eu.mshade.mwork.binarytag.poet.BinaryTagPoet;
 
 import java.io.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkBinaryTagMarshal implements BinaryTagDynamicMarshal {
 
@@ -102,7 +98,7 @@ public class ChunkBinaryTagMarshal implements BinaryTagDynamicMarshal {
         }
     }
 
-    public Chunk read(BinaryTagDriver binaryTagDriver, BinaryTagPoet binaryTagPoet, World world, int chunkX, int chunkZ) throws IOException, NullPointerException, EOFException {
+    public Chunk read(BinaryTagDriver binaryTagDriver, BinaryTagPoet binaryTagPoet, World world, int chunkX, int chunkZ) throws IOException {
         String chunkId = chunkId(chunkX, chunkZ);
         CompoundBinaryTag compoundBinaryTag = binaryTagPoet.readCompoundBinaryTag(chunkId);
         return deserialize(binaryTagDriver, compoundBinaryTag, world);
