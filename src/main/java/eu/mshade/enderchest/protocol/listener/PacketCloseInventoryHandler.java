@@ -26,5 +26,7 @@ public class PacketCloseInventoryHandler implements EventListener<PacketCloseInv
 
         sessionWrapper.sendOpenInventory(player.getOpenedInventory());
         sessionWrapper.sendItemStacks(player.getOpenedInventory());
+
+        sessionWrapper.sendItemStacks(player.getPlayerInventory());
     }
 }
