@@ -24,7 +24,7 @@ public class PacketLoginHandler implements EventListener<PacketLoginEvent> {
         Channel channel = parameterContainer.getContainer(Channel.class);
         SessionWrapper sessionWrapper = ProtocolPipeline.get().getSessionWrapper(channel);
         sessionWrapper.setGameProfile(new GameProfile(event.getName()));
-        sessionWrapper.sendEncryption(enderChest.getMinecraftEncryption().getKeyPair().getPublic());
-        //EnderFrame.get().getPacketEventBus().publish(new PacketFinallyJoinEvent(), parameterContainer);
+        //sessionWrapper.sendEncryption(enderChest.getMinecraftEncryption().getKeyPair().getPublic());
+        EnderFrame.get().getPacketEventBus().publish(new PacketFinallyJoinEvent(), parameterContainer);
     }
 }
