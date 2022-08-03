@@ -7,6 +7,8 @@ import eu.mshade.enderframe.metadata.world.WorldMetadataType;
 import eu.mshade.enderframe.world.World;
 import eu.mshade.enderframe.world.metadata.NameWorldMetadata;
 import eu.mshade.mwork.binarytag.BinaryTagDriver;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,10 +25,12 @@ public class WorldManager {
     private File worldsFolder = new File(System.getProperty("user.dir"), "worlds");
     private Map<String, World> worlds = new ConcurrentHashMap<>();
     private EnderChest enderChest;
+    private EventLoopGroup eventLoopGroup;
 
     public WorldManager(BinaryTagDriver binaryTagDriver, EnderChest enderChest) {
         this.enderChest = enderChest;
         this.worldsFolder.mkdir();
+        this.eventLoopGroup = enderChest.getParentGroup();
 
         WorldBinaryTagMarshal worldBinaryTagMarshal = binaryTagDriver.getDynamicMarshal(WorldBinaryTagMarshal.class);
 
@@ -61,4 +65,7 @@ public class WorldManager {
         return this.worlds.get(name);
     }
 
+    public EventLoopGroup getEventLoopGroup() {
+        return eventLoopGroup;
+    }
 }
