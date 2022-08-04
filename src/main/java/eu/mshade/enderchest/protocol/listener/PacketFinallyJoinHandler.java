@@ -5,9 +5,6 @@ import eu.mshade.enderchest.entity.DefaultPlayer;
 import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
-import eu.mshade.enderframe.entity.ArmorStand;
-import eu.mshade.enderframe.entity.Blaze;
-import eu.mshade.enderframe.entity.Zombie;
 import eu.mshade.enderframe.entity.metadata.SkinPartEntityMetadata;
 import eu.mshade.enderframe.inventory.Inventory;
 import eu.mshade.enderframe.inventory.InventoryType;
@@ -22,18 +19,15 @@ import eu.mshade.enderframe.mojang.Color;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.Property;
 import eu.mshade.enderframe.mojang.SkinPart;
-import eu.mshade.enderframe.mojang.chat.TextComponent;
 import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.protocol.SessionWrapper;
-import eu.mshade.enderframe.protocol.packet.PacketOutDisconnect;
 import eu.mshade.enderframe.sound.Sound;
 import eu.mshade.enderframe.sound.SoundName;
 import eu.mshade.enderframe.sound.SoundPosition;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.World;
 import eu.mshade.enderman.packet.play.PacketOutChangeGameState;
-import eu.mshade.enderman.packet.play.PacketOutRespawn;
 import eu.mshade.enderman.packet.play.PacketOutSetSlot;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
@@ -44,10 +38,8 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoinEvent> {
 
@@ -141,7 +133,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         sessionWrapper.sendOpenInventory(inventory);
         sessionWrapper.sendItemStacks(inventory);
 
-        Sound sound = new Sound(SoundName.RANDOM_CHESTOPEN, new SoundPosition(7, 4, 7), 100F);
+        Sound sound = new Sound(SoundName.AMBIENT_CAVE, new SoundPosition(7, 4, 7), 1F, 63);
         sound.createSound(player);
     }
 }
