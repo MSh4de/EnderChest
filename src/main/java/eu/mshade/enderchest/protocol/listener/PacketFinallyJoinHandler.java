@@ -27,6 +27,9 @@ import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.protocol.SessionWrapper;
 import eu.mshade.enderframe.protocol.packet.PacketOutDisconnect;
+import eu.mshade.enderframe.sound.Sound;
+import eu.mshade.enderframe.sound.SoundName;
+import eu.mshade.enderframe.sound.SoundPosition;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.World;
 import eu.mshade.enderman.packet.play.PacketOutChangeGameState;
@@ -138,8 +141,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         sessionWrapper.sendOpenInventory(inventory);
         sessionWrapper.sendItemStacks(inventory);
 
-
+        Sound sound = new Sound(SoundName.RANDOM_CHESTOPEN, new SoundPosition(7, 4, 7), 100F);
+        sound.createSound(player);
     }
-
-
 }
