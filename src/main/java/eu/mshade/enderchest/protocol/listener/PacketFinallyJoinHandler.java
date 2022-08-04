@@ -23,7 +23,7 @@ import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.protocol.SessionWrapper;
 import eu.mshade.enderframe.sound.Sound;
-import eu.mshade.enderframe.sound.SoundName;
+import eu.mshade.enderframe.sound.SoundEffect;
 import eu.mshade.enderframe.sound.SoundPosition;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.World;
@@ -133,7 +133,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         sessionWrapper.sendOpenInventory(inventory);
         sessionWrapper.sendItemStacks(inventory);
 
-        Sound sound = new Sound(SoundName.AMBIENT_CAVE, new SoundPosition(7, 4, 7), 1F, 63);
-        sound.createSound(player);
+        SoundEffect soundEffect = new SoundEffect(Sound.RANDOM_CHESTOPEN, new SoundPosition(7, 4, 7), 1F, 63);
+        soundEffect.createSound(player);
     }
 }
