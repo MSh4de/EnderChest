@@ -231,7 +231,10 @@ public class PacketClickInventoryHandler implements EventListener<PacketClickInv
                 }
             }
             case SHIFT_LEFT, SHIFT_RIGHT -> {
-
+                ItemStack itemStack = inventory.getItemStack(slot);
+                if (itemStack == null) return;
+                inventory.deleteItemStack(slot);
+                moveItemStack(itemStack, inventory, player);
             }
         }
     }
@@ -242,11 +245,7 @@ public class PacketClickInventoryHandler implements EventListener<PacketClickInv
 
         for (int i = start; i < 9 * 4; i++) {
             foundItemStack = playerInventory.getItemStack(i);
-            if (foundItemStack == null || !foundItemStack.getMaterial().equals(copyItemStack.getMaterial())) continue;
-            int freeSpace = foundItemStack.getMaterial().getMaxStackSize() - foundItemStack.getAmount();
-            int giveAmount = Math.min(freeSpace, copyItemStack.getAmount());
-            copyItemStack.modifyAmount(integer -> integer - giveAmount);
-            foundItemStack.modifyAmount(integer -> integer + giveAmount);
+            dispatchItemIntoOtherItem(copyItemStack, foundItemStack);
         }
 
         if (copyItemStack.getAmount() != 0) {
@@ -255,19 +254,64 @@ public class PacketClickInventoryHandler implements EventListener<PacketClickInv
         }
     }
 
+    private void moveItemStack(ItemStack itemStack, Inventory inventory, Player player) {
+        ItemStack copyItemStack = itemStack.clone();
+        if (inventory instanceof PlayerInventory) {
+            for (int i = 0; i < player.getOpenedInventory().getItemStacks().length; i++) {
+                ItemStack foundItemStack = player.getOpenedInventory().getItemStack(i);
+                dispatchItemIntoOtherItem(copyItemStack, foundItemStack);
+            }
+
+            if (copyItemStack.getAmount() != 0) {
+                int firstEmptySlot = player.getOpenedInventory().findFirstEmptySlot();
+                player.getOpenedInventory().setItemStack(firstEmptySlot, copyItemStack);
+            }
+        } else {
+            int length = player.getPlayerInventory().getItemStacks().length - 1;
+            for (int i = length; i > 9; i--) {
+                ItemStack foundItemStack = player.getPlayerInventory().getItemStacks()[i];
+                dispatchItemIntoOtherItem(copyItemStack, foundItemStack);
+            }
+
+            if (copyItemStack.getAmount() != 0) {
+                int firstEmptySlot = findFirstEmptySlotRawInventory(player.getPlayerInventory());
+                player.getPlayerInventory().getItemStacks()[firstEmptySlot] = copyItemStack;
+            }
+
+        }
+    }
+
+    private void dispatchItemIntoOtherItem(ItemStack copyItemStack, ItemStack foundItemStack) {
+        if (foundItemStack == null || !foundItemStack.getMaterial().equals(copyItemStack.getMaterial())) return;
+        int freeSpace = foundItemStack.getMaterial().getMaxStackSize() - foundItemStack.getAmount();
+        int giveAmount = Math.min(freeSpace, copyItemStack.getAmount());
+        copyItemStack.modifyAmount(integer -> integer - giveAmount);
+        foundItemStack.modifyAmount(integer -> integer + giveAmount);
+    }
+
+    private int findFirstEmptySlotRawInventory(PlayerInventory playerInventory) {
+        ItemStack[] itemStacks = playerInventory.getItemStacks();
+        int length = itemStacks.length - 1;
+        for (int i = length; i > 9; i--) {
+            if (itemStacks[i] == null) return i;
+        }
+        return -1;
+    }
+
 
     private void onDoubleClick(ItemStack pickedItemStack, Inventory inventory) {
 
         List<InventoryBufferStore.PlacedItemStack> placedItemStacks = new ArrayList<>();
+        int size = (inventory instanceof PlayerInventory ? 4 * 9 : inventory.getItemStacks().length);
 
-        for (int i = 0; i < inventory.getItemStacks().length; i++) {
+        for (int i = 0; i < size; i++) {
             ItemStack itemStackTarget = inventory.getItemStack(i);
             if (itemStackTarget != null && itemStackTarget.getMaterial().equals(pickedItemStack.getMaterial()) && itemStackTarget.getAmount() != pickedItemStack.getMaterial().getMaxStackSize()) {
                 placedItemStacks.add(new InventoryBufferStore.PlacedItemStack(i));
             }
         }
 
-        for (int i = 0; i < inventory.getItemStacks().length; i++) {
+        for (int i = 0; i < size; i++) {
             ItemStack itemStackTarget = inventory.getItemStack(i);
             if (itemStackTarget != null && itemStackTarget.getMaterial().equals(pickedItemStack.getMaterial()) && itemStackTarget.getAmount() == pickedItemStack.getMaterial().getMaxStackSize()) {
                 placedItemStacks.add(new InventoryBufferStore.PlacedItemStack(i));
