@@ -1,21 +1,10 @@
+
 public class Test {
 
 
     public static void main(String[] args) throws InterruptedException {
 
-        int index = 4095;
-        System.out.println(Long.toBinaryString(index));
-        int y = index >> 8;
-        int z = y & (index >> 4);
-        int x = index & 0x0F;
-
-        System.out.println(y);
-        System.out.println(z);
-        System.out.println(x);
-
-        System.out.println(Long.toBinaryString(getIndex(15, 15, 15)));
-        System.out.println(getIndex(255, 255, 255));
-
+        System.out.println(17 % 2);
 
         /*
         scheduledExecutorService.scheduleAtFixedRate(() -> {
