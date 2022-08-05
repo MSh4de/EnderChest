@@ -8,6 +8,7 @@ import eu.mshade.enderframe.event.PlayerQuitEvent;
 import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.scoreboard.Scoreboard;
 import eu.mshade.enderframe.world.Chunk;
+import eu.mshade.enderframe.world.border.WorldBorder;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 import io.netty.channel.Channel;
@@ -40,6 +41,11 @@ public class PlayerQuitHandler implements EventListener<PlayerQuitEvent> {
 
         player.getLookAtScoreboard().clear();
         player.getLookAtChunks().clear();
+
+        for (WorldBorder worldBorder : player.getLookAtWorldBorders()) {
+            worldBorder.getViewers().remove(player);
+        }
+        player.getLookAtWorldBorders().clear();
 
         enderChest.removePlayer(player);
 
