@@ -28,6 +28,11 @@ import eu.mshade.enderframe.world.Chunk;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.World;
 import eu.mshade.enderman.packet.play.PacketOutChangeGameState;
+import eu.mshade.enderframe.mojang.chat.ChatColor;
+import eu.mshade.enderframe.mojang.chat.TextComponent;
+import eu.mshade.enderframe.scoreboard.Scoreboard;
+import eu.mshade.enderframe.scoreboard.ScoreboardPosition;
+import eu.mshade.enderframe.scoreboard.ScoreboardType;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 import io.netty.channel.Channel;
@@ -152,7 +157,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         LOGGER.info(String.format("%s join server", player.getGameProfile().getName()));
 
         sessionWrapper.sendMessage("Welcome to project MShade");
-        sessionWrapper.sendHeadAndFooter("Hey this is test", "and this is test");
+        sessionWrapper.sendHeaderAndFooter("Hey this is test", "and this is test");
 
 
         Inventory inventory = new Inventory("test", InventoryType.CHEST);
@@ -162,28 +167,14 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
             inventory.setItemStack(slot++, new ItemStack(materialKey));
         }
 
-
-
-
         sessionWrapper.sendOpenInventory(inventory);
         sessionWrapper.sendItemStacks(inventory);
 
-        /*
-        executorService.schedule(() -> {
-            sessionWrapper.sendOpenInventory(new Inventory("test4", InventoryType.HOPPER));
-        }, 10, TimeUnit.SECONDS);
-
-         */
-
-
-
-
-
-
-
-
-
+        Scoreboard<String> scoreboard = new Scoreboard<String>(TextComponent.of(ChatColor.BLUE + "Scoreboard"))
+                .setScoreboardPosition(ScoreboardPosition.SIDEBAR)
+                .setScoreboardType(ScoreboardType.INTEGER)
+                .addObjective("TokyFR", 59)
+                .addObjective("RealAlpha", 70);
+        scoreboard.showScoreboard(player);
     }
-
-
 }
