@@ -6,46 +6,38 @@ import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
 import eu.mshade.enderframe.entity.metadata.SkinPartEntityMetadata;
-import eu.mshade.enderframe.inventory.EquipmentSlot;
 import eu.mshade.enderframe.inventory.Inventory;
 import eu.mshade.enderframe.inventory.InventoryType;
-import eu.mshade.enderframe.inventory.PlayerInventory;
-import eu.mshade.enderframe.item.*;
-import eu.mshade.enderframe.item.metadata.*;
-import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
-import eu.mshade.enderframe.metadata.attribute.Attribute;
-import eu.mshade.enderframe.metadata.attribute.AttributeModifier;
-import eu.mshade.enderframe.metadata.attribute.AttributeOperation;
+import eu.mshade.enderframe.item.ItemStack;
+import eu.mshade.enderframe.item.Material;
+import eu.mshade.enderframe.item.MaterialKey;
 import eu.mshade.enderframe.metadata.entity.EntityMetadataKey;
-import eu.mshade.enderframe.mojang.Color;
 import eu.mshade.enderframe.mojang.GameProfile;
-import eu.mshade.enderframe.mojang.Property;
 import eu.mshade.enderframe.mojang.SkinPart;
+import eu.mshade.enderframe.mojang.chat.ChatColor;
+import eu.mshade.enderframe.mojang.chat.TextComponent;
 import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.protocol.SessionWrapper;
+import eu.mshade.enderframe.scoreboard.Scoreboard;
+import eu.mshade.enderframe.scoreboard.ScoreboardPosition;
+import eu.mshade.enderframe.scoreboard.ScoreboardType;
+import eu.mshade.enderframe.sound.Sound;
+import eu.mshade.enderframe.sound.SoundEffect;
+import eu.mshade.enderframe.sound.SoundPosition;
 import eu.mshade.enderframe.world.Chunk;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.World;
 import eu.mshade.enderman.packet.play.PacketOutChangeGameState;
-import eu.mshade.enderframe.mojang.chat.ChatColor;
-import eu.mshade.enderframe.mojang.chat.TextComponent;
-import eu.mshade.enderframe.scoreboard.Scoreboard;
-import eu.mshade.enderframe.scoreboard.ScoreboardPosition;
-import eu.mshade.enderframe.scoreboard.ScoreboardType;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoinEvent> {
 
@@ -176,5 +168,8 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
                 .addObjective("TokyFR", 59)
                 .addObjective("RealAlpha", 70);
         scoreboard.showScoreboard(player);
+
+        SoundEffect soundEffect = new SoundEffect(Sound.RANDOM_CHESTOPEN, new SoundPosition(7, 4, 7), 1F, 63);
+        soundEffect.createSound(player);
     }
 }
