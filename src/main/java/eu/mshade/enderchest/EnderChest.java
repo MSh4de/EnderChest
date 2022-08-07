@@ -9,6 +9,7 @@ import eu.mshade.enderchest.marshal.metadata.MetadataKeyValueBinaryTagMarshal;
 import eu.mshade.enderchest.marshal.world.*;
 import eu.mshade.enderchest.protocol.ProtocolRepository;
 import eu.mshade.enderchest.protocol.listener.*;
+import eu.mshade.enderchest.world.ChunkSafeguard;
 import eu.mshade.enderchest.world.DefaultChunkGenerator;
 import eu.mshade.enderchest.world.WorldManager;
 import eu.mshade.enderframe.EnderFrame;
@@ -22,6 +23,8 @@ import eu.mshade.enderframe.mojang.Property;
 import eu.mshade.enderframe.mojang.chat.*;
 import eu.mshade.enderframe.packetevent.*;
 import eu.mshade.enderframe.protocol.MinecraftEncryption;
+import eu.mshade.enderframe.sound.Sound;
+import eu.mshade.enderframe.sound.SoundKey;
 import eu.mshade.enderframe.tick.TickBus;
 import eu.mshade.enderframe.world.*;
 import eu.mshade.enderframe.world.metadata.DifficultyWorldMetadata;
@@ -45,10 +48,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 public class EnderChest {
 
-    private final Logger logger = LoggerFactory.getLogger(EnderChest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnderChest.class);
     private final EventLoopGroup parentGroup;
     private final EventLoopGroup childGroup;
     private final Queue<Player> players = new ConcurrentLinkedQueue<>();
@@ -67,7 +71,7 @@ public class EnderChest {
                 ██╔══╝░░██║╚████║██║░░██║██╔══╝░░██╔══██╗██║░░██╗██╔══██║██╔══╝░░░╚═══██╗░░░██║░░░
                 ███████╗██║░╚███║██████╔╝███████╗██║░░██║╚█████╔╝██║░░██║███████╗██████╔╝░░░██║░░░
                 ╚══════╝╚═╝░░╚══╝╚═════╝░╚══════╝╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝╚══════╝╚═════╝░░░░╚═╝░░░""");
-        logger.info("Starting EnderChest");
+        LOGGER.info("Starting EnderChest");
 
         BinaryTagDriver binaryTagDriver = MWork.get().getBinaryTagDriver();
 
@@ -163,9 +167,9 @@ public class EnderChest {
         });
         world.setChunkGenerator(new DefaultChunkGenerator(world));
 
-        Thread thread = new Thread(tickBus, "TickBus");
-        thread.start();
-        logger.info("Starting "+thread);
+        Thread threadTickBus = new Thread(tickBus, "TickBus");
+        threadTickBus.start();
+        LOGGER.info("Starting "+threadTickBus);
 
 
 
@@ -196,20 +200,22 @@ public class EnderChest {
 
 
         try {
-            logger.info(String.valueOf(channelFuture.sync().channel()));
+            LOGGER.info(String.valueOf(channelFuture.sync().channel()));
         } catch (InterruptedException e) {
-            logger.error("", e);
+            LOGGER.error("", e);
         }
 
 
-        logger.info("Done in {} ms !", (System.currentTimeMillis() - start));
+        LOGGER.info("Done in {} ms !", (System.currentTimeMillis() - start));
 
         /*
         parentGroup.scheduleAtFixedRate(()->{
             System.out.println(String.valueOf(tickBus.getTPS()).replace(".", ","));
         }, 0, 1, TimeUnit.SECONDS);
-        
+
          */
+        
+
 
 
 
@@ -282,4 +288,5 @@ public class EnderChest {
     public TickBus getTickBus() {
         return tickBus;
     }
+
 }
