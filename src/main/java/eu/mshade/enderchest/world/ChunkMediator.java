@@ -12,7 +12,6 @@ public class ChunkMediator implements Mediator<Chunk> {
 
     @Override
     public <T> T notify(Chunk source, Supplier<T> callback, String key, Object[] args) {
-        //System.out.println(key);
         return callback.get();
     }
 
