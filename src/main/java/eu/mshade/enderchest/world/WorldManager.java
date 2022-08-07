@@ -21,16 +21,21 @@ import java.util.function.Consumer;
 
 public class WorldManager {
 
-    private static Logger logger = LoggerFactory.getLogger(WorldManager.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(WorldManager.class);
     private File worldsFolder = new File(System.getProperty("user.dir"), "worlds");
     private Map<String, World> worlds = new ConcurrentHashMap<>();
     private EnderChest enderChest;
     private EventLoopGroup eventLoopGroup;
+    private final ChunkSafeguard chunkSafeguard = new ChunkSafeguard();
 
     public WorldManager(BinaryTagDriver binaryTagDriver, EnderChest enderChest) {
         this.enderChest = enderChest;
         this.worldsFolder.mkdir();
         this.eventLoopGroup = enderChest.getParentGroup();
+
+        Thread threadChunkSafeguard = new Thread(chunkSafeguard, "ChunkSafeguard");
+        threadChunkSafeguard.start();
+        LOGGER.info("Starting "+threadChunkSafeguard);
 
         WorldBinaryTagMarshal worldBinaryTagMarshal = binaryTagDriver.getDynamicMarshal(WorldBinaryTagMarshal.class);
 
@@ -67,5 +72,9 @@ public class WorldManager {
 
     public EventLoopGroup getEventLoopGroup() {
         return eventLoopGroup;
+    }
+
+    public ChunkSafeguard getChunkSafeguard() {
+        return chunkSafeguard;
     }
 }
