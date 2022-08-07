@@ -9,6 +9,7 @@ import eu.mshade.mwork.binarytag.entity.*;
 import eu.mshade.mwork.binarytag.poet.BinaryTagPoet;
 
 import java.io.*;
+import java.util.concurrent.ExecutionException;
 
 public class ChunkBinaryTagMarshal implements BinaryTagDynamicMarshal {
 
@@ -55,7 +56,7 @@ public class ChunkBinaryTagMarshal implements BinaryTagDynamicMarshal {
         ListBinaryTag sectionBinaryTags = (ListBinaryTag) compoundBinaryTag.getBinaryTag("sections");
         ListBinaryTag entityBinaryTags = (ListBinaryTag) compoundBinaryTag.getBinaryTag("entities");
 
-        Chunk chunk = new DefaultChunk(x, z, false, world, biome);
+        Chunk chunk = new DefaultChunk(x, z, world, biome);
         Section[] sections = chunk.getSections();
 
         sectionBinaryTags.forEach(sectionBinaryTag -> {
@@ -93,7 +94,7 @@ public class ChunkBinaryTagMarshal implements BinaryTagDynamicMarshal {
     public void write(BinaryTagDriver binaryTagDriver, BinaryTagPoet binaryTagPoet, Chunk chunk){
         try {
             binaryTagPoet.writeCompoundBinaryTag(chunkId(chunk), this.serialize(binaryTagDriver, chunk));
-        } catch (IOException e) {
+        } catch (ExecutionException | InterruptedException | IOException e) {
             e.printStackTrace();
         }
     }
