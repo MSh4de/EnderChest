@@ -12,6 +12,8 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 
+import java.util.concurrent.TimeUnit;
+
 
 public class EnderChestChannelInitializer extends ChannelInitializer<Channel> {
 
@@ -27,8 +29,9 @@ public class EnderChestChannelInitializer extends ChannelInitializer<Channel> {
                 .addLast("accuracy", new PacketAccuracy())
                 .addLast("compression", VoidHandler.INSTANCE)
                 .addLast("codecs", new PacketCodec())
+                .addLast("timeout", new ReadTimeoutHandler(30, TimeUnit.SECONDS))
                 //.addLast("readtimeout", new ReadTimeoutHandler(20))
-                .addLast("writeidletimeout", new IdleStateHandler(0, 15, 0))
+                //.addLast("writeidletimeout", new IdleStateHandler(0, P, 0))
                 .addLast("handler", new PacketChannelInboundHandlerAdapter(ch));
         /*
         pipeline.addLast("timeout", new ReadTimeoutHandler(0, TimeUnit.MILLISECONDS));
