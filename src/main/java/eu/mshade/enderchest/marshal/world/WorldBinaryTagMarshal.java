@@ -29,6 +29,7 @@ public class WorldBinaryTagMarshal implements BinaryTagDynamicMarshal {
     }
 
     public void write(BinaryTagDriver binaryTagDriver, World world){
+        if (world.getMetadataKeyValueBucket().consumeUpdatedMetadataKeyValue().isEmpty()) return;
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(new File(world.getWorldFolder(), "level.dat"));
             binaryTagDriver.writeCompoundBinaryTag(serialize(binaryTagDriver, world), fileOutputStream);
