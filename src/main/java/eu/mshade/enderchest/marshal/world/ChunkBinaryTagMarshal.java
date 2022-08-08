@@ -4,11 +4,17 @@ import eu.mshade.enderchest.world.DefaultChunk;
 import eu.mshade.enderframe.world.Chunk;
 import eu.mshade.enderframe.world.Section;
 import eu.mshade.enderframe.world.World;
-import eu.mshade.mwork.binarytag.*;
-import eu.mshade.mwork.binarytag.entity.*;
+import eu.mshade.mwork.binarytag.BinaryTag;
+import eu.mshade.mwork.binarytag.BinaryTagDriver;
+import eu.mshade.mwork.binarytag.BinaryTagDynamicMarshal;
+import eu.mshade.mwork.binarytag.BinaryTagType;
+import eu.mshade.mwork.binarytag.entity.ByteArrayBinaryTag;
+import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
+import eu.mshade.mwork.binarytag.entity.ListBinaryTag;
+import eu.mshade.mwork.binarytag.entity.ZstdCompoundBinaryTag;
 import eu.mshade.mwork.binarytag.poet.BinaryTagPoet;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 public class ChunkBinaryTagMarshal implements BinaryTagDynamicMarshal {
