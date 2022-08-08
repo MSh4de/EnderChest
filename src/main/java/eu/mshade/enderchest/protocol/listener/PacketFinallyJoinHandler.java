@@ -17,6 +17,10 @@ import eu.mshade.enderframe.mojang.SkinPart;
 import eu.mshade.enderframe.mojang.chat.ChatColor;
 import eu.mshade.enderframe.mojang.chat.TextComponent;
 import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
+import eu.mshade.enderframe.particle.Particle;
+import eu.mshade.enderframe.particle.ParticleDust;
+import eu.mshade.enderframe.particle.ParticleKey;
+import eu.mshade.enderframe.particle.ParticleType;
 import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.protocol.SessionWrapper;
 import eu.mshade.enderframe.scoreboard.Scoreboard;
@@ -26,14 +30,11 @@ import eu.mshade.enderframe.sound.Sound;
 import eu.mshade.enderframe.sound.SoundEffect;
 import eu.mshade.enderframe.sound.SoundPosition;
 import eu.mshade.enderframe.world.Chunk;
-import eu.mshade.enderframe.protocol.packet.PacketOutDisconnect;
 import eu.mshade.enderframe.title.Title;
-import eu.mshade.enderframe.title.TitleAction;
 import eu.mshade.enderframe.title.TitleTime;
 import eu.mshade.enderframe.world.Location;
+import eu.mshade.enderframe.world.Vector;
 import eu.mshade.enderframe.world.World;
-import eu.mshade.enderframe.world.border.WorldBorder;
-import eu.mshade.enderframe.world.border.WorldBorderCenter;
 import eu.mshade.enderman.packet.play.PacketOutChangeGameState;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
@@ -41,10 +42,12 @@ import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoinEvent> {
 
@@ -89,7 +92,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         sessionWrapper.sendPluginMessage("MC|Brand", protocolBuffer -> protocolBuffer.writeString("Enderchest"));
         //default value of flying speed as 0.05
-        sessionWrapper.sendAbilities(false, false, true, false, 2F, 0.1F);
+        sessionWrapper.sendAbilities(false, false, true, false, 0.05F, 0.1F);
         sessionWrapper.sendPacket(new PacketOutChangeGameState(3, player.getGameMode().getId()));
 
         enderChest.addPlayer(player);
@@ -186,16 +189,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         title.showTitle(player);
 
-        WorldBorder worldBorder = new WorldBorder()
-                .setWorldBorderCenter(new WorldBorderCenter(7d, 7d))
-                .setRadius(20d)
-                .setWarningBlocks(20 - 1)
-                .setWarningTime(2)
-                .setPortalTeleportLimit(29999984);
-
-        worldBorder.createWorldBorder(player);
-
-        executorService.schedule(() -> worldBorder.modifyRadius(2000L, radius -> radius + 20), 3, TimeUnit.SECONDS);
-
+        Particle particle = new ParticleDust(false, new Vector(7, highest + 2, 7), new Vector(0, 0, 0), 1F, 100, 0.4F, 0.4F, 0.4F, 3F);
+        executorService.scheduleAtFixedRate(() -> particle.showParticle(player), 0, 1, TimeUnit.SECONDS);
     }
 }
