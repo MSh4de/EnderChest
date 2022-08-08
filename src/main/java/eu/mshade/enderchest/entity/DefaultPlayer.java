@@ -6,6 +6,8 @@ import eu.mshade.enderframe.entity.Projectile;
 import eu.mshade.enderframe.entity.metadata.FlyingEntityMetadata;
 import eu.mshade.enderframe.entity.metadata.SprintingEntityMetadata;
 import eu.mshade.enderframe.metadata.entity.EntityMetadataKey;
+import eu.mshade.enderframe.mojang.chat.ChatColor;
+import eu.mshade.enderframe.mojang.chat.TextPosition;
 import eu.mshade.enderframe.protocol.SessionWrapper;
 import eu.mshade.enderframe.world.Chunk;
 import eu.mshade.enderframe.world.Location;
@@ -18,6 +20,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 public class DefaultPlayer extends Player {
@@ -62,6 +65,7 @@ public class DefaultPlayer extends Player {
      * Fix le calcul de speed en passant par un elapsedTime et non par une valeur fix(0,05)
      */
 
+
     @Override
     public void tick() {
 
@@ -85,9 +89,14 @@ public class DefaultPlayer extends Player {
 
             if (hasChangeChunk) {
                 Location location = this.getLocation();
+                World world = location.getWorld();
+
+                int radiusMax = 10;
+                //int radius = (int) Math.max(3, Math.round(radiusMax - (memoryEfficiency * radiusMax)));
+
 
                 int radius = 10;
-                //int radius = (int) Math.max(3, Math.round(10 - (speed / vMax)));
+                //int radius = (int) Math.max(3, Math.round(radiusMax - (speed / vMax)));
 
                 if (hasChangeChunk) {
                     lastUpdateByChangeChunk = true;
@@ -101,7 +110,6 @@ public class DefaultPlayer extends Player {
                 }
 
                 long start = System.currentTimeMillis();
-                World world = location.getWorld();
                 Queue<CompletableFuture<Chunk>> askChunks = new ConcurrentLinkedQueue<>();
 
                 int rSquared = radius * radius;
@@ -143,15 +151,16 @@ public class DefaultPlayer extends Player {
                     newChunks.forEach(chunk -> {
                         CompletableFuture<Void> runnableCompletableFuture = new CompletableFuture<>();
                         sendingChunk.add(runnableCompletableFuture);
-                        runnableCompletableFuture.completeAsync(() -> {
+                        ForkJoinPool.commonPool().execute(() -> {
                             this.getSessionWrapper().sendChunk(chunk);
-                            return null;
+                            runnableCompletableFuture.complete(null);
                         });
                     });
 
+
                     Void waitingSendingChunk = CompletableFuture.allOf(sendingChunk.toArray(new CompletableFuture[0])).get();
 
-                    //LOGGER.info("get chunks in {} ms", System.currentTimeMillis() - start);
+                    this.getSessionWrapper().sendMessage(ChatColor.GREEN + "Chunk loaded in " + (System.currentTimeMillis() - start) + "ms, there are "+ world.getChunks().size()+" chunks in all" , TextPosition.HOT_BAR);
                 } catch (InterruptedException | ExecutionException e) {
                     LOGGER.error("", e);
                 }
