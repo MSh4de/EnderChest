@@ -19,12 +19,14 @@ public class ChunkSafeguard implements Runnable {
             try {
                 Chunk chunk = chunkBlockingQueue.take();
                 chunk.getWorld().saveChunk(chunk);
+                chunk.getInChunkSafeguard().set(false);
             } catch (InterruptedException e) {
                 LOGGER.error("ChunkSafeguard interrupted", e);
             }
         }
     }
     public void addChunk(Chunk chunk) {
+        chunk.getInChunkSafeguard().set(true);
         chunkBlockingQueue.add(chunk);
     }
 
