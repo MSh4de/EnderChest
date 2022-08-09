@@ -7,7 +7,7 @@ import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.event.PlayerQuitEvent;
 import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.scoreboard.Scoreboard;
-import eu.mshade.enderframe.world.Chunk;
+import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderframe.world.border.WorldBorder;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
@@ -29,13 +29,13 @@ public class PlayerQuitHandler implements EventListener<PlayerQuitEvent> {
     public void onEvent(PlayerQuitEvent event, ParameterContainer eventContainer) {
         Channel channel = eventContainer.getContainer(Channel.class);
         Player player = ProtocolPipeline.get().getPlayer(channel);
-        enderChest.getTickBus().removeTickable(player);
+        player.leaveTickBus();
 
         for (Chunk chunk : player.getLookAtChunks()) {
             chunk.getViewers().remove(player);
         }
 
-        for (Scoreboard scoreboard : player.getLookAtScoreboard()) {
+        for (Scoreboard<?> scoreboard : player.getLookAtScoreboard()) {
             scoreboard.getViewers().remove(player);
         }
 
