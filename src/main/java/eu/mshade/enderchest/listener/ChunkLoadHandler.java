@@ -1,7 +1,6 @@
 package eu.mshade.enderchest.listener;
 
 import eu.mshade.enderframe.event.ChunkLoadEvent;
-import eu.mshade.enderframe.world.Chunk;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 
