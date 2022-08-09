@@ -3,8 +3,8 @@ package eu.mshade.enderchest.world;
 import eu.mshade.enderchest.world.noise.SimplexOctaveGenerator;
 import eu.mshade.enderframe.item.Material;
 import eu.mshade.enderframe.metadata.world.WorldMetadataType;
-import eu.mshade.enderframe.world.Chunk;
-import eu.mshade.enderframe.world.ChunkGenerator;
+import eu.mshade.enderframe.world.chunk.Chunk;
+import eu.mshade.enderframe.world.chunk.ChunkGenerator;
 import eu.mshade.enderframe.world.World;
 
 public class DefaultChunkGenerator implements ChunkGenerator {

@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.world;
 
-import eu.mshade.enderframe.world.Chunk;
+import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.mwork.mediator.Mediator;
 
 import java.util.function.Supplier;

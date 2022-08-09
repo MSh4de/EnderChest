@@ -1,10 +1,9 @@
 package eu.mshade.enderchest.world;
 
-import eu.mshade.enderframe.world.Chunk;
+import eu.mshade.enderframe.world.chunk.Chunk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 

@@ -1,9 +1,9 @@
 package eu.mshade.enderchest.marshal.world;
 
 import eu.mshade.enderchest.world.DefaultSection;
-import eu.mshade.enderframe.world.Chunk;
-import eu.mshade.enderframe.world.NibbleArray;
-import eu.mshade.enderframe.world.Section;
+import eu.mshade.enderframe.world.chunk.Chunk;
+import eu.mshade.enderframe.world.chunk.NibbleArray;
+import eu.mshade.enderframe.world.chunk.Section;
 import eu.mshade.mwork.binarytag.BinaryTag;
 import eu.mshade.mwork.binarytag.BinaryTagDynamicMarshal;
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;

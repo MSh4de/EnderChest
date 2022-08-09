@@ -1,9 +1,9 @@
 package eu.mshade.enderchest.world;
 
-import eu.mshade.enderframe.world.Chunk;
+import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderframe.world.Dimension;
-import eu.mshade.enderframe.world.NibbleArray;
-import eu.mshade.enderframe.world.Section;
+import eu.mshade.enderframe.world.chunk.NibbleArray;
+import eu.mshade.enderframe.world.chunk.Section;
 
 import java.util.Arrays;
 import java.util.Objects;
