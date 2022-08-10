@@ -17,10 +17,7 @@ import eu.mshade.enderframe.mojang.SkinPart;
 import eu.mshade.enderframe.mojang.chat.ChatColor;
 import eu.mshade.enderframe.mojang.chat.TextComponent;
 import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
-import eu.mshade.enderframe.particle.Particle;
-import eu.mshade.enderframe.particle.ParticleDust;
-import eu.mshade.enderframe.particle.ParticleKey;
-import eu.mshade.enderframe.particle.ParticleType;
+import eu.mshade.enderframe.particle.*;
 import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.protocol.SessionWrapper;
 import eu.mshade.enderframe.scoreboard.Scoreboard;
@@ -47,7 +44,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoinEvent> {
 
@@ -189,7 +185,8 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         title.showTitle(player);
 
-        Particle particle = new ParticleDust(false, new Vector(7, highest + 2, 7), new Vector(0, 0, 0), 1F, 100, 0.4F, 0.4F, 0.4F, 3F);
-        executorService.scheduleAtFixedRate(() -> particle.showParticle(player), 0, 1, TimeUnit.SECONDS);
+        Particle particle = new ParticleBlockCrack(false, new Vector(7, highest + 2, 7), new Vector(0, 0, 0), 1F, 100, Material.GRASS, 0);
+        //Particle particle = new Particle(ParticleType.FIREWORK, false, new Vector(7, highest + 2, 7), new Vector(0, 0, 0), 1F, 100);
+        executorService.scheduleAtFixedRate(() -> particle.showParticle(player), 0, 3, TimeUnit.SECONDS);
     }
 }
