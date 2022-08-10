@@ -28,9 +28,12 @@ public class PacketPlayerDiggingListener implements EventListener<PacketPlayerDi
         if (event.getDiggingStatus() == DiggingStatus.STARTED) {
             world.setBlock(blockPosition.getBlockX(), blockPosition.getBlockY(), blockPosition.getBlockZ(), Material.AIR);
 
-            for (Player viewer : player.getLocation().getChunk().join().getViewers()) {
-                viewer.getSessionWrapper().sendBlockChange(blockPosition, Material.AIR);
-            }
+            player.getLocation().getChunk().join().notify(agent -> {
+                if (agent instanceof Player target) {
+                    target.getSessionWrapper().sendBlockChange(blockPosition, Material.AIR);
+                }
+            });
+
         }
     }
 }

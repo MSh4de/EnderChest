@@ -30,11 +30,15 @@ public class PacketBlockPlaceListener implements EventListener<PacketBlockPlaceE
 
         if (material == null || material.equals(Material.AIR)) return;
 
+
         world.setBlock(blockPosition.getBlockX(), blockPosition.getBlockY(), blockPosition.getBlockZ(), material);
 
-        for (Player viewer : player.getLocation().getChunk().join().getViewers()) {
-            viewer.getSessionWrapper().sendBlockChange(blockPosition, material);
-        }
+        player.getLocation().getChunk().join().notify(agent -> {
+            if (agent instanceof Player target) {
+                target.getSessionWrapper().sendBlockChange(blockPosition, material);
+            }
+        });
+
 
     }
 }
