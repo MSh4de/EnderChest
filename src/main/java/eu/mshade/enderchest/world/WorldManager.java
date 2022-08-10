@@ -33,9 +33,8 @@ public class WorldManager {
         this.worldsFolder.mkdir();
         this.eventLoopGroup = enderChest.getParentGroup();
 
-        Thread threadChunkSafeguard = new Thread(chunkSafeguard, "ChunkSafeguard");
-        threadChunkSafeguard.start();
-        LOGGER.info("Starting "+threadChunkSafeguard);
+        chunkSafeguard.start();
+        LOGGER.info("Starting "+chunkSafeguard);
 
         WorldBinaryTagMarshal worldBinaryTagMarshal = binaryTagDriver.getDynamicMarshal(WorldBinaryTagMarshal.class);
 
