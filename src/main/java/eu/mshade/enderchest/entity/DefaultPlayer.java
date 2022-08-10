@@ -1,5 +1,6 @@
 package eu.mshade.enderchest.entity;
 
+import eu.mshade.enderframe.Watchable;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.Projectile;
 import eu.mshade.enderframe.entity.metadata.FlyingEntityMetadata;
@@ -136,13 +137,13 @@ public class DefaultPlayer extends Player {
                         if (!result.contains(chunk)) {
                             this.getLookAtChunks().remove(chunk);
                             this.getSessionWrapper().sendUnloadChunk(chunk);
-                            chunk.removeViewer(this);
+                            chunk.removeWatcher(this);
                         }
                     }
                     Queue<Chunk> newChunks = new ConcurrentLinkedQueue<>();
                     result.stream().filter(chunk -> !hasLookAtChunk(chunk)).forEach(chunk -> {
                         this.getLookAtChunks().add(chunk);
-                        chunk.addViewer(this);
+                        chunk.addWatcher(this);
                         newChunks.add(chunk);
                     });
 
@@ -150,16 +151,16 @@ public class DefaultPlayer extends Player {
                     newChunks.forEach(chunk -> {
                         CompletableFuture<Void> runnableCompletableFuture = new CompletableFuture<>();
                         sendingChunk.add(runnableCompletableFuture);
-                        ForkJoinPool.commonPool().execute(() -> {
+                        runnableCompletableFuture.completeAsync(() -> {
                             this.getSessionWrapper().sendChunk(chunk);
-                            runnableCompletableFuture.complete(null);
+                            return null;
                         });
                     });
 
 
                     Void waitingSendingChunk = CompletableFuture.allOf(sendingChunk.toArray(new CompletableFuture[0])).get();
 
-                    this.getSessionWrapper().sendMessage(ChatColor.GREEN + "Chunk loaded in " + (System.currentTimeMillis() - start) + "ms, there are "+ world.getChunks().size()+" chunks in all" , TextPosition.HOT_BAR);
+                    this.getSessionWrapper().sendMessage(ChatColor.GREEN + "Chunk loaded in " + (System.currentTimeMillis() - start) + "ms, there are "+ world.getChunks().size()+" chunks in all, new chunk "+sendingChunk.size() , TextPosition.HOT_BAR);
                 } catch (InterruptedException | ExecutionException e) {
                     LOGGER.error("", e);
                 }
@@ -207,10 +208,27 @@ public class DefaultPlayer extends Player {
         }
     }
 
+
+
     @Override
     public String toString() {
         return "DefaultPlayer{" +
                 "sessionWrapper=" + sessionWrapper +
                 '}';
+    }
+
+    @Override
+    public String getAgent() {
+        return this.getName();
+    }
+
+    @Override
+    public void joinWatch(Watchable watchable) {
+        watchable.addWatcher(this);
+    }
+
+    @Override
+    public void leaveWatch(Watchable watchable) {
+        watchable.removeWatcher(this);
     }
 }
