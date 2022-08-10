@@ -32,7 +32,7 @@ public class PlayerQuitHandler implements EventListener<PlayerQuitEvent> {
         player.leaveTickBus();
 
         for (Chunk chunk : player.getLookAtChunks()) {
-            chunk.getViewers().remove(player);
+            chunk.removeWatcher(player);
         }
 
         for (Scoreboard<?> scoreboard : player.getLookAtScoreboard()) {
