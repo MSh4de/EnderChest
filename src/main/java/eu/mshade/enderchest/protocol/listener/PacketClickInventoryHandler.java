@@ -1,7 +1,6 @@
 package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderframe.GameMode;
-import eu.mshade.enderframe.entity.Item;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.inventory.*;
 import eu.mshade.enderframe.item.ItemStack;
@@ -14,11 +13,7 @@ import eu.mshade.mwork.event.EventListener;
 import io.netty.channel.Channel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class PacketClickInventoryHandler implements EventListener<PacketClickInventoryEvent> {
 
@@ -101,7 +96,7 @@ public class PacketClickInventoryHandler implements EventListener<PacketClickInv
                 }
 
                 if (pickedItemStack.getAmount() == maxStackSize) return;
-                onDoubleClick(pickedItemStack, player.getPlayerInventory());
+                onDoubleClick(pickedItemStack, player.getInventory());
 
             }
             case ADD_ITEM_FROM_DRAG ->
@@ -120,7 +115,7 @@ public class PacketClickInventoryHandler implements EventListener<PacketClickInv
 
 
                 for (InventoryBufferStore.PlacedItemStack placedItemStack : inventoryBufferStore.getPLacedItemStacks()) {
-                    Inventory inventoryTarget = (placedItemStack.isPlayerInventory() ? player.getPlayerInventory() : player.getOpenedInventory());
+                    Inventory inventoryTarget = (placedItemStack.isPlayerInventory() ? player.getInventory() : player.getOpenedInventory());
 
                     ItemStack itemStack = inventoryTarget.getItemStack(placedItemStack.getSlot());
                     if (itemStack == null) {
@@ -144,7 +139,7 @@ public class PacketClickInventoryHandler implements EventListener<PacketClickInv
                 if (pickedItemStack.getAmount() <= 0) inventoryBufferStore.setPickedItemStack(null);
 
                 for (InventoryBufferStore.PlacedItemStack placedItemStack : inventoryBufferStore.getPLacedItemStacks()) {
-                    Inventory inventoryTarget = (placedItemStack.isPlayerInventory() ? player.getPlayerInventory() : player.getOpenedInventory());
+                    Inventory inventoryTarget = (placedItemStack.isPlayerInventory() ? player.getInventory() : player.getOpenedInventory());
 
                     ItemStack itemStack = inventoryTarget.getItemStack(placedItemStack.getSlot());
                     if (itemStack == null) {
@@ -166,7 +161,7 @@ public class PacketClickInventoryHandler implements EventListener<PacketClickInv
 
                 if (inventoryBufferStore.getPLacedItemStacks().size() == 1) {
                     InventoryBufferStore.PlacedItemStack lastPlacedItemStack = inventoryBufferStore.getLastPlacedItemStack();
-                    Inventory inventoryTarget = (lastPlacedItemStack.isPlayerInventory() ? player.getPlayerInventory() : player.getOpenedInventory());
+                    Inventory inventoryTarget = (lastPlacedItemStack.isPlayerInventory() ? player.getInventory() : player.getOpenedInventory());
                     if (inventoryTarget.equals(inventory)) {
                         ItemStack itemStack = inventoryTarget.getItemStack(lastPlacedItemStack.getSlot());
                         inventoryTarget.setItemStack(lastPlacedItemStack.getSlot(), pickedItemStack);
@@ -175,7 +170,7 @@ public class PacketClickInventoryHandler implements EventListener<PacketClickInv
                 } else {
 
                     for (InventoryBufferStore.PlacedItemStack placedItemStack : inventoryBufferStore.getPLacedItemStacks()) {
-                        Inventory inventoryTarget = (placedItemStack.isPlayerInventory() ? player.getPlayerInventory() : player.getOpenedInventory());
+                        Inventory inventoryTarget = (placedItemStack.isPlayerInventory() ? player.getInventory() : player.getOpenedInventory());
                         ItemStack itemStack = inventoryTarget.getItemStack(placedItemStack.getSlot());
                         if (itemStack == null) {
                             inventoryTarget.setItemStack(placedItemStack.getSlot(), pickedItemStack.clone());
@@ -199,7 +194,7 @@ public class PacketClickInventoryHandler implements EventListener<PacketClickInv
             }
             case NUMBER_KEY -> {
                 int key = event.getKey();
-                PlayerInventory playerInventory = player.getPlayerInventory();
+                PlayerInventory playerInventory = player.getInventory();
                 ItemStack itemStackFromHotBar = playerInventory.getItemStack(key);
                 ItemStack itemStackFromInventory = inventory.getItemStack(slot);
 
@@ -267,15 +262,15 @@ public class PacketClickInventoryHandler implements EventListener<PacketClickInv
                 player.getOpenedInventory().setItemStack(firstEmptySlot, copyItemStack);
             }
         } else {
-            int length = player.getPlayerInventory().getItemStacks().length - 1;
+            int length = player.getInventory().getItemStacks().length - 1;
             for (int i = length; i > 9; i--) {
-                ItemStack foundItemStack = player.getPlayerInventory().getItemStacks()[i];
+                ItemStack foundItemStack = player.getInventory().getItemStacks()[i];
                 dispatchItemIntoOtherItem(copyItemStack, foundItemStack);
             }
 
             if (copyItemStack.getAmount() != 0) {
-                int firstEmptySlot = findFirstEmptySlotRawInventory(player.getPlayerInventory());
-                player.getPlayerInventory().getItemStacks()[firstEmptySlot] = copyItemStack;
+                int firstEmptySlot = findFirstEmptySlotRawInventory(player.getInventory());
+                player.getInventory().getItemStacks()[firstEmptySlot] = copyItemStack;
             }
 
         }
