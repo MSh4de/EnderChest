@@ -11,6 +11,7 @@ import eu.mshade.enderchest.protocol.ProtocolRepository;
 import eu.mshade.enderchest.protocol.listener.*;
 import eu.mshade.enderchest.world.ChunkSafeguard;
 import eu.mshade.enderchest.world.DefaultChunkGenerator;
+import eu.mshade.enderchest.world.SchematicLoader;
 import eu.mshade.enderchest.world.WorldManager;
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.GameMode;
@@ -18,6 +19,7 @@ import eu.mshade.enderframe.entity.CreeperState;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.VillagerType;
 import eu.mshade.enderframe.event.*;
+import eu.mshade.enderframe.item.Material;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.Property;
 import eu.mshade.enderframe.mojang.chat.*;
@@ -27,6 +29,7 @@ import eu.mshade.enderframe.sound.Sound;
 import eu.mshade.enderframe.sound.SoundKey;
 import eu.mshade.enderframe.tick.TickBus;
 import eu.mshade.enderframe.world.*;
+import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderframe.world.metadata.DifficultyWorldMetadata;
 import eu.mshade.enderframe.world.metadata.DimensionWorldMetadata;
 import eu.mshade.enderframe.world.metadata.LevelTypeWorldMetadata;
@@ -46,8 +49,12 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class EnderChest {
@@ -135,7 +142,6 @@ public class EnderChest {
         enderFrameEventBus.subscribe(PlayerQuitEvent.class, new PlayerQuitHandler(this));
 
 
-
         binaryTagDriver.registerMarshal(GameMode.class, new DefaultGameModeMarshal());
         binaryTagDriver.registerMarshal(GameProfile.class, new DefaultGameProfileMarshal());
         binaryTagDriver.registerMarshal(Property.class, new DefaultPropertyMarshal());
@@ -154,7 +160,6 @@ public class EnderChest {
         binaryTagDriver.registerDynamicMarshal(new LocationBinaryTagMarshal());
 
 
-
         binaryTagDriver.registerDynamicMarshal(new MetadataKeyValueBinaryTagMarshal(binaryTagDriver));
 
         this.worldManager = new WorldManager(binaryTagDriver, this);
@@ -165,28 +170,37 @@ public class EnderChest {
             metadataKeyValueBucket.setMetadataKeyValue(new DimensionWorldMetadata(Dimension.OVERWORLD));
             metadataKeyValueBucket.setMetadataKeyValue(new DifficultyWorldMetadata(Difficulty.NORMAL));
         });
-        world.setChunkGenerator(new DefaultChunkGenerator(world));
+        world.setChunkGenerator(chunk -> {
+            for (int x = 0; x < 16; x++) {
+                for (int z = 0; z < 16; z++) {
+                    chunk.setBlock(x, 0, z, Material.STONE);
+                }
+            }
+        });
 
         Thread threadTickBus = new Thread(tickBus, "TickBus");
         threadTickBus.start();
-        LOGGER.info("Starting "+threadTickBus);
-
+        LOGGER.info("Starting " + threadTickBus);
 
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            worldManager.getWorlds().forEach(worldBuffer -> {
-                worldBuffer.getChunks().forEach(chunkCompletableFuture -> worldBuffer.flushChunk(chunkCompletableFuture.join()));
-                worldBuffer.getRegionBinaryTagPoets().forEach(binaryTagPoet -> {
-                    if (binaryTagPoet.getCompoundSectionIndex().consume()) {
-                        binaryTagPoet.writeCompoundSectionIndex();
-                    }
+            worldManager.getChunkSafeguard().stopSafeguard();
+            worldManager.getWorlds().forEach(w -> {
+                LOGGER.info("Saving world " + w.getName());
+                w.saveWorld();
+                w.getChunks().forEach(chunkCompletableFuture -> {
+                    w.saveChunk(chunkCompletableFuture.join());
+                });
+                LOGGER.info("Chunks saved "+ w.getChunks().size() + " in world " + w.getName());
+                w.getRegionBinaryTagPoets().forEach(binaryTagPoet -> {
+                    if (binaryTagPoet.getCompoundSectionIndex().consume()) binaryTagPoet.writeCompoundSectionIndex();
                 });
             });
+            LOGGER.info("Worlds saved");
             parentGroup.shutdownGracefully();
         }));
 
         //this.emerald = new Emerald(parentGroup);
-
 
 
         ChannelFuture channelFuture = new ServerBootstrap()
@@ -208,42 +222,44 @@ public class EnderChest {
 
         LOGGER.info("Done in {} ms !", (System.currentTimeMillis() - start));
 
+/*        parentGroup.scheduleAtFixedRate(()-> {
+            worldManager.getWorlds().forEach(w -> {
+                LOGGER.info("World {} has {} chunks", w.getName(), w.getChunks().size());
+            });
+        }, 0, 1, TimeUnit.SECONDS);*/
+
+
+//        SchematicLoader.placeSchematic(world, this.getClass().getClassLoader().getResourceAsStream("./spawn-e1930.schematic"), new Vector(0, 0, 0));
+///*        SchematicLoader.placeSchematic(world, this.getClass().getClassLoader().getResourceAsStream("./spawn-e1930.schematic"), new Vector(130, 0, 0));
+//        SchematicLoader.placeSchematic(world, this.getClass().getClassLoader().getResourceAsStream("./WaitingLobby1.schematic"), new Vector(-1577, 1, -95));
         /*
         parentGroup.scheduleAtFixedRate(()->{
             System.out.println(String.valueOf(tickBus.getTPS()).replace(".", ","));
         }, 0, 1, TimeUnit.SECONDS);
 
          */
-        
 
 
 
 
 
-        /*
         parentGroup.execute(()->{
             long startGenMap = System.currentTimeMillis();
             List<CompletableFuture<Chunk>> ask = new ArrayList<>();
-            for (int x = 0; x < 200; x++) {
-                for (int z = 0; z < 200; z++) {
+            for (int x = 0; x < 300; x++) {
+                for (int z = 0; z < 300; z++) {
                     ask.add(world.getChunk(x, z));
 
                 }
             }
             try {
                 Void unused = CompletableFuture.allOf(ask.toArray(new CompletableFuture[0])).get();
-                logger.info("Done GenMap in {} ms", (System.currentTimeMillis()-startGenMap));
+                LOGGER.info("Done GenMap in {} ms", (System.currentTimeMillis()-startGenMap));
             } catch (InterruptedException | ExecutionException e) {
-                logger.error("", e);
+                LOGGER.error("", e);
             }
 
         });
-
-         */
-
-
-
-
 
 
 
@@ -257,11 +273,11 @@ public class EnderChest {
         return parentGroup;
     }
 
-    public void addPlayer(Player player){
+    public void addPlayer(Player player) {
         this.players.add(player);
     }
 
-    public void removePlayer(Player player){
+    public void removePlayer(Player player) {
         this.players.remove(player);
     }
 
