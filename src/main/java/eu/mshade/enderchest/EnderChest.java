@@ -184,6 +184,7 @@ public class EnderChest {
 
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LOGGER.warn("Beginning save of server don't close the console !");
             worldManager.getChunkSafeguard().stopSafeguard();
             worldManager.getWorlds().forEach(w -> {
                 LOGGER.info("Saving world " + w.getName());
