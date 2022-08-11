@@ -54,20 +54,30 @@ public class SchematicLoader {
                             int block = blockByIndex < 0 ? blockByIndex + 256 : blockByIndex;
                             byte blockData = blocksData[index];
 
-                            MaterialKey materialKey = MaterialKey.from(block, blockData);
-                            MaterialKey reverse = endermanMaterialWrapper.reverse(materialKey);
-                            if (reverse == null) {
-                                reverse = endermanMaterialWrapper.reverse(MaterialKey.from(block));
+                            MaterialKey materialKey;
+                            if (block == 0) {
+                                materialKey = Material.AIR;
+                            } else {
+                                materialKey = MaterialKey.from(block, blockData);
                             }
+                            MaterialKey reverse;
+                            if (materialKey != Material.AIR) {
+                                reverse = endermanMaterialWrapper.reverse(materialKey);
+                                if (reverse == null) {
+                                    reverse = endermanMaterialWrapper.reverse(MaterialKey.from(block));
+                                }
 
 /*                            if (reverse == null) {
                                 unknown++;
                                 continue;
                             }*/
 
-                        if (reverse == null) {
-                            reverse = Material.RED_WOOL;
-                        }
+                                if (reverse == null) {
+                                    reverse = Material.RED_WOOL;
+                                }
+                            }else {
+                                reverse = materialKey;
+                            }
                             CompletableFuture<Chunk> chunkCompletableFuture = world.getChunk((x + start.getBlockX()) >> 4, (z + start.getBlockZ()) >> 4);
                             Chunk chunk = chunkCompletableFuture.get();
                             updatedChunks.add(chunk);
