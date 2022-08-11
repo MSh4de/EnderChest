@@ -25,11 +25,14 @@ public class ChunkSafeguard extends Thread {
     public void run() {
         while (running) {
             try {
-                Chunk chunk = chunkBlockingQueue.take();
-                chunk.getWorld().saveChunk(chunk);
-                ChunkStateStore chunkStateStore = chunk.getChunkStateStore();
-                chunkStateStore.leaveChunkSafeguard();
-                if (chunkStateStore.getChunkStatus() == ChunkStatus.PREPARE_TO_UNLOAD) chunkStateStore.finishWrite();
+                Chunk chunk = chunkBlockingQueue.poll();
+                if (chunk != null) {
+                    chunk.getWorld().saveChunk(chunk);
+                    ChunkStateStore chunkStateStore = chunk.getChunkStateStore();
+                    chunkStateStore.leaveChunkSafeguard();
+                    if (chunkStateStore.getChunkStatus() == ChunkStatus.PREPARE_TO_UNLOAD && running)
+                        chunkStateStore.finishWrite();
+                }
                 if (!running) {
                     waitingFinishLastChunk.complete(null);
                 }
@@ -42,9 +45,9 @@ public class ChunkSafeguard extends Thread {
 
     public void stopSafeguard() {
         running = false;
-        LOGGER.info("ChunkSafeguard is finished");
         try {
             waitingFinishLastChunk.get();
+            LOGGER.info("ChunkSafeguard is finished");
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Impossible to waiting last chunk", e);
         }
