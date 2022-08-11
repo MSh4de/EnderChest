@@ -25,15 +25,12 @@ import eu.mshade.enderframe.scoreboard.ScoreboardType;
 import eu.mshade.enderframe.sound.Sound;
 import eu.mshade.enderframe.sound.SoundEffect;
 import eu.mshade.enderframe.sound.SoundPosition;
-import eu.mshade.enderframe.world.Chunk;
-import eu.mshade.enderframe.protocol.packet.PacketOutDisconnect;
+import eu.mshade.enderframe.world.*;
 import eu.mshade.enderframe.title.Title;
-import eu.mshade.enderframe.title.TitleAction;
 import eu.mshade.enderframe.title.TitleTime;
-import eu.mshade.enderframe.world.Location;
-import eu.mshade.enderframe.world.World;
 import eu.mshade.enderframe.world.border.WorldBorder;
 import eu.mshade.enderframe.world.border.WorldBorderCenter;
+import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderman.packet.play.PacketOutChangeGameState;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
@@ -41,16 +38,14 @@ import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoinEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PacketFinallyJoinHandler.class);
-    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private EnderChest enderChest;
+    private Chunk chunk = null;
 
     public PacketFinallyJoinHandler(EnderChest enderChest) {
         this.enderChest = enderChest;
@@ -68,10 +63,12 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
 
         World world = enderChest.getWorldManager().getWorld("world");
-        Location location = new Location(world, 7, 0, 7);
+        Location location = new Location(world, 7.5, 0, 7.5);
         int highest = 0;
         try {
-            Chunk chunk = location.getChunk().get();
+            chunk = location.getChunk().get();
+            chunk.setBlock(7, 50, 7, Material.BEDROCK);
+            chunk.setBlock(7, 49, 7, Material.WATER);
             highest = chunk.getHighest(location.getBlockX(), location.getBlockZ());
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.info("");
@@ -89,7 +86,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         sessionWrapper.sendPluginMessage("MC|Brand", protocolBuffer -> protocolBuffer.writeString("Enderchest"));
         //default value of flying speed as 0.05
-        sessionWrapper.sendAbilities(false, false, true, false, 2F, 0.1F);
+        sessionWrapper.sendAbilities(false, false, true, false, 0.5F, 0.1F);
         sessionWrapper.sendPacket(new PacketOutChangeGameState(3, player.getGameMode().getId()));
 
         enderChest.addPlayer(player);
@@ -105,7 +102,6 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         player.joinTickBus(enderChest.getTickBus());
 
-        ItemStack itemStack = new ItemStack(Material.WOODEN_PICKAXE, 1);
         /*
         MetadataKeyValueBucket metadataKeyValueBucket = itemStack.getMetadataKeyValueBucket();
         metadataKeyValueBucket.setMetadataKeyValue(new NameItemStackMetadata("Petit test de mort"));
@@ -124,16 +120,11 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
          */
         Inventory playerInventory = player.getPlayerInventory();
 
-        playerInventory.setItemStack(36, itemStack);
-        playerInventory.setItemStack(37, itemStack);
-        playerInventory.setItemStack(38, itemStack);
-        playerInventory.setItemStack(39, itemStack);
-        playerInventory.setItemStack(40, new ItemStack(Material.OAK_WOOD));
-        playerInventory.setItemStack(41, new ItemStack(Material.OAK_WOOD));
-        playerInventory.setItemStack(42, new ItemStack(Material.OAK_WOOD));
-        playerInventory.setItemStack(43, new ItemStack(Material.OAK_WOOD));
+        playerInventory.setItemStack(40, new ItemStack(Material.OAK_LOG));
+        playerInventory.setItemStack(41, new ItemStack(Material.OAK_LOG));
+        playerInventory.setItemStack(42, new ItemStack(Material.OAK_LOG));
+        playerInventory.setItemStack(43, new ItemStack(Material.OAK_LOG));
         playerInventory.setItemStack(44, new ItemStack(Material.OAK_WOOD_PLANKS));
-        playerInventory.setItemStack(0, itemStack);
         playerInventory.setItemStack(1, new ItemStack(Material.OAK_WOOD_PLANKS, 64));
         playerInventory.setItemStack(2, new ItemStack(Material.OAK_WOOD_PLANKS, 32));
         playerInventory.setItemStack(3, new ItemStack(Material.OAK_WOOD_PLANKS, 64));
@@ -141,20 +132,14 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         sessionWrapper.sendItemStacks(player.getPlayerInventory());
 
-        //sessionWrapper.sendItemStack();
-
-
-        //sessionWrapper.sendPacket(new PacketOutSetItemStack(36, 0, itemStack));
-
-
-        //enderFrameSession.getPlayer().getEnderFrameSessionHandler().sendPacket(new PacketOutSpawnPosition(new BlockPosition(location.getBlockX(),location.getBlockY(),location.getBlockZ())));
-
-        //enderFrameSession.sendPosition(location);
-        //sessionWrapper.sendSquareChunk(10, location.getChunkX(), location.getChunkZ(), world);
-
 
         LOGGER.info(String.format("%s join server", player.getGameProfile().getName()));
 
+        // write TextComponent with rainbow color using CharColor
+        TextComponent textComponent =  TextComponent.of("§1c§2o§3r§4t§5i§6n§7g§8e§9r§a");
+        sessionWrapper.sendMessage(textComponent);
+
+        // send TextComponent to player
         sessionWrapper.sendMessage("Welcome to project MShade");
         sessionWrapper.sendHeaderAndFooter("Hey this is test", "and this is test");
 
@@ -163,11 +148,14 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         int slot = 0;
 
         for (MaterialKey materialKey : Material.getRegisteredMaterials()) {
+            if (slot == inventory.getInventoryKey().getDefaultSlot()) {
+                break;
+            }
             inventory.setItemStack(slot++, new ItemStack(materialKey));
         }
 
-        sessionWrapper.sendOpenInventory(inventory);
-        sessionWrapper.sendItemStacks(inventory);
+       // sessionWrapper.sendOpenInventory(inventory);
+       // sessionWrapper.sendItemStacks(inventory);
 
         Scoreboard<String> scoreboard = new Scoreboard<String>(TextComponent.of(ChatColor.BLUE + "Scoreboard"))
                 .setScoreboardPosition(ScoreboardPosition.SIDEBAR)
@@ -182,9 +170,10 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         Title title = new Title()
                 .setTitle(TextComponent.of("Test du titre"))
                 .setSubtitle(TextComponent.of("Test du sous titre"))
-                .setTitleTime(new TitleTime(10, 200, 10));
+                .setTitleTime(new TitleTime(10, 100, 10));
 
         title.showTitle(player);
+
 
         WorldBorder worldBorder = new WorldBorder()
                 .setWorldBorderCenter(new WorldBorderCenter(7d, 7d))
@@ -193,9 +182,17 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
                 .setWarningTime(2)
                 .setPortalTeleportLimit(29999984);
 
-        worldBorder.createWorldBorder(player);
+        //worldBorder.createWorldBorder(player);
 
-        executorService.schedule(() -> worldBorder.modifyRadius(2000L, radius -> radius + 20), 3, TimeUnit.SECONDS);
+        /*
+        executorService.schedule(() -> {
+            Section section = chunk.getSection(60);
+            Arrays.fill(section.getBlocks(), 2);
+            sessionWrapper.sendSection(section);
+
+        }, 5, TimeUnit.SECONDS);
+
+         */
 
     }
 }
