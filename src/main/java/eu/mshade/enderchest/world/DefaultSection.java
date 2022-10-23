@@ -1,8 +1,13 @@
 package eu.mshade.enderchest.world;
 
+import eu.mshade.enderframe.UniqueId;
+import eu.mshade.enderframe.item.Material;
+import eu.mshade.enderframe.item.MaterialKey;
+import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
 import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderframe.world.Dimension;
 import eu.mshade.enderframe.world.chunk.NibbleArray;
+import eu.mshade.enderframe.world.chunk.Palette;
 import eu.mshade.enderframe.world.chunk.Section;
 
 import java.util.Arrays;
@@ -10,17 +15,18 @@ import java.util.Objects;
 
 public class DefaultSection extends Section {
 
-    public DefaultSection(Chunk chunk, int y, int realBlock) {
-        this(chunk, y, realBlock, new int[4096], NibbleArray.allocate(4096), NibbleArray.allocate(4096));
+    public DefaultSection(Chunk chunk, int y) {
+        super(chunk, y);
         if (chunk.getWorld().getDimension() == Dimension.OVERWORLD) {
             skyLight.fill((byte) 15);
         }
 
         blockLight.fill((byte) 15);
+        palette.setBlock(0, 4096, Material.AIR.toBlock());
     }
 
-    public DefaultSection(Chunk chunk, int y, int realBlock, int[] blocks, NibbleArray blocksLight, NibbleArray skyLight) {
-        super(chunk, y, blocks, blocksLight, skyLight);
+    public DefaultSection(Chunk chunk, int y, int realBlock, Palette palette, int[] blocks, UniqueId uniqueId, NibbleArray blockLight, NibbleArray skyLight) {
+        super(chunk, y, palette, blocks, uniqueId, blockLight, skyLight);
         this.realBlock = realBlock;
     }
 
@@ -34,18 +40,5 @@ public class DefaultSection extends Section {
                 '}';
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DefaultSection that = (DefaultSection) o;
-        return y == that.y && realBlock == that.realBlock && Objects.equals(chunk, that.chunk) && Arrays.equals(blocks, that.blocks) && Objects.equals(blockLight, that.blockLight) && Objects.equals(skyLight, that.skyLight);
-    }
 
-    @Override
-    public int hashCode() {
-        int result = Objects.hash(chunk, y, realBlock, blockLight, skyLight);
-        result = 31 * result + Arrays.hashCode(blocks);
-        return result;
-    }
 }
