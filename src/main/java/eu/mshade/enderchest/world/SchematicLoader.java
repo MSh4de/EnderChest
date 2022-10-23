@@ -4,10 +4,12 @@ import eu.mshade.enderframe.Agent;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.item.Material;
 import eu.mshade.enderframe.item.MaterialKey;
+import eu.mshade.enderframe.world.block.Block;
+import eu.mshade.enderframe.world.block.BlockTransformerRepository;
 import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderframe.world.Vector;
 import eu.mshade.enderframe.world.World;
-import eu.mshade.enderman.wrapper.EndermanMaterialWrapper;
+import eu.mshade.enderman.EndermanProtocol;
 import eu.mshade.mwork.MWork;
 import eu.mshade.mwork.binarytag.BinaryTagDriver;
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
@@ -24,10 +26,13 @@ import java.util.zip.GZIPInputStream;
 
 public class SchematicLoader {
 
-    private static EndermanMaterialWrapper endermanMaterialWrapper = new EndermanMaterialWrapper();
+    private static EndermanProtocol endermanProtocol = new EndermanProtocol();
     private static Logger LOGGER = LoggerFactory.getLogger(SchematicLoader.class);
+    private static final Block AIR = Material.AIR.toBlock();
 
     public static void placeSchematic(World world, InputStream inputStream, Vector start) {
+        BlockTransformerRepository blockTransformerRepository = endermanProtocol.getBlockTransformerRepository();
+        Block STONE = Material.STONE.toBlock();
         CompletableFuture.runAsync(() -> {
 
             BinaryTagDriver binaryTagDriver = MWork.get().getBinaryTagDriver();
@@ -43,9 +48,11 @@ public class SchematicLoader {
                 byte[] blocks = compoundBinaryTag.getByteArray("Blocks");
                 byte[] blocksData = compoundBinaryTag.getByteArray("Data");
 
+                System.out.println("Schematic size: " + width + "x" + length + "x" + height);
+
                 int unknown = 0;
                 Set<Chunk> updatedChunks = new HashSet<>();
-                // with, legnth, height by center
+                
                 for (int x = 0; x < width; x++) {
                     for (int y = 0; y < height; y++) {
                         for (int z = 0; z < length; z++) {
@@ -60,24 +67,23 @@ public class SchematicLoader {
                             } else {
                                 materialKey = MaterialKey.from(block, blockData);
                             }
-                            MaterialKey reverse;
+                            Block reverse;
                             if (materialKey != Material.AIR) {
-                                reverse = endermanMaterialWrapper.reverse(materialKey);
-                                if (reverse == null) {
-                                    reverse = endermanMaterialWrapper.reverse(MaterialKey.from(block));
-                                }
+                                reverse = blockTransformerRepository.reverse(materialKey);
 
-/*                            if (reverse == null) {
+                            if (reverse == null) {
                                 unknown++;
-                                continue;
-                            }*/
-
-                                if (reverse == null) {
-                                    reverse = Material.RED_WOOL;
-                                }
-                            }else {
-                                reverse = materialKey;
+                                reverse = STONE;
                             }
+
+/*                                if (reverse == null) {
+
+                                }*/
+                            }else {
+                                reverse = AIR;
+                            }
+
+
                             CompletableFuture<Chunk> chunkCompletableFuture = world.getChunk((x + start.getBlockX()) >> 4, (z + start.getBlockZ()) >> 4);
                             Chunk chunk = chunkCompletableFuture.get();
                             updatedChunks.add(chunk);
@@ -86,12 +92,13 @@ public class SchematicLoader {
                                 schematicAgent.joinWatch(chunk);
                             }
 
-                            chunk.setBlock(x + start.getBlockX(), y + start.getBlockY(), z + start.getBlockZ(), reverse);
+                            Block finalReverse = reverse;
+                            chunk.setBlock(x + start.getBlockX(), y + start.getBlockY(), z + start.getBlockZ(), finalReverse);
                         }
                     }
                 }
 
-                System.out.println(unknown + " unknown blocks out of " + blocks.length);
+                System.out.println(unknown + " unknown blocks out of " + blocks.length+ " blocks (" + (unknown / (double) blocks.length * 100) + "%)");
                 LOGGER.info("Loaded schematic in " + (System.currentTimeMillis() - startTime) + "ms");
 
                 updatedChunks.forEach(chunk -> {
@@ -122,10 +129,8 @@ public class SchematicLoader {
                 });
 
 
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
-            } catch (ExecutionException | InterruptedException e) {
-                throw new RuntimeException(e);
             }
 
         });
