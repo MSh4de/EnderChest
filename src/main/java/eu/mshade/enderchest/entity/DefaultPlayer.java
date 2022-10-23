@@ -158,7 +158,11 @@ public class DefaultPlayer extends Player {
                     });
 
 
-                    Void waitingSendingChunk = CompletableFuture.allOf(sendingChunk.toArray(new CompletableFuture[0])).get();
+                    Void waitingSendingChunk = CompletableFuture.allOf(sendingChunk.toArray(new CompletableFuture[0]))
+                            .exceptionally(throwable -> {
+                                LOGGER.error("Error while sending chunk", throwable);
+                                return null;
+                            }).get();
 
                     this.getSessionWrapper().sendMessage(ChatColor.GREEN + "Chunk loaded in " + (System.currentTimeMillis() - start) + "ms, there are "+ world.getChunks().size()+" chunks in all, new chunk "+sendingChunk.size() , TextPosition.HOT_BAR);
                 } catch (InterruptedException | ExecutionException e) {
@@ -204,7 +208,6 @@ public class DefaultPlayer extends Player {
 
         if (isPeriod(20)){
             this.getSessionWrapper().sendKeepAlive((int) System.currentTimeMillis());
-
         }
     }
 
