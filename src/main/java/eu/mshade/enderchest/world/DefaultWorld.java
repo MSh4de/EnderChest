@@ -12,6 +12,7 @@ import eu.mshade.enderframe.event.ChunkLoadEvent;
 import eu.mshade.enderframe.item.MaterialKey;
 import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
 import eu.mshade.enderframe.world.*;
+import eu.mshade.enderframe.world.block.Block;
 import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderframe.world.chunk.ChunkStateStore;
 import eu.mshade.mwork.MWork;
@@ -213,7 +214,33 @@ public class DefaultWorld extends World {
 
         try {
             Chunk chunk = getChunk(chunkX, chunkZ).get();
-            chunk.setBlock(x, y, z, materialKey);
+            chunk.setBlock(x, y, z, materialKey.toBlock());
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void setBlock(int x, int y, int z, Block block) {
+        int chunkX = x >> 4;
+        int chunkZ = z >> 4;
+
+        try {
+            Chunk chunk = getChunk(chunkX, chunkZ).get();
+            chunk.setBlock(x, y, z, block);
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Block getBlock(int x, int y, int z) {
+        int chunkX = x >> 4;
+        int chunkZ = z >> 4;
+
+        try {
+            Chunk chunk = getChunk(chunkX, chunkZ).get();
+            return chunk.getBlock(x, y, z);
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
@@ -307,4 +334,10 @@ public class DefaultWorld extends World {
         return getBinaryTagPoet(binaryTagDriver, world, chunk.getX(), chunk.getZ());
     }
 
+    @Override
+    public String toString() {
+        return "DefaultWorld{" +
+                "name=" + getName() +
+                '}';
+    }
 }
