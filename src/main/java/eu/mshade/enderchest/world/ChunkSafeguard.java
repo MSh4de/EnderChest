@@ -15,7 +15,7 @@ public class ChunkSafeguard extends Thread {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChunkSafeguard.class);
     protected BlockingQueue<Chunk> chunkBlockingQueue = new LinkedBlockingQueue<>();
     protected boolean running = true;
-    protected CompletableFuture<Void> waitingFinishLastChunk = new CompletableFuture<>();
+    protected CompletableFuture<Boolean> waitingFinishLastChunk = new CompletableFuture<>();
 
     public ChunkSafeguard() {
         super("ChunkSafeguard");
@@ -24,31 +24,24 @@ public class ChunkSafeguard extends Thread {
     @Override
     public void run() {
         while (running) {
-            try {
-                Chunk chunk = chunkBlockingQueue.poll();
-                if (chunk != null) {
-                    chunk.getWorld().saveChunk(chunk);
-                    ChunkStateStore chunkStateStore = chunk.getChunkStateStore();
-                    chunkStateStore.leaveChunkSafeguard();
-                    if (chunkStateStore.getChunkStatus() == ChunkStatus.PREPARE_TO_UNLOAD && running)
-                        chunkStateStore.finishWrite();
-                }
-                if (!running) {
-                    waitingFinishLastChunk.complete(null);
-                }
-            }catch (Exception e) {
-                LOGGER.error("Impossible to take chunk", e);
+            Chunk chunk = chunkBlockingQueue.poll();
+            if (chunk != null) {
+                chunk.getWorld().saveChunk(chunk);
+                ChunkStateStore chunkStateStore = chunk.getChunkStateStore();
+                chunkStateStore.leaveChunkSafeguard();
+                if (chunkStateStore.getChunkStatus() == ChunkStatus.PREPARE_TO_UNLOAD && running)
+                    chunkStateStore.finishWrite();
             }
         }
-
+        waitingFinishLastChunk.complete(true);
     }
 
     public void stopSafeguard() {
         running = false;
         try {
-            waitingFinishLastChunk.get();
+            boolean unused = waitingFinishLastChunk.get(5, TimeUnit.SECONDS);
             LOGGER.info("ChunkSafeguard is finished");
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOGGER.error("Impossible to waiting last chunk", e);
         }
     }
