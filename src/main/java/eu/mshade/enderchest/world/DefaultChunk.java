@@ -1,9 +1,14 @@
 package eu.mshade.enderchest.world;
 
 import eu.mshade.enderframe.Agent;
+import eu.mshade.enderframe.item.Material;
 import eu.mshade.enderframe.item.MaterialKey;
+import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
 import eu.mshade.enderframe.world.ChunkStatus;
+import eu.mshade.enderframe.world.Location;
+import eu.mshade.enderframe.world.block.Block;
 import eu.mshade.enderframe.world.chunk.Chunk;
+import eu.mshade.enderframe.world.chunk.Palette;
 import eu.mshade.enderframe.world.chunk.Section;
 import eu.mshade.enderframe.world.World;
 import org.slf4j.Logger;
@@ -19,7 +24,6 @@ import java.util.function.Consumer;
 public class DefaultChunk extends Chunk {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultChunk.class);
-
     public static final int WIDTH = 16, HEIGHT = 16, DEPTH = 256, SEC_DEPTH = 16;
 
     private final Queue<Agent> agents = new ConcurrentLinkedQueue<>();
@@ -38,7 +42,8 @@ public class DefaultChunk extends Chunk {
     public int getBitMask() {
         int sectionBitmask = 0;
         for (int i = 0; i < sections.length; i++) {
-            if (sections[i] != null) {
+            Section section = sections[i];
+            if (section != null && section.getRealBlock() != 0) {
                 sectionBitmask |= 1 << i;
             }
         }
@@ -47,27 +52,41 @@ public class DefaultChunk extends Chunk {
 
 
     @Override
-    public int getBlock(int x, int y, int z) {
+    public Block getBlock(int x, int y, int z) {
         Section section = getSection(y);
-        return section.getBlocks()[getBlockIndex(x, y, z)];
+        int blockIndex = getBlockIndex(x, y, z);
+        return section.getBlock(blockIndex);
     }
 
     @Override
-    public void setBlock(int x, int y, int z, MaterialKey materialKey) {
+    public void setBlock(int x, int y, int z, Block block) {
         if (y < 0 || y > 255) return;
 
         Section section = getSection(y);
+        Palette palette = section.getPalette();
         int index = getBlockIndex(x, y, z);
-        int lastBlock = section.getBlocks()[index];
+        Block targetBlock = section.getBlock(index);
 
-        // check if the block is already set to the same value
-        //if (lastBlock == materialKey.getId()) return;
+        if (block.equals(targetBlock)) return;
 
-        if (materialKey.getId() == 0 && lastBlock != 0) {
-            int i = section.getRealBlock() - 1;
-            section.setRealBlock(Math.max(i, 0));
-        } else section.setRealBlock(section.getRealBlock() + 1);
-        section.getBlocks()[index] = materialKey.getId();
+
+        if (targetBlock != null) {
+            Integer blockId = palette.getId(targetBlock);
+            if (blockId != null) {
+                palette.removeCount(blockId);
+                int blockCount = palette.getCount(blockId);
+                if (blockCount <= 0) palette.deleteBlock(blockId);
+            }
+        }
+
+        Integer blockId = palette.getId(block);
+        if (blockId == null) {
+            blockId = section.getUniqueId().getFreeId();
+            palette.setBlock(blockId, block);
+        }
+        palette.addCount(blockId);
+        section.getBlocks()[index] = blockId;
+
 
         this.getChunkStateStore().interact();
 
@@ -120,13 +139,14 @@ public class DefaultChunk extends Chunk {
     @Override
     public int getHighest(int x, int z) {
         for (int i = 255; i > 0; i--) {
-            if (sections[i >> 4] != null && getBlock(x, i, z) != 0) {
+            Block block = getBlock(x, i, z);
+            if (block == null) continue;
+            if (sections[i >> 4] != null && block.getMaterialKey() != Material.AIR) {
                 return i;
             }
         }
         return 0;
     }
-
 
 
     public void setBiomes(byte[] biomes) {
@@ -138,7 +158,7 @@ public class DefaultChunk extends Chunk {
     public Section getSection(int y) {
         int realY = y >> 4;
         if (sections[realY] == null) {
-            sections[realY] = new DefaultSection(this, realY, 0);
+            sections[realY] = new DefaultSection(this, realY);
         }
         return sections[realY];
     }
@@ -146,7 +166,7 @@ public class DefaultChunk extends Chunk {
     @Override
     public void addWatcher(Agent agent) {
         agents.add(agent);
-        if(chunkStateStore.getChunkStatus() != ChunkStatus.LOADED){
+        if (chunkStateStore.getChunkStatus() != ChunkStatus.LOADED) {
             chunkStateStore.setChunkStatus(ChunkStatus.LOADED);
         }
     }
