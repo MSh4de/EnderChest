@@ -23,6 +23,10 @@ import eu.mshade.enderframe.protocol.SessionWrapper;
 import eu.mshade.enderframe.scoreboard.Scoreboard;
 import eu.mshade.enderframe.scoreboard.ScoreboardPosition;
 import eu.mshade.enderframe.scoreboard.ScoreboardType;
+import eu.mshade.enderframe.scoreboard.team.Team;
+import eu.mshade.enderframe.scoreboard.team.TeamFriendlyFire;
+import eu.mshade.enderframe.scoreboard.team.TeamMode;
+import eu.mshade.enderframe.scoreboard.team.TeamNameTagVisibility;
 import eu.mshade.enderframe.sound.Sound;
 import eu.mshade.enderframe.sound.SoundEffect;
 import eu.mshade.enderframe.sound.SoundPosition;
@@ -40,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -172,10 +177,10 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
                 .setScoreboardPosition(ScoreboardPosition.SIDEBAR)
                 .setScoreboardType(ScoreboardType.INTEGER)
                 .addObjective("TokyFR", 59)
-                .addObjective("RealAlpha", 70);
+                .addObjective("_RealAlpha_", 70);
         scoreboard.showScoreboard(player);
 
-        SoundEffect soundEffect = new SoundEffect(Sound.RANDOM_CHESTOPEN, new SoundPosition(7, 4, 7), 1F, 63);
+        SoundEffect soundEffect = new SoundEffect(Sound.RANDOM_CHESTOPEN, new SoundPosition(7, highest + 2, 7), 100F, 63);
         soundEffect.createSound(player);
 
         Title title = new Title()
@@ -185,8 +190,22 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         title.showTitle(player);
 
+        Team team = new Team.TeamBuilder()
+                .setTeamName(scoreboard.getScoreboardId())
+                .setTeamMode(TeamMode.CREATE_TEAM)
+                .setTeamDisplayName("MCHAD")
+                .setTeamPrefix("Eh")
+                .setTeamSuffix("HE")
+                .setTeamColor(ChatColor.YELLOW)
+                .setPlayersName(List.of("TokyFR", "_RealAlpha_"))
+                .setTeamNameTagVisibility(TeamNameTagVisibility.ALWAYS)
+                .setTeamFriendlyFire(TeamFriendlyFire.ON)
+                .buildTeam();
+
+        //sessionWrapper.sendTeams(team);
+
         Particle particle = new ParticleBlockCrack(false, new Vector(7, highest + 2, 7), new Vector(0, 0, 0), 1F, 100, Material.GRASS, 0);
         //Particle particle = new Particle(ParticleType.FIREWORK, false, new Vector(7, highest + 2, 7), new Vector(0, 0, 0), 1F, 100);
-        executorService.scheduleAtFixedRate(() -> particle.showParticle(player), 0, 3, TimeUnit.SECONDS);
+        executorService.schedule(() ->  sessionWrapper.sendTeams(team), 3, TimeUnit.SECONDS);
     }
 }
