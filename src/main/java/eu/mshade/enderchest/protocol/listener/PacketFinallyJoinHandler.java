@@ -5,14 +5,21 @@ import eu.mshade.enderchest.entity.DefaultPlayer;
 import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
+import eu.mshade.enderframe.entity.Item;
 import eu.mshade.enderframe.entity.metadata.SkinPartEntityMetadata;
+import eu.mshade.enderframe.inventory.EquipmentSlot;
 import eu.mshade.enderframe.inventory.Inventory;
 import eu.mshade.enderframe.inventory.InventoryType;
-import eu.mshade.enderframe.item.ItemStack;
-import eu.mshade.enderframe.item.Material;
-import eu.mshade.enderframe.item.MaterialKey;
+import eu.mshade.enderframe.item.*;
+import eu.mshade.enderframe.item.metadata.*;
+import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
+import eu.mshade.enderframe.metadata.attribute.Attribute;
+import eu.mshade.enderframe.metadata.attribute.AttributeModifier;
+import eu.mshade.enderframe.metadata.attribute.AttributeOperation;
 import eu.mshade.enderframe.metadata.entity.EntityMetadataKey;
+import eu.mshade.enderframe.mojang.Color;
 import eu.mshade.enderframe.mojang.GameProfile;
+import eu.mshade.enderframe.mojang.Property;
 import eu.mshade.enderframe.mojang.SkinPart;
 import eu.mshade.enderframe.mojang.chat.ChatColor;
 import eu.mshade.enderframe.mojang.chat.TextComponent;
@@ -38,6 +45,9 @@ import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoinEvent> {
@@ -67,13 +77,11 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         int highest = 0;
         try {
             chunk = location.getChunk().get();
-            chunk.setBlock(7, 50, 7, Material.BEDROCK);
-            chunk.setBlock(7, 49, 7, Material.WATER);
             highest = chunk.getHighest(location.getBlockX(), location.getBlockZ());
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.info("");
         }
-        location.setY(highest + 1);
+        location.setY(highest+1);
 
         DefaultPlayer player = new DefaultPlayer(location, gameProfile.getId().hashCode(), sessionWrapper);
         player.setGameMode(GameMode.CREATIVE);
@@ -86,7 +94,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         sessionWrapper.sendPluginMessage("MC|Brand", protocolBuffer -> protocolBuffer.writeString("Enderchest"));
         //default value of flying speed as 0.05
-        sessionWrapper.sendAbilities(false, false, true, false, 0.5F, 0.1F);
+        sessionWrapper.sendAbilities(false, false, true, false, 0.1F, 0.1F);
         sessionWrapper.sendPacket(new PacketOutChangeGameState(3, player.getGameMode().getId()));
 
         enderChest.addPlayer(player);
@@ -102,8 +110,10 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         player.joinTickBus(enderChest.getTickBus());
 
-        /*
-        MetadataKeyValueBucket metadataKeyValueBucket = itemStack.getMetadataKeyValueBucket();
+
+        ItemStack grassItemStack = new ItemStack(Material.GRASS);
+
+        MetadataKeyValueBucket metadataKeyValueBucket = grassItemStack.getMetadataKeyValueBucket();
         metadataKeyValueBucket.setMetadataKeyValue(new NameItemStackMetadata("Petit test de mort"));
         metadataKeyValueBucket.setMetadataKeyValue(new LoreItemStackMetadata(List.of("Ca fonctionne ?", "ALORS", "Es que ça fonctionne ?", "Du coup ?", "Oui ça fonctionne pd")));
         //metadataKeyValueBucket.setMetadataKeyValue(new UnbreakableItemStackMetadata(true));
@@ -112,25 +122,25 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         metadataKeyValueBucket.setMetadataKeyValue(new HideFlagsItemStackMetadata(Set.of(ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_DESTROYS)));
         metadataKeyValueBucket.setMetadataKeyValue(new ColorItemStackMetadata(Color.BLUE));
         metadataKeyValueBucket.setMetadataKeyValue(new SkullOwnerItemStackMetadata(new GameProfile(UUID.randomUUID(), "okok", List.of(new Property("textures", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTkxYTc3OThkZDBhNDZiNmIzZjE3YmIwMzBhNmFkZjZlNDkwNjRjNGI5M2QxZDlkNTYzNDc4OWM4OTQ5In19fQ==")))));
+        
 
 
         metadataKeyValueBucket.setMetadataKeyValue(new AttributeModifiersItemStackMetadata(List.of(new ItemStackAttributeModifier(Attribute.MAX_HEALTH, "test", EquipmentSlot.MAIN_HAND, new AttributeModifier(UUID.randomUUID(), 10, AttributeOperation.ADD_NUMBER)))));
 
 
-         */
-        Inventory playerInventory = player.getPlayerInventory();
+        Inventory playerInventory = player.getInventory();
 
-        playerInventory.setItemStack(40, new ItemStack(Material.OAK_LOG));
+/*        playerInventory.setItemStack(40, new ItemStack(Material.OAK_LOG));
         playerInventory.setItemStack(41, new ItemStack(Material.OAK_LOG));
         playerInventory.setItemStack(42, new ItemStack(Material.OAK_LOG));
-        playerInventory.setItemStack(43, new ItemStack(Material.OAK_LOG));
+        playerInventory.setItemStack(43, new ItemStack(Material.OAK_LOG));*/
         playerInventory.setItemStack(44, new ItemStack(Material.OAK_WOOD_PLANKS));
         playerInventory.setItemStack(1, new ItemStack(Material.OAK_WOOD_PLANKS, 64));
         playerInventory.setItemStack(2, new ItemStack(Material.OAK_WOOD_PLANKS, 32));
         playerInventory.setItemStack(3, new ItemStack(Material.OAK_WOOD_PLANKS, 64));
         playerInventory.setItemStack(4, new ItemStack(Material.OAK_WOOD_PLANKS, 64));
 
-        sessionWrapper.sendItemStacks(player.getPlayerInventory());
+        sessionWrapper.sendItemStacks(player.getInventory());
 
 
         LOGGER.info(String.format("%s join server", player.getGameProfile().getName()));
@@ -162,7 +172,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
                 .setScoreboardType(ScoreboardType.INTEGER)
                 .addObjective("TokyFR", 59)
                 .addObjective("RealAlpha", 70);
-        scoreboard.showScoreboard(player);
+        //scoreboard.showScoreboard(player);
 
         SoundEffect soundEffect = new SoundEffect(Sound.RANDOM_CHESTOPEN, new SoundPosition(7, 4, 7), 1F, 63);
         soundEffect.createSound(player);

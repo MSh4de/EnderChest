@@ -21,10 +21,10 @@ public class PacketEntityActionHandler implements EventListener<PacketEntityActi
 
         switch (event.getActionType()){
             case START_SNEAKING:
-                //player.setSneaking(true);
+                player.setSneaking(true);
                 break;
             case STOP_SNEAKING:
-                //player.setSneaking(false);
+                player.setSneaking(false);
                 break;
             case START_SPRINTING:
                 metadataKeyValueBucket.setMetadataKeyValue(new SprintingEntityMetadata(true));
