@@ -13,6 +13,7 @@ import eu.mshade.enderchest.world.ChunkSafeguard;
 import eu.mshade.enderchest.world.DefaultChunkGenerator;
 import eu.mshade.enderchest.world.SchematicLoader;
 import eu.mshade.enderchest.world.WorldManager;
+import eu.mshade.enderframe.Agent;
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.entity.CreeperState;
@@ -20,6 +21,8 @@ import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.VillagerType;
 import eu.mshade.enderframe.event.*;
 import eu.mshade.enderframe.item.Material;
+import eu.mshade.enderframe.item.MaterialKey;
+import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.Property;
 import eu.mshade.enderframe.mojang.chat.*;
@@ -29,6 +32,10 @@ import eu.mshade.enderframe.sound.Sound;
 import eu.mshade.enderframe.sound.SoundKey;
 import eu.mshade.enderframe.tick.TickBus;
 import eu.mshade.enderframe.world.*;
+import eu.mshade.enderframe.world.block.Block;
+import eu.mshade.enderframe.world.block.BlockFace;
+import eu.mshade.enderframe.world.block.FaceBlockMetadata;
+import eu.mshade.enderframe.world.block.PoweredBlockMetadata;
 import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderframe.world.metadata.DifficultyWorldMetadata;
 import eu.mshade.enderframe.world.metadata.DimensionWorldMetadata;
@@ -52,10 +59,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class EnderChest {
 
@@ -141,6 +145,7 @@ public class EnderChest {
 
         enderFrameEventBus.subscribe(PlayerQuitEvent.class, new PlayerQuitHandler(this));
 
+        MetadataKeyValueBinaryTagMarshal metadataKeyValueBinaryTagMarshal = new MetadataKeyValueBinaryTagMarshal(binaryTagDriver);
 
         binaryTagDriver.registerMarshal(GameMode.class, new DefaultGameModeMarshal());
         binaryTagDriver.registerMarshal(GameProfile.class, new DefaultGameProfileMarshal());
@@ -153,14 +158,16 @@ public class EnderChest {
         binaryTagDriver.registerMarshal(LevelType.class, new LevelTypeBinaryTagMarshal());
 
 
+        binaryTagDriver.registerDynamicMarshal(metadataKeyValueBinaryTagMarshal);
         binaryTagDriver.registerDynamicMarshal(new WorldBinaryTagMarshal());
-        binaryTagDriver.registerDynamicMarshal(new SectionBinaryTagMarshal());
         binaryTagDriver.registerDynamicMarshal(new ChunkBinaryTagMarshal());
         binaryTagDriver.registerDynamicMarshal(new DefaultVectorMarshal());
         binaryTagDriver.registerDynamicMarshal(new LocationBinaryTagMarshal());
+        binaryTagDriver.registerDynamicMarshal(new UniqueIdBinaryTagMarshal());
+        binaryTagDriver.registerDynamicMarshal(new PaletteBinaryTagMarshal(binaryTagDriver));
+        binaryTagDriver.registerDynamicMarshal(new SectionBinaryTagMarshal(binaryTagDriver));
 
 
-        binaryTagDriver.registerDynamicMarshal(new MetadataKeyValueBinaryTagMarshal(binaryTagDriver));
 
         this.worldManager = new WorldManager(binaryTagDriver, this);
 
@@ -170,13 +177,7 @@ public class EnderChest {
             metadataKeyValueBucket.setMetadataKeyValue(new DimensionWorldMetadata(Dimension.OVERWORLD));
             metadataKeyValueBucket.setMetadataKeyValue(new DifficultyWorldMetadata(Difficulty.NORMAL));
         });
-        world.setChunkGenerator(chunk -> {
-            for (int x = 0; x < 16; x++) {
-                for (int z = 0; z < 16; z++) {
-                    chunk.setBlock(x, 0, z, Material.STONE);
-                }
-            }
-        });
+        world.setChunkGenerator(new DefaultChunkGenerator(world));
 
         Thread threadTickBus = new Thread(tickBus, "TickBus");
         threadTickBus.start();
@@ -192,14 +193,17 @@ public class EnderChest {
                 w.getChunks().forEach(chunkCompletableFuture -> {
                     w.saveChunk(chunkCompletableFuture.join());
                 });
-                LOGGER.info("Chunks saved "+ w.getChunks().size() + " in world " + w.getName());
+                // log number of chunks saved in the world
+                LOGGER.info("Saved " + w.getChunks().size() + " chunks in world " + w.getName());
                 w.getRegionBinaryTagPoets().forEach(binaryTagPoet -> {
                     if (binaryTagPoet.getCompoundSectionIndex().consume()) binaryTagPoet.writeCompoundSectionIndex();
                 });
             });
             LOGGER.info("Worlds saved");
             parentGroup.shutdownGracefully();
+            childGroup.shutdownGracefully();
         }));
+
 
         //this.emerald = new Emerald(parentGroup);
 
@@ -223,32 +227,54 @@ public class EnderChest {
 
         LOGGER.info("Done in {} ms !", (System.currentTimeMillis() - start));
 
-/*        parentGroup.scheduleAtFixedRate(()-> {
-            worldManager.getWorlds().forEach(w -> {
-                LOGGER.info("World {} has {} chunks", w.getName(), w.getChunks().size());
-            });
-        }, 0, 1, TimeUnit.SECONDS);*/
+
+/*
+        try {
+            Chunk chunk = world.getChunk(0, 0).get();
+            Agent agentTest = Agent.from("AGENT_TEST");
+            agentTest.joinWatch(chunk);
+
+            Block block = Material.OAK_BUTTON.toBlock();
+            MetadataKeyValueBucket metadataKeyValueBucket = block.getMetadataKeyValueBucket();
+            BlockFace[] blockFaces = BlockFace.values();
+
+
+            parentGroup.scheduleAtFixedRate(()-> {
+                metadataKeyValueBucket.setMetadataKeyValue(new FaceBlockMetadata(blockFaces[ThreadLocalRandom.current().nextInt(blockFaces.length)]));
+                metadataKeyValueBucket.setMetadataKeyValue(new PoweredBlockMetadata(ThreadLocalRandom.current().nextBoolean()));
+
+                chunk.getWatching().forEach(agent -> {
+                    if (agent instanceof Player player) {
+                        player.getSessionWrapper().sendBlockChange(new Vector(7, 53, 7), block);
+                    }
+                });
+
+            },0, 600, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+*/
+
 
 
 //        SchematicLoader.placeSchematic(world, this.getClass().getClassLoader().getResourceAsStream("./spawn-e1930.schematic"), new Vector(0, 0, 0));
 ///*        SchematicLoader.placeSchematic(world, this.getClass().getClassLoader().getResourceAsStream("./spawn-e1930.schematic"), new Vector(130, 0, 0));
 //        SchematicLoader.placeSchematic(world, this.getClass().getClassLoader().getResourceAsStream("./WaitingLobby1.schematic"), new Vector(-1577, 1, -95));
-        /*
-        parentGroup.scheduleAtFixedRate(()->{
+
+/*        parentGroup.scheduleAtFixedRate(()->{
             System.out.println(String.valueOf(tickBus.getTPS()).replace(".", ","));
-        }, 0, 1, TimeUnit.SECONDS);
-
-         */
+        }, 0, 1, TimeUnit.SECONDS);*/
 
 
 
 
 
-        parentGroup.execute(()->{
+
+/*        parentGroup.execute(()->{
             long startGenMap = System.currentTimeMillis();
             List<CompletableFuture<Chunk>> ask = new ArrayList<>();
-            for (int x = 0; x < 300; x++) {
-                for (int z = 0; z < 300; z++) {
+            for (int x = 0; x < 250; x++) {
+                for (int z = 0; z < 250; z++) {
                     ask.add(world.getChunk(x, z));
 
                 }
@@ -260,7 +286,7 @@ public class EnderChest {
                 LOGGER.error("", e);
             }
 
-        });
+        });*/
 
 
 
