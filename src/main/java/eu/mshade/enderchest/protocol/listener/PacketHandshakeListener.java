@@ -42,10 +42,10 @@ public class PacketHandshakeListener implements EventListener<PacketHandshakeEve
                     sessionWrapper.toggleProtocol(protocol);
                     sessionWrapper.toggleProtocolStatus(ProtocolStatus.LOGIN);
                 }else {
-                    sessionWrapper.sendPacketAndClose(new PacketOutDisconnect(TextComponent.of("You version has not supported by MShade")));
+                    sessionWrapper.sendPacketAndClose(new PacketOutDisconnect(TextComponent.of("Your version is not supported by MShade")));
                 }
             } else {
-                sessionWrapper.sendPacketAndClose(new PacketOutDisconnect(TextComponent.of("You version has not supported by MShade")));
+                sessionWrapper.sendPacketAndClose(new PacketOutDisconnect(TextComponent.of("Your version is not supported by MShade")));
             }
         }
         sessionWrapper.setHandshake(handshake);
