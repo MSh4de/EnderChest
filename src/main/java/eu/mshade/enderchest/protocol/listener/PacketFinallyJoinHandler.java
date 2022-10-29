@@ -24,6 +24,8 @@ import eu.mshade.enderframe.mojang.SkinPart;
 import eu.mshade.enderframe.mojang.chat.ChatColor;
 import eu.mshade.enderframe.mojang.chat.TextComponent;
 import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
+import eu.mshade.enderframe.particle.Particle;
+import eu.mshade.enderframe.particle.ParticleBlockCrack;
 import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.protocol.SessionWrapper;
 import eu.mshade.enderframe.scoreboard.Scoreboard;
@@ -32,23 +34,26 @@ import eu.mshade.enderframe.scoreboard.ScoreboardType;
 import eu.mshade.enderframe.sound.Sound;
 import eu.mshade.enderframe.sound.SoundEffect;
 import eu.mshade.enderframe.sound.SoundPosition;
-import eu.mshade.enderframe.world.*;
 import eu.mshade.enderframe.title.Title;
 import eu.mshade.enderframe.title.TitleTime;
 import eu.mshade.enderframe.world.border.WorldBorder;
 import eu.mshade.enderframe.world.border.WorldBorderCenter;
 import eu.mshade.enderframe.world.chunk.Chunk;
+import eu.mshade.enderframe.world.Location;
+import eu.mshade.enderframe.world.Vector;
+import eu.mshade.enderframe.world.World;
 import eu.mshade.enderman.packet.play.PacketOutChangeGameState;
-import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
-import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoinEvent> {
 
@@ -183,7 +188,6 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         title.showTitle(player);
 
-
         WorldBorder worldBorder = new WorldBorder()
                 .setWorldBorderCenter(new WorldBorderCenter(7d, 7d))
                 .setRadius(20d)
@@ -202,6 +206,10 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         }, 5, TimeUnit.SECONDS);
 
          */
+
+        Particle particle = new ParticleBlockCrack(false, new Vector(7, highest + 2, 7), new Vector(0, 0, 0), 1F, 100, Material.GRASS, 0);
+        //Particle particle = new Particle(ParticleType.FIREWORK, false, new Vector(7, highest + 2, 7), new Vector(0, 0, 0), 1F, 100);
+        executorService.scheduleAtFixedRate(() -> particle.showParticle(player), 0, 3, TimeUnit.SECONDS);
 
     }
 }
