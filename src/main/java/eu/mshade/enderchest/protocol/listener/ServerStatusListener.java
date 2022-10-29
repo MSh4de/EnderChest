@@ -15,9 +15,8 @@ import io.netty.channel.Channel;
 public class ServerStatusListener implements EventListener<ServerStatusEvent> {
 
     @Override
-    public void onEvent(ServerStatusEvent event, ParameterContainer parameterContainer) {
-        Channel channel = parameterContainer.getContainer(Channel.class);
-        SessionWrapper sessionWrapper = ProtocolPipeline.get().getSessionWrapper(channel);
+    public void onEvent(ServerStatusEvent event) {
+        SessionWrapper sessionWrapper = event.getSessionWrapper();
 
         MotdVersion motdVersion = new MotdVersion("1.8.X", 47);
         MotdPlayer motdPlayer = new MotdPlayer(20, 0);

@@ -7,7 +7,7 @@ import eu.mshade.mwork.event.EventListener;
 public class ChunkLoadHandler implements EventListener<ChunkLoadEvent> {
 
     @Override
-    public void onEvent(ChunkLoadEvent event, ParameterContainer eventContainer) {
+    public void onEvent(ChunkLoadEvent event) {
 
 
     }

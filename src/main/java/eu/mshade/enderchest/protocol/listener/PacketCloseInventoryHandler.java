@@ -16,11 +16,8 @@ import java.util.concurrent.TimeUnit;
 public class PacketCloseInventoryHandler implements EventListener<PacketCloseInventoryEvent> {
 
     @Override
-    public void onEvent(PacketCloseInventoryEvent event, ParameterContainer eventContainer) {
-        ProtocolPipeline protocolPipeline = ProtocolPipeline.get();
-        Channel channel = eventContainer.getContainer(Channel.class);
-        SessionWrapper sessionWrapper = protocolPipeline.getSessionWrapper(channel);
-        Player player = protocolPipeline.getPlayer(channel);
+    public void onEvent(PacketCloseInventoryEvent event) {
+        Player player = event.getPlayer();
 
         player.getInventoryBufferStore().setPickedItemStack(null);
 

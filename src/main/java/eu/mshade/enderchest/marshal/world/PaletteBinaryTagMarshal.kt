@@ -37,8 +37,8 @@ class PaletteBinaryTagMarshal(val binaryTagDriver: BinaryTagDriver): BinaryTagDy
         val paletteCompound = binaryTag as CompoundBinaryTag
         val blockList = paletteCompound.getBinaryTag("blocks") as ListBinaryTag
         val palette = Palette()
-        blockList.forEach { blockCompound ->
-            val blockCompound = blockCompound as CompoundBinaryTag
+        blockList.forEach {
+            val blockCompound = it as CompoundBinaryTag
             val blockId = blockCompound.getInt("blockId")
             val materialId = blockCompound.getInt("materialId")
             val count = blockCompound.getInt("count")

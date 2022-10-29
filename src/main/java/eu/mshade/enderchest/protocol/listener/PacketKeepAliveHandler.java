@@ -20,10 +20,9 @@ public class PacketKeepAliveHandler implements EventListener<PacketKeepAliveEven
     }
 
     @Override
-    public void onEvent(PacketKeepAliveEvent event, ParameterContainer parameterContainer) {
-        Channel channel = parameterContainer.getContainer(Channel.class);
-        Player player = ProtocolPipeline.get().getPlayer(channel);
-        SessionWrapper sessionWrapper = player.getSessionWrapper();
+    public void onEvent(PacketKeepAliveEvent event) {
+        SessionWrapper sessionWrapper = event.getSessionWrapper();
+        Player player = sessionWrapper.getPlayer();
 
         int ping = (int) (System.currentTimeMillis() - event.getThreshold());
         player.setPing(ping);

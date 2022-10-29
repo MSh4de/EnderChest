@@ -21,10 +21,10 @@ public class PacketHandshakeListener implements EventListener<PacketHandshakeEve
     }
 
     @Override
-    public void onEvent(PacketHandshakeEvent event, ParameterContainer parameterContainer) {
+    public void onEvent(PacketHandshakeEvent event) {
         ProtocolPipeline protocolPipeline = ProtocolPipeline.get();
-        Channel channel = parameterContainer.getContainer(Channel.class);
-        SessionWrapper sessionWrapper = protocolPipeline.getSessionWrapper(channel);
+        SessionWrapper sessionWrapper = event.getSessionWrapper();
+        Channel channel = sessionWrapper.getChannel();
         Handshake handshake = event.getHandshake();
         HandshakeStatus handshakeStatus = handshake.getHandshakeStatus();
         MinecraftProtocolVersion minecraftProtocolVersion = handshake.getVersion();

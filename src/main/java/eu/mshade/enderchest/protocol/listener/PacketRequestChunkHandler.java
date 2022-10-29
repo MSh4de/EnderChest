@@ -17,9 +17,8 @@ public class PacketRequestChunkHandler implements EventListener<PacketMoveEvent>
 
 
     @Override
-    public void onEvent(PacketMoveEvent event, ParameterContainer parameterContainer) {
-        Channel channel = parameterContainer.getContainer(Channel.class);
-        Player player = ProtocolPipeline.get().getPlayer(channel);
+    public void onEvent(PacketMoveEvent event) {
+        Player player = event.getPlayer();
         Location before = player.getBeforeLocation();
         Location now = player.getLocation();
 

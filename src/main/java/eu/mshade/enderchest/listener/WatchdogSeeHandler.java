@@ -6,7 +6,7 @@ import eu.mshade.mwork.event.EventListener;
 
 public class WatchdogSeeHandler implements EventListener<WatchdogSeeEvent> {
     @Override
-    public void onEvent(WatchdogSeeEvent event, ParameterContainer eventContainer) {
+    public void onEvent(WatchdogSeeEvent event) {
 
     }
 }

@@ -62,10 +62,9 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
     }
 
     @Override
-    public void onEvent(PacketFinallyJoinEvent event, ParameterContainer parameterContainer) {
+    public void onEvent(PacketFinallyJoinEvent event) {
         ProtocolPipeline protocolPipeline = ProtocolPipeline.get();
-        Channel channel = parameterContainer.getContainer(Channel.class);
-        SessionWrapper sessionWrapper = protocolPipeline.getSessionWrapper(channel);
+        SessionWrapper sessionWrapper = event.getSessionWrapper();
         GameProfile gameProfile = sessionWrapper.getGameProfile();
 
         sessionWrapper.sendCompression(256);
@@ -85,7 +84,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         DefaultPlayer player = new DefaultPlayer(location, gameProfile.getId().hashCode(), sessionWrapper);
         player.setGameMode(GameMode.CREATIVE);
-        protocolPipeline.setPlayer(channel, player);
+        protocolPipeline.setPlayer(sessionWrapper.getChannel(), player);
 
 
         sessionWrapper.sendJoinGame(world, false);
@@ -94,7 +93,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         sessionWrapper.sendPluginMessage("MC|Brand", protocolBuffer -> protocolBuffer.writeString("Enderchest"));
         //default value of flying speed as 0.05
-        sessionWrapper.sendAbilities(false, false, true, false, 0.1F, 0.1F);
+        sessionWrapper.sendAbilities(false, false, true, false, 0.5F, 0.1F);
         sessionWrapper.sendPacket(new PacketOutChangeGameState(3, player.getGameMode().getId()));
 
         enderChest.addPlayer(player);

@@ -40,10 +40,8 @@ public class PacketEncryptionHandler implements EventListener<PacketEncryptionEv
     }
 
     @Override
-    public void onEvent(PacketEncryptionEvent event, ParameterContainer parameterContainer) {
-        ProtocolPipeline protocolPipeline = ProtocolPipeline.get();
-        Channel channel = parameterContainer.getContainer(Channel.class);
-        SessionWrapper sessionWrapper = protocolPipeline.getSessionWrapper(channel);
+    public void onEvent(PacketEncryptionEvent event) {
+        SessionWrapper sessionWrapper = event.getSessionWrapper();
         MinecraftEncryption minecraftEncryption = enderChest.getMinecraftEncryption();
 
         try {
@@ -79,7 +77,7 @@ public class PacketEncryptionHandler implements EventListener<PacketEncryptionEv
             GameProfile gameProfile = new GameProfile(uuid, jsonObject.getString("name"), properties);
             sessionWrapper.setGameProfile(gameProfile);
 
-            EnderFrame.get().getPacketEventBus().publish(new PacketFinallyJoinEvent(), parameterContainer);
+            EnderFrame.get().getPacketEventBus().publish(new PacketFinallyJoinEvent(sessionWrapper));
         }catch (Exception e){
             LOGGER.error("", e);
         }

@@ -18,10 +18,8 @@ import java.util.List;
 public class PacketClickInventoryHandler implements EventListener<PacketClickInventoryEvent> {
 
     @Override
-    public void onEvent(PacketClickInventoryEvent event, ParameterContainer eventContainer) {
-        Channel channel = eventContainer.getContainer(Channel.class);
-        Player player = ProtocolPipeline.get().getPlayer(channel);
-        SessionWrapper sessionWrapper = player.getSessionWrapper();
+    public void onEvent(PacketClickInventoryEvent event) {
+        Player player = event.getPlayer();
 
         Inventory inventory = event.getInventory();
         InventoryBufferStore inventoryBufferStore = player.getInventoryBufferStore();

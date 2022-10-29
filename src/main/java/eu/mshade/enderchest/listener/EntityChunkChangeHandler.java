@@ -8,7 +8,7 @@ import eu.mshade.mwork.event.EventListener;
 public class EntityChunkChangeHandler implements EventListener<EntityChunkChangeEvent> {
 
     @Override
-    public void onEvent(EntityChunkChangeEvent event, ParameterContainer eventContainer) {
+    public void onEvent(EntityChunkChangeEvent event) {
         Entity entity = event.getEntity();
 
 

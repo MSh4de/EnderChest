@@ -11,9 +11,8 @@ import io.netty.channel.Channel;
 public class ServerPingListener implements EventListener<ServerPingEvent> {
 
     @Override
-    public void onEvent(ServerPingEvent event, ParameterContainer parameterContainer) {
-        Channel channel = parameterContainer.getContainer(Channel.class);
-        SessionWrapper sessionWrapper = ProtocolPipeline.get().getSessionWrapper(channel);
+    public void onEvent(ServerPingEvent event) {
+        SessionWrapper sessionWrapper = event.getSessionWrapper();
         sessionWrapper.sendPacket(new PacketOutPong(event.getPayload()));
     }
 }

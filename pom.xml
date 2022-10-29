@@ -35,7 +35,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Main-Class>eu.mshade.enderchest.EnderChest</Main-Class>
+                            <Main-Class>eu.mshade.enderchest.EnderChestKt</Main-Class>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -106,11 +106,6 @@
         <dependency>
             <groupId>eu.mshade</groupId>
             <artifactId>mwork</artifactId>
-            <version>0.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.mshade</groupId>
-            <artifactId>shulker</artifactId>
             <version>0.0.1</version>
         </dependency>
         <dependency>

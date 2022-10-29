@@ -26,9 +26,8 @@ public class PlayerQuitHandler implements EventListener<PlayerQuitEvent> {
     }
 
     @Override
-    public void onEvent(PlayerQuitEvent event, ParameterContainer eventContainer) {
-        Channel channel = eventContainer.getContainer(Channel.class);
-        Player player = ProtocolPipeline.get().getPlayer(channel);
+    public void onEvent(PlayerQuitEvent event) {
+        Player player = event.getSessionWrapper().getPlayer();
         player.leaveTickBus();
 
         for (Chunk chunk : player.getLookAtChunks()) {

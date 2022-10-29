@@ -41,11 +41,8 @@ public class PacketBlockPlaceListener implements EventListener<PacketBlockPlaceE
     }
 
     @Override
-    public void onEvent(PacketBlockPlaceEvent event, ParameterContainer eventContainer) {
-        ProtocolPipeline protocolPipeline = ProtocolPipeline.get();
-        Channel channel = eventContainer.getContainer(Channel.class);
-        Player player = protocolPipeline.getPlayer(channel);
-
+    public void onEvent(PacketBlockPlaceEvent event) {
+        Player player = event.getPlayer();
         World world = player.getLocation().getWorld();
         BlockFace blockFace = event.getBlockFace();
         Vector blockPosition;

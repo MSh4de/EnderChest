@@ -7,14 +7,16 @@ import eu.mshade.enderframe.world.Location;
 import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PacketMoveHandler implements EventListener<PacketMoveEvent> {
 
+    private static Logger LOGGER = LoggerFactory.getLogger(PacketMoveHandler.class);
 
     @Override
-    public void onEvent(PacketMoveEvent event, ParameterContainer parameterContainer) {
-        Channel channel = parameterContainer.getContainer(Channel.class);
-        Player player = ProtocolPipeline.get().getPlayer(channel);
+    public void onEvent(PacketMoveEvent event) {
+        Player player = event.getPlayer();
         Location location = player.getLocation().clone();
 
         location.setX(event.getX());

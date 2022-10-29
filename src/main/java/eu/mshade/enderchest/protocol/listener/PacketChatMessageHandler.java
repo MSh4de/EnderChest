@@ -29,10 +29,8 @@ public class PacketChatMessageHandler implements EventListener<PacketChatMessage
     }
 
     @Override
-    public void onEvent(PacketChatMessageEvent event, ParameterContainer parameterContainer) {
-        ProtocolPipeline protocolPipeline = ProtocolPipeline.get();
-        Channel channel = parameterContainer.getContainer(Channel.class);
-        Player player = protocolPipeline.getPlayer(channel);
+    public void onEvent(PacketChatMessageEvent event) {
+        Player player = event.getPlayer();
         Location location = player.getLocation();
 
         if (event.getMessage().startsWith("schematic")) {

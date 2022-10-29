@@ -9,7 +9,7 @@ import eu.mshade.mwork.event.EventListener;
 public class ChunkUnseeHandler implements EventListener<ChunkUnseeEvent> {
 
     @Override
-    public void onEvent(ChunkUnseeEvent event, ParameterContainer eventContainer) {
+    public void onEvent(ChunkUnseeEvent event) {
         Chunk chunk = event.getChunkBuffer();
         Player player = event.getPlayer();
 

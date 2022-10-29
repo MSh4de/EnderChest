@@ -13,9 +13,8 @@ import io.netty.channel.Channel;
 public class PacketEntityActionHandler implements EventListener<PacketEntityActionEvent> {
 
     @Override
-    public void onEvent(PacketEntityActionEvent event, ParameterContainer parameterContainer) {
-        Channel channel = parameterContainer.getContainer(Channel.class);
-        Player player = ProtocolPipeline.get().getPlayer(channel);
+    public void onEvent(PacketEntityActionEvent event) {
+        Player player = event.getPlayer();
         MetadataKeyValueBucket metadataKeyValueBucket = player.getMetadataKeyValueBucket();
 
 

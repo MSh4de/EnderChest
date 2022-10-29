@@ -29,6 +29,7 @@ class MetadataKeyValueBinaryTagMarshal(binaryTagDriver: BinaryTagDriver?) : Bina
         register(WorldMetadataType.DIMENSION, DimensionWorldMetadataBuffer(binaryTagDriver!!))
         register(WorldMetadataType.LEVEL_TYPE, LevelTypeWorldMetadataBuffer(binaryTagDriver))
         register(WorldMetadataType.DIFFICULTY, DifficultyWorldMetadataBuffer(binaryTagDriver))
+
         register(EXTRA, ExtraBlockMetadataBuffer())
         register(FACE, FaceBlockMetadataBuffer())
         register(HALF, HalfBlockMetadataBuffer())
@@ -39,6 +40,7 @@ class MetadataKeyValueBinaryTagMarshal(binaryTagDriver: BinaryTagDriver?) : Bina
         register(DECAYABLE, DecayableBlockMetadataBuffer())
         register(CHECK_DECAY, CheckDecayBlockMetadataBuffer())
         register(SEAMLESS, SeamlessBlockMetadataBuffer())
+
         LOGGER.info("Register {} metadataKeyValueBuffers", metadataKeyByName.size)
     }
 

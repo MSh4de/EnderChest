@@ -16,10 +16,8 @@ import io.netty.channel.Channel;
 public class PacketPlayerDiggingListener implements EventListener<PacketPlayerDiggingEvent> {
 
     @Override
-    public void onEvent(PacketPlayerDiggingEvent event, ParameterContainer eventContainer) {
-        ProtocolPipeline protocolPipeline = ProtocolPipeline.get();
-        Channel channel = eventContainer.getContainer(Channel.class);
-        Player player = protocolPipeline.getPlayer(channel);
+    public void onEvent(PacketPlayerDiggingEvent event) {
+        Player player = event.getPlayer();
 
         World world = player.getLocation().getWorld();
         BlockFace blockFace = event.getBlockFace();

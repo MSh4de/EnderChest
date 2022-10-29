@@ -8,7 +8,7 @@ import eu.mshade.mwork.event.EventListener;
 public class ChunkUnloadHandler implements EventListener<ChunkUnloadEvent> {
 
     @Override
-    public void onEvent(ChunkUnloadEvent event, ParameterContainer eventContainer) {
+    public void onEvent(ChunkUnloadEvent event) {
         Chunk chunk = event.getChunkBuffer();
 
 

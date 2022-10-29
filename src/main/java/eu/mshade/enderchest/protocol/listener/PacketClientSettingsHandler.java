@@ -8,6 +8,6 @@ import eu.mshade.mwork.event.EventListener;
 public class PacketClientSettingsHandler implements EventListener<PacketClientSettingsEvent> {
 
     @Override
-    public void onEvent(PacketClientSettingsEvent event, ParameterContainer eventContainer) {
+    public void onEvent(PacketClientSettingsEvent event) {
     }
 }

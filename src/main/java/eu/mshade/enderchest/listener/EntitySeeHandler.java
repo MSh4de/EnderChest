@@ -9,7 +9,7 @@ import eu.mshade.mwork.event.EventListener;
 public class EntitySeeHandler implements EventListener<EntitySeeEvent> {
 
     @Override
-    public void onEvent(EntitySeeEvent event, ParameterContainer eventContainer) {
+    public void onEvent(EntitySeeEvent event) {
         Entity entity = event.getEntity();
         Player player = event.getPlayer();
 

@@ -13,9 +13,8 @@ import io.netty.channel.Channel;
 public class PacketToggleFlyingListener implements EventListener<PacketToggleFlyingEvent> {
 
     @Override
-    public void onEvent(PacketToggleFlyingEvent event, ParameterContainer eventContainer) {
-        Channel channel = eventContainer.getContainer(Channel.class);
-        Player player = ProtocolPipeline.get().getPlayer(channel);
+    public void onEvent(PacketToggleFlyingEvent event) {
+        Player player = event.getPlayer();
 
         MetadataKeyValueBucket metadataKeyValueBucket = player.getMetadataKeyValueBucket();
         metadataKeyValueBucket.setMetadataKeyValue(new FlyingEntityMetadata(event.isFlying()));

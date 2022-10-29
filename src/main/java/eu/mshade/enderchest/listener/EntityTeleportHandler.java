@@ -8,7 +8,7 @@ import eu.mshade.mwork.event.EventListener;
 public class EntityTeleportHandler implements EventListener<EntityTeleportEvent> {
 
     @Override
-    public void onEvent(EntityTeleportEvent event, ParameterContainer eventContainer) {
+    public void onEvent(EntityTeleportEvent event) {
         Entity entity = event.getEntity();
 
     }

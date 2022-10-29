@@ -8,7 +8,7 @@ import eu.mshade.mwork.event.EventListener;
 public class EntityMoveHandler implements EventListener<EntityMoveEvent> {
 
     @Override
-    public void onEvent(EntityMoveEvent event, ParameterContainer eventContainer) {
+    public void onEvent(EntityMoveEvent event) {
         Entity entity = event.getEntity();
 
 

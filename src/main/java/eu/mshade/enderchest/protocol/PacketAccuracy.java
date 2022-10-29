@@ -10,7 +10,7 @@ import java.util.List;
 
 public class PacketAccuracy extends ByteToMessageCodec<ByteBuf> {
 
-    private Protocol protocol = TempProtocol.getInstance();
+    private Protocol protocol = TempProtocol.Companion.getINSTANCE();
 
     private static boolean readableVarInt(ByteBuf buf) {
         if (buf.readableBytes() > 5) {

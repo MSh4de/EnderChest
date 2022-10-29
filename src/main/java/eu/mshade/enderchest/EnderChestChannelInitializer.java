@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class EnderChestChannelInitializer extends ChannelInitializer<Channel> {
 
     private final ProtocolPipeline protocolPipeline = ProtocolPipeline.get();
-    private final Protocol tempProtocol = TempProtocol.getInstance();
+    private final Protocol tempProtocol = TempProtocol.Companion.getINSTANCE();
     @Override
     protected void initChannel(Channel ch) throws Exception {
         protocolPipeline.setProtocol(ch, tempProtocol);

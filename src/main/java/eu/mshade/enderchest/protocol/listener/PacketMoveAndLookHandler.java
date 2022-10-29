@@ -13,9 +13,8 @@ public class PacketMoveAndLookHandler implements EventListener<PacketMoveAndLook
 
 
     @Override
-    public void onEvent(PacketMoveAndLookEvent event, ParameterContainer parameterContainer) {
-        Channel channel = parameterContainer.getContainer(Channel.class);
-        Player player = ProtocolPipeline.get().getPlayer(channel);
+    public void onEvent(PacketMoveAndLookEvent event) {
+        Player player = event.getPlayer();
         Location location = player.getLocation().clone();
 
         location.setX(event.getX());
