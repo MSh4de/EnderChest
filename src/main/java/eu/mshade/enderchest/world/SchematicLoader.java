@@ -16,12 +16,10 @@ import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.zip.GZIPInputStream;
 
 public class SchematicLoader {
