@@ -1,5 +1,6 @@
 package eu.mshade.enderchest
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
 import eu.mshade.enderchest.listener.*
 import eu.mshade.enderchest.marshal.common.*
@@ -15,8 +16,11 @@ import eu.mshade.enderframe.entity.CreeperState
 import eu.mshade.enderframe.entity.Player
 import eu.mshade.enderframe.entity.VillagerType
 import eu.mshade.enderframe.event.*
+import eu.mshade.enderframe.item.Material
+import eu.mshade.enderframe.item.MaterialKey.DefaultMaterialKey
 import eu.mshade.enderframe.metadata.MetadataKeyValueBucket
 import eu.mshade.enderframe.mojang.GameProfile
+import eu.mshade.enderframe.mojang.NamespacedKey
 import eu.mshade.enderframe.mojang.Property
 import eu.mshade.enderframe.mojang.chat.*
 import eu.mshade.enderframe.packetevent.*
@@ -33,7 +37,6 @@ import eu.mshade.mwork.MWork
 import eu.mshade.mwork.binarytag.poet.BinaryTagPoet
 import eu.mshade.mwork.event.EventFilter
 import eu.mshade.mwork.event.EventPriorities
-import eu.mshade.mwork.event.EventPriority
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelOption
 import io.netty.channel.EventLoopGroup
@@ -144,6 +147,16 @@ class EnderChest {
         binaryTagDriver.registerDynamicMarshal(UniqueIdBinaryTagMarshal())
         binaryTagDriver.registerDynamicMarshal(PaletteBinaryTagMarshal(binaryTagDriver))
         binaryTagDriver.registerDynamicMarshal(SectionBinaryTagMarshal(binaryTagDriver))
+
+        // Register materials id
+        val mapper = ObjectMapper()
+        val materialsId = mapper.readTree(this::class.java.getResourceAsStream("materials.json"))
+        materialsId.fields().forEach { (key, value) ->
+            val material = Material.fromNamespacedKey(NamespacedKey.fromString(key)) as DefaultMaterialKey
+            material.id = value.asInt()
+            Material.registerMaterialKey(material)
+        }
+
         worldManager = WorldManager(binaryTagDriver, this)
         val world = worldManager.createWorld("world") { metadataKeyValueBucket: MetadataKeyValueBucket ->
             metadataKeyValueBucket.setMetadataKeyValue(SeedWorldMetadata(-4975988339999789512L))
@@ -177,7 +190,6 @@ class EnderChest {
             parentGroup.shutdownGracefully()
             childGroup.shutdownGracefully()
         })
-
 
         //this.emerald = new Emerald(parentGroup);
         val channelFuture = ServerBootstrap()
