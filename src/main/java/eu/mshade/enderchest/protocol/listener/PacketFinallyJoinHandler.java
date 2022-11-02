@@ -1,11 +1,14 @@
 package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderchest.EnderChest;
+import eu.mshade.enderchest.entity.DefaultBat;
+import eu.mshade.enderchest.entity.DefaultPig;
 import eu.mshade.enderchest.entity.DefaultPlayer;
 import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
-import eu.mshade.enderframe.entity.Item;
+import eu.mshade.enderframe.entity.EntityIdManager;
+import eu.mshade.enderframe.entity.metadata.EntityMetadataKey;
 import eu.mshade.enderframe.entity.metadata.SkinPartEntityMetadata;
 import eu.mshade.enderframe.inventory.EquipmentSlot;
 import eu.mshade.enderframe.inventory.Inventory;
@@ -16,7 +19,6 @@ import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
 import eu.mshade.enderframe.metadata.attribute.Attribute;
 import eu.mshade.enderframe.metadata.attribute.AttributeModifier;
 import eu.mshade.enderframe.metadata.attribute.AttributeOperation;
-import eu.mshade.enderframe.metadata.entity.EntityMetadataKey;
 import eu.mshade.enderframe.mojang.Color;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.Property;
@@ -109,12 +111,24 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
 
         player.getMetadataKeyValueBucket().setMetadataKeyValue(new SkinPartEntityMetadata(new SkinPart(true, true, true, true, true, true, true)));
-        sessionWrapper.sendMetadata(player, EntityMetadataKey.SKIN_PART);
+        sessionWrapper.sendMetadata(player, EntityMetadataKey.INSTANCE.getSKIN_PART());
 
 
         PlayerInfoBuilder playerInfoBuilder = PlayerInfoBuilder.of(PlayerInfoType.ADD_PLAYER);
         enderChest.getPlayers().forEach(playerInfoBuilder::withPlayer);
         enderChest.getPlayers().forEach(target -> target.getSessionWrapper().sendPlayerInfo(playerInfoBuilder));
+
+        int chunkX = location.getChunkX();
+        int chunkZ = location.getChunkZ();
+
+        for (int x = chunkX - 5; x <= chunkX + 5; x++) {
+            for (int z = chunkZ - 5; z <= chunkZ + 5; z++) {
+                Location entityLocation = player.getLocation().clone().add(x * 16, 0, z * 16);
+                entityLocation.getChunk().thenAccept(chunk -> {
+                    chunk.getEntities().add(new DefaultBat(entityLocation, EntityIdManager.get().getFreeId()));
+                });
+            }
+        }
 
         player.joinTickBus(enderChest.getTickBus());
 
@@ -138,7 +152,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
 
         Inventory playerInventory = player.getInventory();
 
-/*        playerInventory.setItemStack(40, new ItemStack(Material.OAK_LOG));
+        /*playerInventory.setItemStack(40, new ItemStack(Material.OAK_LOG));
         playerInventory.setItemStack(41, new ItemStack(Material.OAK_LOG));
         playerInventory.setItemStack(42, new ItemStack(Material.OAK_LOG));
         playerInventory.setItemStack(43, new ItemStack(Material.OAK_LOG));*/
@@ -149,7 +163,6 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         playerInventory.setItemStack(4, new ItemStack(Material.OAK_WOOD_PLANKS, 64));
 
         sessionWrapper.sendItemStacks(player.getInventory());
-
 
         LOGGER.info(String.format("%s join server", player.getGameProfile().getName()));
 
@@ -171,9 +184,9 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
             }
             inventory.setItemStack(slot++, new ItemStack(materialKey));
         }
+        // sessionWrapper.sendOpenInventory(inventory);
+        // sessionWrapper.sendItemStacks(inventory);
 
-       // sessionWrapper.sendOpenInventory(inventory);
-       // sessionWrapper.sendItemStacks(inventory);
 
         Scoreboard<String> scoreboard = new Scoreboard<String>(TextComponent.of(ChatColor.BLUE + "Scoreboard"))
                 .setScoreboardPosition(ScoreboardPosition.SIDEBAR)

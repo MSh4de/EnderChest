@@ -3,12 +3,8 @@ package eu.mshade.enderchest.protocol.listener;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.metadata.SprintingEntityMetadata;
 import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
-import eu.mshade.enderframe.metadata.entity.EntityMetadataKey;
 import eu.mshade.enderframe.packetevent.PacketEntityActionEvent;
-import eu.mshade.enderframe.protocol.ProtocolPipeline;
-import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
-import io.netty.channel.Channel;
 
 public class PacketEntityActionHandler implements EventListener<PacketEntityActionEvent> {
 
