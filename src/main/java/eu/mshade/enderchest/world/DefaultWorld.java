@@ -270,7 +270,7 @@ public class DefaultWorld extends World {
                         chunkStateStore.resetAge();
                     }
 
-                    if (chunk.getWatching().isEmpty() && chunkStateStore.outdatedInteract(500)) {
+                    if (chunk.getWatchers().isEmpty() && chunkStateStore.outdatedInteract(500)) {
                         chunkStateStore.setChunkStatus(ChunkStatus.PREPARE_TO_UNLOAD);
                     }
                 }
@@ -296,6 +296,14 @@ public class DefaultWorld extends World {
 
             saveWorld();
         }
+
+        this.getChunks().forEach(chunkCompletableFuture -> {
+            Chunk chunk = chunkCompletableFuture.join();
+            if (chunk == null)
+                return;
+
+            chunk.getEntities().forEach(Entity::tick);
+        });
     }
 
     private String regionId(Chunk chunk) {
