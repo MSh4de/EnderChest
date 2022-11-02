@@ -4,9 +4,7 @@ import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderframe.mojang.chat.TextComponent;
 import eu.mshade.enderframe.packetevent.PacketHandshakeEvent;
 import eu.mshade.enderframe.protocol.*;
-import eu.mshade.enderframe.protocol.packet.PacketOutDisconnect;
-import eu.mshade.mwork.MOptional;
-import eu.mshade.mwork.ParameterContainer;
+import eu.mshade.enderframe.protocol.packet.MinecraftPacketOutDisconnect;
 import eu.mshade.mwork.event.EventListener;
 import io.netty.channel.Channel;
 
@@ -34,18 +32,17 @@ public class PacketHandshakeListener implements EventListener<PacketHandshakeEve
         }else {
             sessionWrapper.toggleProtocolStatus(ProtocolStatus.LOGIN);
             if (minecraftProtocolVersion != MinecraftProtocolVersion.UNKNOWN) {
-                MOptional<Protocol> protocolFrameByVersion = enderChest.getProtocolRepository().getProtocolFrameByVersion(minecraftProtocolVersion);
-                if (protocolFrameByVersion.isPresent()) {
-                    Protocol protocol = protocolFrameByVersion.get();
+                Protocol protocol = enderChest.getProtocolRepository().getProtocolFrameByVersion(minecraftProtocolVersion);
+                if (protocol != null) {
                     sessionWrapper = protocol.getSessionWrapper(channel);
                     protocolPipeline.setSessionWrapper(channel, sessionWrapper);
                     sessionWrapper.toggleProtocol(protocol);
                     sessionWrapper.toggleProtocolStatus(ProtocolStatus.LOGIN);
                 }else {
-                    sessionWrapper.sendPacketAndClose(new PacketOutDisconnect(TextComponent.of("Your version is not supported by MShade")));
+                    sessionWrapper.sendPacketAndClose(new MinecraftPacketOutDisconnect(TextComponent.of("Your version is not supported by MShade")));
                 }
             } else {
-                sessionWrapper.sendPacketAndClose(new PacketOutDisconnect(TextComponent.of("Your version is not supported by MShade")));
+                sessionWrapper.sendPacketAndClose(new MinecraftPacketOutDisconnect(TextComponent.of("Your version is not supported by MShade")));
             }
         }
         sessionWrapper.setHandshake(handshake);
