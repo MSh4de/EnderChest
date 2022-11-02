@@ -150,10 +150,14 @@ class EnderChest {
 
         // Register materials id
         val mapper = ObjectMapper()
-        val materialsId = mapper.readTree(this::class.java.getResourceAsStream("materials.json"))
+        val materialsId = mapper.readTree(this::class.java.getResourceAsStream("/materials.json"))
         materialsId.fields().forEach { (key, value) ->
-            val material = Material.fromNamespacedKey(NamespacedKey.fromString(key)) as DefaultMaterialKey
-            material.id = value.asInt()
+            val material = Material.fromNamespacedKey(NamespacedKey.minecraft(key))
+            if(material == null){
+                LOGGER.warn("Material $key not found")
+                return@forEach
+            }
+            (material as DefaultMaterialKey).id = value.asInt()
             Material.registerMaterialKey(material)
         }
 
