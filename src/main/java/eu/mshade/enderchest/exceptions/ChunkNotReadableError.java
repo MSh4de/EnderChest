@@ -1,4 +1,4 @@
-package eu.mshade.enderchest.execptions;
+package eu.mshade.enderchest.exceptions;
 
 public class ChunkNotReadableError extends Exception {
 
