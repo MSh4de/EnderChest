@@ -5,7 +5,6 @@ import eu.mshade.enderchest.entity.DefaultPlayer;
 import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
-import eu.mshade.enderframe.entity.Item;
 import eu.mshade.enderframe.entity.metadata.SkinPartEntityMetadata;
 import eu.mshade.enderframe.inventory.EquipmentSlot;
 import eu.mshade.enderframe.inventory.Inventory;
@@ -46,7 +45,7 @@ import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Vector;
 import eu.mshade.enderframe.world.World;
-import eu.mshade.enderman.packet.play.PacketOutChangeGameState;
+import eu.mshade.enderman.packet.play.MinecraftPacketOutChangeGameState;
 import eu.mshade.mwork.event.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,7 +102,7 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         sessionWrapper.sendPluginMessage("MC|Brand", protocolBuffer -> protocolBuffer.writeString("Enderchest"));
         //default value of flying speed as 0.05
         sessionWrapper.sendAbilities(false, false, true, false, 0.5F, 0.1F);
-        sessionWrapper.sendPacket(new PacketOutChangeGameState(3, player.getGameMode().getId()));
+        sessionWrapper.sendPacket(new MinecraftPacketOutChangeGameState(3, player.getGameMode().getId()));
 
         enderChest.addPlayer(player);
 

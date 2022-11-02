@@ -5,12 +5,9 @@ import eu.mshade.enderframe.motd.MotdComponent;
 import eu.mshade.enderframe.motd.MotdPlayer;
 import eu.mshade.enderframe.motd.MotdVersion;
 import eu.mshade.enderframe.packetevent.ServerStatusEvent;
-import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.protocol.SessionWrapper;
-import eu.mshade.enderframe.protocol.temp.packet.PacketOutStatus;
-import eu.mshade.mwork.ParameterContainer;
+import eu.mshade.enderframe.protocol.temp.packet.MinecraftPacketOutStatus;
 import eu.mshade.mwork.event.EventListener;
-import io.netty.channel.Channel;
 
 public class ServerStatusListener implements EventListener<ServerStatusEvent> {
 
@@ -23,7 +20,7 @@ public class ServerStatusListener implements EventListener<ServerStatusEvent> {
         MotdComponent motdComponent = new MotdComponent(motdVersion, motdPlayer, TextComponent.of("Hello"));
 
 
-        sessionWrapper.sendPacket(new PacketOutStatus(motdComponent));
+        sessionWrapper.sendPacket(new MinecraftPacketOutStatus(motdComponent));
 
     }
 }
