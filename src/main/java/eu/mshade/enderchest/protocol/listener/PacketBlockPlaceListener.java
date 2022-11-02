@@ -4,26 +4,13 @@ import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.item.*;
 import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
 import eu.mshade.enderframe.packetevent.PacketBlockPlaceEvent;
-import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.world.Vector;
 import eu.mshade.enderframe.world.World;
 import eu.mshade.enderframe.world.block.*;
-import eu.mshade.enderframe.world.chunk.Chunk;
-import eu.mshade.enderframe.world.chunk.Palette;
-import eu.mshade.enderframe.world.chunk.Section;
-import eu.mshade.mwork.ParameterContainer;
-import eu.mshade.mwork.binarytag.BinaryTagType;
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
-import eu.mshade.mwork.binarytag.entity.ListBinaryTag;
-import eu.mshade.mwork.binarytag.entity.StringBinaryTag;
 import eu.mshade.mwork.event.EventListener;
-import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
-import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class PacketBlockPlaceListener implements EventListener<PacketBlockPlaceEvent> {
 

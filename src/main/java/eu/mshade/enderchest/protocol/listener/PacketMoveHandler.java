@@ -2,11 +2,8 @@ package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.packetevent.PacketMoveEvent;
-import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.world.Location;
-import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
-import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

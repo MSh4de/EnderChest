@@ -6,11 +6,7 @@ import eu.mshade.enderframe.inventory.*;
 import eu.mshade.enderframe.item.ItemStack;
 import eu.mshade.enderframe.item.Material;
 import eu.mshade.enderframe.packetevent.PacketClickInventoryEvent;
-import eu.mshade.enderframe.protocol.ProtocolPipeline;
-import eu.mshade.enderframe.protocol.SessionWrapper;
-import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
-import io.netty.channel.Channel;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -5,11 +5,8 @@ import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
 import eu.mshade.enderframe.packetevent.PacketLoginEvent;
-import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.protocol.SessionWrapper;
-import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
-import io.netty.channel.Channel;
 
 public class PacketLoginHandler implements EventListener<PacketLoginEvent> {
 
