@@ -252,11 +252,11 @@ class EnderChest {
         });*/
 
         //print length of chunk of the worlds
-        parentGroup.scheduleAtFixedRate({
+        /*parentGroup.scheduleAtFixedRate({
             worldManager.worlds.forEach(Consumer { w: World ->
                 LOGGER.info("World " + w.name + " has " + w.chunks.size + " chunks")
             })
-        }, 0, 1, TimeUnit.SECONDS)
+        }, 0, 1, TimeUnit.SECONDS)*/
 
     }
 
