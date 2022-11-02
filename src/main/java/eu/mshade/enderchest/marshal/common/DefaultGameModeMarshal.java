@@ -1,13 +1,10 @@
 package eu.mshade.enderchest.marshal.common;
 
 import eu.mshade.enderframe.GameMode;
-import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.binarytag.BinaryTag;
 import eu.mshade.mwork.binarytag.BinaryTagDriver;
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
 import eu.mshade.mwork.binarytag.BinaryTagMarshal;
-
-import java.lang.reflect.Type;
 
 public class DefaultGameModeMarshal implements BinaryTagMarshal<GameMode> {
 

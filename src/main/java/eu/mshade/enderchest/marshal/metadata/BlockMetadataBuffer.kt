@@ -3,9 +3,9 @@ package eu.mshade.enderchest.marshal.metadata
 import eu.mshade.enderframe.metadata.MetadataKeyValue
 import eu.mshade.enderframe.world.block.*
 import eu.mshade.mwork.binarytag.BinaryTag
-import eu.mshade.mwork.binarytag.entity.BooleanBinaryTag
+import eu.mshade.mwork.binarytag.BooleanBinaryTag
+import eu.mshade.mwork.binarytag.IntBinaryTag
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag
-import eu.mshade.mwork.binarytag.entity.IntegerBinaryTag
 
 class ExtraBlockMetadataBuffer: MetadataKeyValueBuffer{
 
@@ -26,7 +26,7 @@ class FaceBlockMetadataBuffer: MetadataKeyValueBuffer{
     }
 
     override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
-        return IntegerBinaryTag((metadataKeyValue as FaceBlockMetadata).metadataValue.id)
+        return IntBinaryTag((metadataKeyValue as FaceBlockMetadata).metadataValue.id)
     }
 
 }
@@ -38,7 +38,7 @@ class HalfBlockMetadataBuffer: MetadataKeyValueBuffer{
     }
 
     override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
-        return IntegerBinaryTag((metadataKeyValue as HalfBlockMetadata).metadataValue.id)
+        return IntBinaryTag((metadataKeyValue as HalfBlockMetadata).metadataValue.id)
     }
 
 }
@@ -50,7 +50,7 @@ class ShapeBlockMetadataBuffer: MetadataKeyValueBuffer{
     }
 
     override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
-        return IntegerBinaryTag((metadataKeyValue as ShapeBlockMetadata).metadataValue.id)
+        return IntBinaryTag((metadataKeyValue as ShapeBlockMetadata).metadataValue.id)
     }
 
 }
@@ -62,7 +62,7 @@ class AxisBlockMetadataBuffer: MetadataKeyValueBuffer{
     }
 
     override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
-        return IntegerBinaryTag((metadataKeyValue as AxisBlockMetadata).metadataValue.id)
+        return IntBinaryTag((metadataKeyValue as AxisBlockMetadata).metadataValue.id)
     }
 
 }
@@ -79,6 +79,7 @@ class PoweredBlockMetadataBuffer: MetadataKeyValueBuffer{
 
 }
 
+
 class PowerBlockMetadataBuffer: MetadataKeyValueBuffer{
 
     override fun read(binaryTag: BinaryTag<*>): MetadataKeyValue<*> {
@@ -86,7 +87,7 @@ class PowerBlockMetadataBuffer: MetadataKeyValueBuffer{
     }
 
     override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
-        return IntegerBinaryTag((metadataKeyValue as PowerBlockMetadata).metadataValue)
+        return IntBinaryTag((metadataKeyValue as PowerBlockMetadata).metadataValue)
     }
 
 }

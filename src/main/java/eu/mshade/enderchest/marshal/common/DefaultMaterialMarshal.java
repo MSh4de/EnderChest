@@ -9,7 +9,7 @@ import eu.mshade.mwork.binarytag.BinaryTagMarshal;
 public class DefaultMaterialMarshal implements BinaryTagMarshal<Material> {
 
     @Override
-    public BinaryTag<?> serialize(BinaryTagDriver binaryTagDriver, Material material) throws Exception {
+    public BinaryTag<?> serialize(BinaryTagDriver binaryTagDriver, Material material)  {
         CompoundBinaryTag compoundBinaryTag = new CompoundBinaryTag();
         compoundBinaryTag.putString("material", material.toString());
 
@@ -17,7 +17,7 @@ public class DefaultMaterialMarshal implements BinaryTagMarshal<Material> {
     }
 
     @Override
-    public Material deserialize(BinaryTagDriver binaryTagDriver, BinaryTag<?> binaryTag) throws Exception {
+    public Material deserialize(BinaryTagDriver binaryTagDriver, BinaryTag<?> binaryTag) {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
         return null;
     }
