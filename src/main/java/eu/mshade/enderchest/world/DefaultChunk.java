@@ -177,7 +177,7 @@ public class DefaultChunk extends Chunk {
     }
 
     @Override
-    public Collection<Agent> getWatching() {
+    public Collection<Agent> getWatchers() {
         return agents;
     }
 
