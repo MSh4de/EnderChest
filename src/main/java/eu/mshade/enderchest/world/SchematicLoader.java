@@ -16,6 +16,7 @@ import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,7 +40,7 @@ public class SchematicLoader {
 
                 long startTime = System.currentTimeMillis();
                 GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
-                CompoundBinaryTag compoundBinaryTag = binaryTagDriver.readCompoundBinaryTag(gzipInputStream);
+                CompoundBinaryTag compoundBinaryTag = binaryTagDriver.readCompoundBinaryTag(new ByteArrayInputStream(gzipInputStream.readAllBytes()));
                 short width = compoundBinaryTag.getShort("Width");
                 short length = compoundBinaryTag.getShort("Length");
                 short height = compoundBinaryTag.getShort("Height");
