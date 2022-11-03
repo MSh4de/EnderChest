@@ -36,10 +36,9 @@ public class WorldManager {
         chunkSafeguard.start();
         LOGGER.info("Starting "+chunkSafeguard);
 
-        WorldBinaryTagMarshal worldBinaryTagMarshal = binaryTagDriver.getDynamicMarshal(WorldBinaryTagMarshal.class);
 
         for (File file : Objects.requireNonNull(this.worldsFolder.listFiles())) {
-            World world = worldBinaryTagMarshal.read(binaryTagDriver, file, this);
+            World world = WorldBinaryTagMarshal.INSTANCE.read(binaryTagDriver, file, this, EnderChest.INSTANCE.getMetadataKeyValueBinaryTagMarshal());
             world.joinTickBus(enderChest.getTickBus());
             worlds.put(world.getName(), world);
         }
