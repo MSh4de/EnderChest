@@ -6,16 +6,13 @@ import eu.mshade.enderframe.world.block.Block
 import eu.mshade.enderframe.world.chunk.Palette
 import eu.mshade.mwork.binarytag.BinaryTag
 import eu.mshade.mwork.binarytag.BinaryTagDriver
-import eu.mshade.mwork.binarytag.BinaryTagDynamicMarshal
 import eu.mshade.mwork.binarytag.BinaryTagType
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag
 import eu.mshade.mwork.binarytag.entity.ListBinaryTag
 
-class PaletteBinaryTagMarshal(val binaryTagDriver: BinaryTagDriver): BinaryTagDynamicMarshal {
+object PaletteBinaryTagMarshal {
 
-    private val metadataKeyValueBinaryTagMarshal = binaryTagDriver.getDynamicMarshal(MetadataKeyValueBinaryTagMarshal::class.java)
-
-    fun serialize(palette: Palette): BinaryTag<*> {
+    fun serialize(palette: Palette, metadataKeyValueBinaryTagMarshal: MetadataKeyValueBinaryTagMarshal): BinaryTag<*> {
         val paletteCompound = CompoundBinaryTag()
         val blockList = ListBinaryTag(BinaryTagType.COMPOUND)
         palette.blockById.forEach { (id, block) ->
@@ -33,11 +30,11 @@ class PaletteBinaryTagMarshal(val binaryTagDriver: BinaryTagDriver): BinaryTagDy
         return paletteCompound
     }
 
-    fun deserialize(binaryTag: BinaryTag<*>): Palette {
+    fun deserialize(binaryTag: BinaryTag<*>, metadataKeyValueBinaryTagMarshal: MetadataKeyValueBinaryTagMarshal): Palette {
         val paletteCompound = binaryTag as CompoundBinaryTag
         val blockList = paletteCompound.getBinaryTag("blocks") as ListBinaryTag
         val palette = Palette()
-        blockList.forEach {
+        blockList.value.forEach {
             val blockCompound = it as CompoundBinaryTag
             val blockId = blockCompound.getInt("blockId")
             val materialId = blockCompound.getInt("materialId")

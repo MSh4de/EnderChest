@@ -4,7 +4,8 @@ import eu.mshade.enderframe.world.Vector
 import eu.mshade.mwork.binarytag.BinaryTag
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag
 
-class DefaultVectorMarshal {
+object DefaultVectorMarshal {
+
     fun serialize(vector: Vector): BinaryTag<*> {
         val compoundBinaryTag = CompoundBinaryTag()
         compoundBinaryTag.putDouble("x", vector.x)

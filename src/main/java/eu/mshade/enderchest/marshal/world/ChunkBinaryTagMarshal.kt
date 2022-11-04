@@ -1,5 +1,6 @@
 package eu.mshade.enderchest.marshal.world
 
+import eu.mshade.enderchest.marshal.metadata.MetadataKeyValueBinaryTagMarshal
 import eu.mshade.enderchest.world.DefaultChunk
 import eu.mshade.enderframe.world.World
 import eu.mshade.enderframe.world.chunk.Chunk
@@ -10,56 +11,65 @@ import eu.mshade.mwork.binarytag.entity.ListBinaryTag
 import java.io.IOException
 import java.util.concurrent.ExecutionException
 
-class ChunkBinaryTagMarshal {
-    fun serialize(binaryTagDriver: BinaryTagDriver, chunk: Chunk): CompoundBinaryTag {
+object ChunkBinaryTagMarshal {
+
+    fun serialize(
+        chunk: Chunk,
+        metadataKeyValueBinaryTagMarshal: MetadataKeyValueBinaryTagMarshal
+    ): CompoundBinaryTag {
         val compoundBinaryTag: CompoundBinaryTag = ZstdCompoundBinaryTag()
         compoundBinaryTag.putInt("x", chunk.x)
         compoundBinaryTag.putInt("z", chunk.z)
         compoundBinaryTag.putBinaryTag("biomes", ByteArrayBinaryTag(chunk.biomes))
         val listBinaryTagSections = ListBinaryTag(BinaryTagType.COMPOUND)
         val listBinaryTagEntities = ListBinaryTag(BinaryTagType.COMPOUND)
-        val sectionBinaryTagMarshal: SectionBinaryTagMarshal = binaryTagDriver.getDynamicMarshal(
-            SectionBinaryTagMarshal::class.java
-        )
         for (section in chunk.sections) {
-            if (section != null) listBinaryTagSections.add(sectionBinaryTagMarshal.serialize(section))
+            if (section != null) listBinaryTagSections.add(
+                SectionBinaryTagMarshal.serialize(
+                    section,
+                    metadataKeyValueBinaryTagMarshal
+                )
+            )
         }
 
         /*
-        for(Entity entity : chunk.getEntities()) {
-            listBinaryTagEntities.add(binaryTagDriver.marshal(entity));
-        }
+    for(Entity entity : chunk.getEntities()) {
+        listBinaryTagEntities.add(binaryTagDriver.marshal(entity));
+    }
 
-         */compoundBinaryTag.putBinaryTag("sections", listBinaryTagSections)
+     */compoundBinaryTag.putBinaryTag("sections", listBinaryTagSections)
         compoundBinaryTag.putBinaryTag("entities", listBinaryTagEntities)
         return compoundBinaryTag
     }
 
-    fun deserialize(binaryTagDriver: BinaryTagDriver, binaryTag: BinaryTag<*>?, world: World?): Chunk {
+    fun deserialize(
+        binaryTag: BinaryTag<*>,
+        world: World,
+        metadataKeyValueBinaryTagMarshal: MetadataKeyValueBinaryTagMarshal
+    ): Chunk {
         val compoundBinaryTag = binaryTag as CompoundBinaryTag?
-        val sectionBinaryTagMarshal: SectionBinaryTagMarshal = binaryTagDriver.getDynamicMarshal(
-            SectionBinaryTagMarshal::class.java
-        )
+
         val x = compoundBinaryTag!!.getInt("x")
         val z = compoundBinaryTag.getInt("z")
         val biome = compoundBinaryTag.getByteArray("biomes")
-        val sectionBinaryTags = compoundBinaryTag.getBinaryTag("sections") as ListBinaryTag?
-        val entityBinaryTags = compoundBinaryTag.getBinaryTag("entities") as ListBinaryTag?
+        val sectionBinaryTags = compoundBinaryTag.getBinaryTag("sections") as ListBinaryTag
+        val entityBinaryTags = compoundBinaryTag.getBinaryTag("entities") as ListBinaryTag
         val chunk: Chunk = DefaultChunk(x, z, world, biome)
         val sections = chunk.sections
-        sectionBinaryTags.forEach { sectionBinaryTag ->
-            val section = sectionBinaryTagMarshal.deserialize(sectionBinaryTag, chunk)
+        sectionBinaryTags.value.forEach { sectionBinaryTag ->
+            val section =
+                SectionBinaryTagMarshal.deserialize(sectionBinaryTag, chunk, metadataKeyValueBinaryTagMarshal)
             sections[section.y] = section
         }
 
         /*
-        entityBinaryTags.forEach(entityBinaryTag ->{
-            CompoundBinaryTag compoundBinaryTagEntity = (CompoundBinaryTag)entityBinaryTag;
-            EntityType entityType = EntityType.getEntityTypeByName(compoundBinaryTagEntity.getString("entityType"));
-            chunk.addEntity(binaryTagDriver.unMarshal(entityBinaryTag, entityType.getClazz()));
-        });
+    entityBinaryTags.forEach(entityBinaryTag ->{
+        CompoundBinaryTag compoundBinaryTagEntity = (CompoundBinaryTag)entityBinaryTag;
+        EntityType entityType = EntityType.getEntityTypeByName(compoundBinaryTagEntity.getString("entityType"));
+        chunk.addEntity(binaryTagDriver.unMarshal(entityBinaryTag, entityType.getClazz()));
+    });
 
-         */return chunk
+     */return chunk
     }
 
     private fun regionId(chunk: Chunk): String {
@@ -78,9 +88,17 @@ class ChunkBinaryTagMarshal {
         return "$chunkX,$chunkZ"
     }
 
-    fun write(binaryTagDriver: BinaryTagDriver, carbonBinaryTag: CarbonBinaryTag, chunk: Chunk) {
+    fun write(
+        binaryTagDriver: BinaryTagDriver,
+        carbonBinaryTag: CarbonBinaryTag,
+        chunk: Chunk,
+        metadataKeyValueBinaryTagMarshal: MetadataKeyValueBinaryTagMarshal
+    ) {
         try {
-            carbonBinaryTag.writeCompoundBinaryTag(chunkId(chunk), this.serialize(binaryTagDriver, chunk))
+            carbonBinaryTag.writeCompoundBinaryTag(
+                chunkId(chunk),
+                this.serialize(chunk, metadataKeyValueBinaryTagMarshal)
+            )
         } catch (e: ExecutionException) {
             e.printStackTrace()
         } catch (e: InterruptedException) {
@@ -90,16 +108,16 @@ class ChunkBinaryTagMarshal {
         }
     }
 
-    @Throws(IOException::class)
     fun read(
-        binaryTagDriver: BinaryTagDriver,
         carbonBinaryTag: CarbonBinaryTag,
-        world: World?,
+        world: World,
         chunkX: Int,
-        chunkZ: Int
+        chunkZ: Int,
+        metadataKeyValueBinaryTagMarshal: MetadataKeyValueBinaryTagMarshal
     ): Chunk {
         val chunkId = chunkId(chunkX, chunkZ)
         val compoundBinaryTag = carbonBinaryTag.readCompoundBinaryTag(chunkId)
-        return deserialize(binaryTagDriver, compoundBinaryTag, world)
+        return deserialize(compoundBinaryTag!!, world, metadataKeyValueBinaryTagMarshal)
     }
+
 }

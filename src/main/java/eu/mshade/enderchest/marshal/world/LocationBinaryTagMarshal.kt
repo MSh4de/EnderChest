@@ -3,10 +3,12 @@ package eu.mshade.enderchest.marshal.world
 import eu.mshade.enderchest.world.WorldManager
 import eu.mshade.enderframe.metadata.world.WorldMetadataType
 import eu.mshade.enderframe.world.Location
+import eu.mshade.enderframe.world.WorldRepository
 import eu.mshade.mwork.binarytag.BinaryTag
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag
 
-class LocationBinaryTagMarshal {
+object LocationBinaryTagMarshal {
+
     fun serialize(location: Location): BinaryTag<*> {
         val compoundBinaryTag = CompoundBinaryTag()
         val world = location.world
@@ -20,9 +22,9 @@ class LocationBinaryTagMarshal {
         return compoundBinaryTag
     }
 
-    fun deserialize(binaryTag: BinaryTag<*>, worldManager: WorldManager): Location {
+    fun deserialize(binaryTag: BinaryTag<*>): Location {
         val compoundBinaryTag = binaryTag as CompoundBinaryTag
-        val world = worldManager.getWorld(compoundBinaryTag.getString("world"))
+        val world = WorldRepository.getWorld(compoundBinaryTag.getString("world"))
         val x = compoundBinaryTag.getDouble("x")
         val y = compoundBinaryTag.getDouble("y")
         val z = compoundBinaryTag.getDouble("z")

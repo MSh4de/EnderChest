@@ -1,5 +1,6 @@
 package eu.mshade.enderchest.marshal.world
 
+import eu.mshade.enderchest.marshal.metadata.MetadataKeyValueBinaryTagMarshal
 import eu.mshade.enderchest.world.DefaultSection
 import eu.mshade.enderframe.world.chunk.Chunk
 import eu.mshade.enderframe.world.chunk.NibbleArray
@@ -8,33 +9,26 @@ import eu.mshade.mwork.binarytag.BinaryTag
 import eu.mshade.mwork.binarytag.BinaryTagDriver
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag
 
-class SectionBinaryTagMarshal(binaryTagDriver: BinaryTagDriver) {
-    private val paletteBinaryTagMarshal: PaletteBinaryTagMarshal
-    private val uniqueIdBinaryTagMarshal: UniqueIdBinaryTagMarshal
+object SectionBinaryTagMarshal {
 
-    init {
-        paletteBinaryTagMarshal = binaryTagDriver.getDynamicMarshal(PaletteBinaryTagMarshal::class.java)
-        uniqueIdBinaryTagMarshal = binaryTagDriver.getDynamicMarshal(UniqueIdBinaryTagMarshal::class.java)
-    }
-
-    fun serialize(section: Section): BinaryTag<*> {
+    fun serialize(section: Section, metadataKeyValueBinaryTagMarshal: MetadataKeyValueBinaryTagMarshal): BinaryTag<*> {
         val compoundBinaryTag = CompoundBinaryTag()
         compoundBinaryTag.putInt("y", section.y)
         compoundBinaryTag.putInt("realBlock", section.realBlock)
-        compoundBinaryTag.putBinaryTag("uniqueId", uniqueIdBinaryTagMarshal.serialize(section.uniqueId))
-        compoundBinaryTag.putBinaryTag("palette", paletteBinaryTagMarshal.serialize(section.palette))
+        compoundBinaryTag.putBinaryTag("uniqueId", UniqueIdBinaryTagMarshal.serialize(section.uniqueId))
+        compoundBinaryTag.putBinaryTag("palette", PaletteBinaryTagMarshal.serialize(section.palette, metadataKeyValueBinaryTagMarshal))
         compoundBinaryTag.putIntArray("blocks", section.blocks)
         compoundBinaryTag.putByteArray("blockLight", section.blockLight.rawData)
         compoundBinaryTag.putByteArray("skyLight", section.skyLight.rawData)
         return compoundBinaryTag
     }
 
-    fun deserialize(binaryTag: BinaryTag<*>, chunk: Chunk?): Section {
+    fun deserialize(binaryTag: BinaryTag<*>, chunk: Chunk, metadataKeyValueBinaryTagMarshal: MetadataKeyValueBinaryTagMarshal): Section {
         val compoundBinaryTag = binaryTag as CompoundBinaryTag
         val y = compoundBinaryTag.getInt("y")
         val realBlock = compoundBinaryTag.getInt("realBlock")
-        val uniqueId = uniqueIdBinaryTagMarshal.deserialize(compoundBinaryTag.getBinaryTag("uniqueId")!!)
-        val palette = paletteBinaryTagMarshal.deserialize(compoundBinaryTag.getBinaryTag("palette")!!)
+        val uniqueId = UniqueIdBinaryTagMarshal.deserialize(compoundBinaryTag.getBinaryTag("uniqueId")!!)
+        val palette = PaletteBinaryTagMarshal.deserialize(compoundBinaryTag.getBinaryTag("palette")!!, metadataKeyValueBinaryTagMarshal)
         val blocks = compoundBinaryTag.getIntArray("blocks")
         val blockLight = NibbleArray(*compoundBinaryTag.getByteArray("blockLight"))
         val skyLight = NibbleArray(*compoundBinaryTag.getByteArray("skyLight"))
