@@ -5,13 +5,10 @@ import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.event.PlayerQuitEvent;
-import eu.mshade.enderframe.protocol.ProtocolPipeline;
 import eu.mshade.enderframe.scoreboard.Scoreboard;
 import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderframe.world.border.WorldBorder;
-import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.event.EventListener;
-import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
