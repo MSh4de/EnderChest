@@ -1,13 +1,12 @@
 package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderchest.EnderChest;
-import eu.mshade.enderchest.entity.DefaultBat;
-import eu.mshade.enderchest.entity.DefaultPig;
-import eu.mshade.enderchest.entity.DefaultPlayer;
+import eu.mshade.enderchest.entity.*;
 import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
-import eu.mshade.enderframe.entity.EntityIdManager;
+import eu.mshade.enderframe.entity.Entity;
+import eu.mshade.enderframe.entity.EntityIdProvider;
 import eu.mshade.enderframe.entity.metadata.EntityMetadataKey;
 import eu.mshade.enderframe.entity.metadata.SkinPartEntityMetadata;
 import eu.mshade.enderframe.inventory.EquipmentSlot;
@@ -121,14 +120,34 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         int chunkX = location.getChunkX();
         int chunkZ = location.getChunkZ();
 
-        for (int x = chunkX - 5; x <= chunkX + 5; x++) {
+        /*  for (int x = chunkX - 5; x <= chunkX + 5; x++) {
             for (int z = chunkZ - 5; z <= chunkZ + 5; z++) {
                 Location entityLocation = player.getLocation().clone().add(x * 16, 0, z * 16);
                 entityLocation.getChunk().thenAccept(chunk -> {
-                    chunk.getEntities().add(new DefaultBat(entityLocation, EntityIdManager.get().getFreeId()));
+                    chunk.getEntities().add(new DefaultArmorStand(entityLocation, EntityIdManager.get().getFreeId()));
                 });
             }
-        }
+        }*/
+
+        world.putEntity(player);
+
+        Location entityLocation = player.getLocation().clone().add(1, 0, 0);
+        entityLocation.getChunk().thenAccept(chunk -> {
+            Entity entity = new DefaultEnderDragon(entityLocation, EntityIdProvider.INSTANCE.getFreeId());
+
+            MetadataKeyValueBucket bucket = entity.getMetadataKeyValueBucket();
+
+
+            LOGGER.info("Test");
+
+            bucket.getMetadataKeyValues().forEach(metadataKeyValue -> LOGGER.info("Key=" + metadataKeyValue.getMetadataKey() + " Value=" + metadataKeyValue.getMetadataValue()));
+
+            /*arrow.getMetadataKeyValueBucket().setMetadataKeyValue(new OwnerEntityMetadata(player.getUniqueId()));
+
+            arrow.setVelocity(new Vector(0, 10, 0));*/
+
+            chunk.getEntities().add(entity);
+        });
 
         player.joinTickBus(enderChest.getTickBus());
 
