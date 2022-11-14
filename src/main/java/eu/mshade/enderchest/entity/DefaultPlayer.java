@@ -3,7 +3,6 @@ package eu.mshade.enderchest.entity;
 import eu.mshade.enderframe.Watchable;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.Player;
-import eu.mshade.enderframe.entity.Projectile;
 import eu.mshade.enderframe.entity.metadata.EntityMetadataKey;
 import eu.mshade.enderframe.entity.metadata.FlyingEntityMetadata;
 import eu.mshade.enderframe.entity.metadata.SprintingEntityMetadata;

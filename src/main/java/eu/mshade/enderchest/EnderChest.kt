@@ -33,7 +33,6 @@ import eu.mshade.mwork.MWork
 import eu.mshade.mwork.binarytag.poet.BinaryTagPoet
 import eu.mshade.mwork.event.EventFilter
 import eu.mshade.mwork.event.EventPriorities
-import eu.mshade.mwork.event.EventPriority
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelOption
 import io.netty.channel.EventLoopGroup
@@ -43,7 +42,6 @@ import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
 class EnderChest {
