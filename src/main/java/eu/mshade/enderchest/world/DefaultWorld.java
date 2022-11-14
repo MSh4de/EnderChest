@@ -5,7 +5,7 @@ import eu.mshade.enderchest.marshal.world.ChunkBinaryTagMarshal;
 import eu.mshade.enderchest.marshal.world.WorldBinaryTagMarshal;
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.entity.Entity;
-import eu.mshade.enderframe.entity.EntityIdManager;
+import eu.mshade.enderframe.entity.EntityIdProvider;
 import eu.mshade.enderframe.entity.EntityType;
 import eu.mshade.enderframe.event.ChunkCreateEvent;
 import eu.mshade.enderframe.event.ChunkLoadEvent;
@@ -182,7 +182,7 @@ public class DefaultWorld extends World {
             throw new NullPointerException("Location cannot be null when trying to spawn an entity.");
 
         EntityFactory entityFactory = EntityFactory.get();
-        EntityIdManager entityIdManager = EntityIdManager.get();
+        EntityIdProvider entityIdManager = EntityIdProvider.INSTANCE;
         Location entityLocation = location.clone();
 
         try {
