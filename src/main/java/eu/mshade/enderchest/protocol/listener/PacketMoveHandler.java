@@ -1,18 +1,18 @@
 package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderframe.entity.Player;
-import eu.mshade.enderframe.packetevent.PacketMoveEvent;
+import eu.mshade.enderframe.packetevent.MinecraftPacketMoveEvent;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.mwork.event.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PacketMoveHandler implements EventListener<PacketMoveEvent> {
+public class PacketMoveHandler implements EventListener<MinecraftPacketMoveEvent> {
 
     private static Logger LOGGER = LoggerFactory.getLogger(PacketMoveHandler.class);
 
     @Override
-    public void onEvent(PacketMoveEvent event) {
+    public void onEvent(MinecraftPacketMoveEvent event) {
         Player player = event.getPlayer();
         Location location = player.getLocation().clone();
 

@@ -2,17 +2,15 @@ package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.item.*;
-import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
-import eu.mshade.enderframe.packetevent.PacketBlockPlaceEvent;
+import eu.mshade.enderframe.packetevent.MinecraftPacketBlockPlaceEvent;
 import eu.mshade.enderframe.world.Vector;
 import eu.mshade.enderframe.world.World;
 import eu.mshade.enderframe.world.block.*;
-import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
 import eu.mshade.mwork.event.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PacketBlockPlaceListener implements EventListener<PacketBlockPlaceEvent> {
+public class PacketBlockPlaceListener implements EventListener<MinecraftPacketBlockPlaceEvent> {
 
     //logger with logback
     private static final Logger LOGGER = LoggerFactory.getLogger(PacketBlockPlaceListener.class);
@@ -25,10 +23,11 @@ public class PacketBlockPlaceListener implements EventListener<PacketBlockPlaceE
         this.blockRuleRepository.register(MaterialCategory.BUTTON, new ButtonBlockRule());
         this.blockRuleRepository.register(MaterialCategory.LEVER, new LeverBlockRule());
         this.blockRuleRepository.register(MaterialCategory.SLAB, new SlabBlockRule());
+        this.blockRuleRepository.register(MaterialCategory.VINE, new VineBlockRule());
     }
 
     @Override
-    public void onEvent(PacketBlockPlaceEvent event) {
+    public void onEvent(MinecraftPacketBlockPlaceEvent event) {
         Player player = event.getPlayer();
         World world = player.getLocation().getWorld();
         BlockFace blockFace = event.getBlockFace();
@@ -42,6 +41,8 @@ public class PacketBlockPlaceListener implements EventListener<PacketBlockPlaceE
 
         if (material.equals(Material.AIR)){
             blockPosition = event.getBlockPosition();
+
+
             System.out.println(world.getBlock(blockPosition).getMetadataKeyValueBucket().toPrettyString(0));
             return;
         }
@@ -60,13 +61,14 @@ public class PacketBlockPlaceListener implements EventListener<PacketBlockPlaceE
             if (block == null) block = Material.AIR.toBlock();
 
 
-            MetadataKeyValueBucket metadataKeyValueBucket = block.getMetadataKeyValueBucket();
+/*            MetadataKeyValueBucket metadataKeyValueBucket = block.getMetadataKeyValueBucket();
             CompoundBinaryTag extra = new CompoundBinaryTag();
             extra.putString("bvn","Wesh l'equipe comment ça va ??");
             extra.putString("owner", player.getName());
             extra.putLong("timeSet", System.currentTimeMillis());
 
-            metadataKeyValueBucket.setMetadataKeyValue(new ExtraBlockMetadata(extra));
+            metadataKeyValueBucket.setMetadataKeyValue(new ExtraBlockMetadata(extra));*/
+
 
 
             world.setBlock(blockPosition, block);
@@ -74,7 +76,7 @@ public class PacketBlockPlaceListener implements EventListener<PacketBlockPlaceE
             Block finalBlock = block;
             player.getLocation().getChunk().join().notify(agent -> {
                 if (agent instanceof Player target) {
-                    target.getSessionWrapper().sendBlockChange(blockPosition, finalBlock);
+                    target.getMinecraftSession().sendBlockChange(blockPosition, finalBlock);
                 }
             });
 

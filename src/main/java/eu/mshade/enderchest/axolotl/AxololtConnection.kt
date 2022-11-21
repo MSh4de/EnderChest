@@ -1,15 +1,18 @@
 package eu.mshade.enderchest.axolotl
 
 import eu.mshade.axolotl.protocol.AxolotlPacketOut
+import eu.mshade.axolotl.protocol.AxolotlProtocolPipeline
+import eu.mshade.axolotl.protocol.AxolotlSession
 import io.netty.channel.Channel
+import java.util.function.Consumer
 
 object AxololtConnection {
 
     val connections = mutableListOf<Channel>()
 
-    fun send(packet: AxolotlPacketOut) {
+    fun send(axolotlSession: Consumer<AxolotlSession>) {
         connections.forEach {
-            it.writeAndFlush(packet)
+            axolotlSession.accept(AxolotlProtocolPipeline.axolotlSessionByChannel[it]!!)
         }
     }
 

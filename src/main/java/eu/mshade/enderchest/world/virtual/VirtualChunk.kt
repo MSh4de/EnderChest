@@ -21,7 +21,6 @@ class VirtualChunk(x: Int, z: Int, private val virtualWorld: VirtualWorld) : Chu
             return parentWorld.getBlock(x, y, z)
         }
 
-        section = getSectionOrCreate(y)
         return section.getBlock(getBlockIndex(x, y, z))
     }
 
@@ -89,26 +88,28 @@ class VirtualChunk(x: Int, z: Int, private val virtualWorld: VirtualWorld) : Chu
     }
 
     override fun getSectionOrCreate(y: Int): Section {
-        val realY = y shr 4
-        if (sections[realY] == null) {
-            sections[realY] = createSection(y)
+        if (sections[y] == null) {
+            sections[y] = createSection(y)
         }
-        return sections[realY]
+        return sections[y]
     }
 
     override fun createSection(y: Int): Section {
-        val realY = y shr 4
 
-        if (sections[realY] != null) {
+        if (sections[y] != null) {
             throw IllegalStateException("Section already exists")
         }
 
-        sections[realY] = VirtualSection(this, realY)
-        return sections[realY]
+        sections[y] = VirtualSection(this, y, VirtualSectionStatus.DIFFERENT)
+        return sections[y]
     }
 
     override fun getBiomes(): ByteArray {
         return ByteArray(256)
+    }
+
+    override fun setBiomes(biomes: ByteArray?) {
+
     }
 
     override fun addWatcher(agent: Agent) {
@@ -122,7 +123,7 @@ class VirtualChunk(x: Int, z: Int, private val virtualWorld: VirtualWorld) : Chu
         agents.remove(agent)
     }
 
-    override fun getWatching(): Collection<Agent?> {
+    override fun getWatcher(): Collection<Agent?> {
         return agents
     }
 
@@ -130,9 +131,9 @@ class VirtualChunk(x: Int, z: Int, private val virtualWorld: VirtualWorld) : Chu
         return agents.contains(agent)
     }
 
-    override fun notify(agentConsumer: Consumer<Agent>) {
+    override fun notify(consumer: Consumer<Agent>) {
         for (agent in agents) {
-            agentConsumer.accept(agent)
+            consumer.accept(agent)
         }
     }
 

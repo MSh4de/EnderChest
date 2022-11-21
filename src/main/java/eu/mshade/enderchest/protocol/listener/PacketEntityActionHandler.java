@@ -3,13 +3,13 @@ package eu.mshade.enderchest.protocol.listener;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.metadata.SprintingEntityMetadata;
 import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
-import eu.mshade.enderframe.packetevent.PacketEntityActionEvent;
+import eu.mshade.enderframe.packetevent.MinecraftPacketEntityActionEvent;
 import eu.mshade.mwork.event.EventListener;
 
-public class PacketEntityActionHandler implements EventListener<PacketEntityActionEvent> {
+public class PacketEntityActionHandler implements EventListener<MinecraftPacketEntityActionEvent> {
 
     @Override
-    public void onEvent(PacketEntityActionEvent event) {
+    public void onEvent(MinecraftPacketEntityActionEvent event) {
         Player player = event.getPlayer();
         MetadataKeyValueBucket metadataKeyValueBucket = player.getMetadataKeyValueBucket();
 

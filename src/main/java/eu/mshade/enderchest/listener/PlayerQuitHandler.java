@@ -1,6 +1,7 @@
 package eu.mshade.enderchest.listener;
 
 import eu.mshade.enderchest.EnderChest;
+import eu.mshade.enderchest.axolotl.AxololtConnection;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
 import eu.mshade.enderframe.entity.Player;
@@ -48,7 +49,12 @@ public class PlayerQuitHandler implements EventListener<PlayerQuitEvent> {
         PlayerInfoBuilder playerInfoBuilder = PlayerInfoBuilder.of(PlayerInfoType.REMOVE_PLAYER)
                 .withPlayer(player);
         enderChest.getPlayers().forEach(target -> {
-            target.getSessionWrapper().sendPlayerInfo(playerInfoBuilder);
+            target.getMinecraftSession().sendPlayerInfo(playerInfoBuilder);
+        });
+
+
+        AxololtConnection.INSTANCE.send(axolotlSession -> {
+            axolotlSession.sendPlayerLeave(player);
         });
 
         logger.info("{} leave server", player.getName());

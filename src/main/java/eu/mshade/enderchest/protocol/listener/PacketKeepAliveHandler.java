@@ -4,11 +4,11 @@ import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
 import eu.mshade.enderframe.entity.Player;
-import eu.mshade.enderframe.packetevent.PacketKeepAliveEvent;
-import eu.mshade.enderframe.protocol.SessionWrapper;
+import eu.mshade.enderframe.packetevent.MinecraftPacketKeepAliveEvent;
+import eu.mshade.enderframe.protocol.MinecraftSession;
 import eu.mshade.mwork.event.EventListener;
 
-public class PacketKeepAliveHandler implements EventListener<PacketKeepAliveEvent> {
+public class PacketKeepAliveHandler implements EventListener<MinecraftPacketKeepAliveEvent> {
 
     private EnderChest enderChest;
 
@@ -17,15 +17,15 @@ public class PacketKeepAliveHandler implements EventListener<PacketKeepAliveEven
     }
 
     @Override
-    public void onEvent(PacketKeepAliveEvent event) {
-        SessionWrapper sessionWrapper = event.getSessionWrapper();
-        Player player = sessionWrapper.getPlayer();
+    public void onEvent(MinecraftPacketKeepAliveEvent event) {
+        MinecraftSession minecraftSession = event.getSessionWrapper();
+        Player player = minecraftSession.getPlayer();
 
         int ping = (int) (System.currentTimeMillis() - event.getThreshold());
         player.setPing(ping);
         PlayerInfoBuilder playerInfoBuilder = PlayerInfoBuilder
                 .of(PlayerInfoType.UPDATE_LATENCY);
         enderChest.getPlayers().forEach(playerInfoBuilder::withPlayer);
-        sessionWrapper.sendPlayerInfo(playerInfoBuilder);
+        minecraftSession.sendPlayerInfo(playerInfoBuilder);
     }
 }

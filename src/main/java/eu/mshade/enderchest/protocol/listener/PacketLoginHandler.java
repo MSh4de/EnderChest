@@ -1,14 +1,12 @@
 package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderchest.EnderChest;
-import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.mojang.GameProfile;
-import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
-import eu.mshade.enderframe.packetevent.PacketLoginEvent;
-import eu.mshade.enderframe.protocol.SessionWrapper;
+import eu.mshade.enderframe.packetevent.MinecraftPacketLoginEvent;
+import eu.mshade.enderframe.protocol.MinecraftSession;
 import eu.mshade.mwork.event.EventListener;
 
-public class PacketLoginHandler implements EventListener<PacketLoginEvent> {
+public class PacketLoginHandler implements EventListener<MinecraftPacketLoginEvent> {
 
     private EnderChest enderChest;
 
@@ -17,10 +15,10 @@ public class PacketLoginHandler implements EventListener<PacketLoginEvent> {
     }
 
     @Override
-    public void onEvent(PacketLoginEvent event) {
-        SessionWrapper sessionWrapper = event.getSessionWrapper();
-        sessionWrapper.setGameProfile(new GameProfile(event.getName()));
-        //sessionWrapper.sendEncryption(enderChest.getMinecraftEncryption().getKeyPair().getPublic());
-        EnderFrame.get().getPacketEventBus().publish(new PacketFinallyJoinEvent(sessionWrapper));
+    public void onEvent(MinecraftPacketLoginEvent event) {
+        MinecraftSession minecraftSession = event.getSessionWrapper();
+        minecraftSession.setGameProfile(new GameProfile(event.getName()));
+        minecraftSession.sendEncryption(enderChest.getMinecraftEncryption().getKeyPair().getPublic());
+        //EnderFrame.get().getPacketEventBus().publish(new PacketFinallyJoinEvent(minecraftSession));
     }
 }

@@ -1,20 +1,24 @@
 package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderchest.EnderChest;
+import eu.mshade.enderchest.axolotl.AxololtConnection;
 import eu.mshade.enderchest.world.SchematicLoader;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.item.MaterialKey;
 import eu.mshade.enderframe.mojang.chat.ChatColor;
 import eu.mshade.enderframe.mojang.chat.TextComponent;
-import eu.mshade.enderframe.packetevent.PacketChatMessageEvent;
-import eu.mshade.enderframe.protocol.SessionWrapper;
+import eu.mshade.enderframe.packetevent.MinecraftPacketChatMessageEvent;
+import eu.mshade.enderframe.protocol.MinecraftSession;
+import eu.mshade.enderframe.virtualserver.VirtualWorld;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Vector;
+import eu.mshade.enderframe.world.WorldRepository;
 import eu.mshade.mwork.event.EventListener;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 
-public class PacketChatMessageHandler implements EventListener<PacketChatMessageEvent> {
+public class PacketChatMessageHandler implements EventListener<MinecraftPacketChatMessageEvent> {
 
 
     private EnderChest enderChest;
@@ -24,15 +28,17 @@ public class PacketChatMessageHandler implements EventListener<PacketChatMessage
     }
 
     @Override
-    public void onEvent(PacketChatMessageEvent event) {
+    public void onEvent(MinecraftPacketChatMessageEvent event) {
         Player player = event.getPlayer();
         Location location = player.getLocation();
+
+        //AxololtConnection.INSTANCE.send(new AxolotlPacketOutChatMessage(player, event.getMessage()));
 
         if (event.getMessage().startsWith("schematic")) {
             String[] args = event.getMessage().split(" ");
             if (args.length == 2) {
                 String schematicPath = args[1];
-                player.getSessionWrapper().sendMessage(ChatColor.GREEN + "Loading schematic " + schematicPath);
+                player.getMinecraftSession().sendMessage(ChatColor.GREEN + "Loading schematic " + schematicPath);
                 ForkJoinPool.commonPool().execute(() -> {
                     SchematicLoader.placeSchematic(location.getWorld(), this.getClass().getClassLoader().getResourceAsStream("./" + schematicPath), new Vector(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
                 });
@@ -44,38 +50,38 @@ public class PacketChatMessageHandler implements EventListener<PacketChatMessage
                 int x = Integer.parseInt(args[1]);
                 int y = Integer.parseInt(args[2]);
                 int z = Integer.parseInt(args[3]);
-                player.getSessionWrapper().teleport(new Location(location.getWorld(), x, y, z));
+                player.getMinecraftSession().teleport(new Location(location.getWorld(), x, y, z));
             } else if (args.length == 2) {
                 String name = args[1];
                 enderChest.getPlayers().stream().filter(p -> p.getName().equals(name))
                         .findFirst()
                         .ifPresentOrElse((p -> {
-                            player.getSessionWrapper().teleport(p.getLocation());
+                            player.getMinecraftSession().teleport(p.getLocation());
                         }), () -> {
-                            player.getSessionWrapper().sendMessage(ChatColor.RED + "Player not found");
+                            player.getMinecraftSession().sendMessage(ChatColor.RED + "Player not found");
                 });
             }
             return;
         } else if (event.getMessage().startsWith("dblock")) {
             String[] args = event.getMessage().split(" ");
             int id = Integer.parseInt(args[1]);
-            SessionWrapper sessionWrapper = player.getSessionWrapper();
+            MinecraftSession minecraftSession = player.getMinecraftSession();
 
             if (args.length == 2) {
                 for (int i = 0; i < 16; i++) {
                     MaterialKey materialKey = MaterialKey.from(id, i);
                     Vector vector = new Vector(location.getBlockX(), location.getBlockY(), location.getBlockZ()).add(i * 2, 0, 0);
-                    sessionWrapper.sendUnsafeBlockChange(vector, materialKey);
+                    minecraftSession.sendUnsafeBlockChange(vector, materialKey);
                 }
                 for (int i = 0; i < 16; i++) {
                     Vector vector = new Vector(location.getBlockX(), location.getBlockY(), location.getBlockZ()).add(i * 2, 1, 0);
-                    sessionWrapper.sendUnsafeBlockChange(vector, MaterialKey.from(63));
-                    sessionWrapper.sendSign(vector, TextComponent.of("id: " + id), TextComponent.of("data: " + i));
+                    minecraftSession.sendUnsafeBlockChange(vector, MaterialKey.from(63));
+                    minecraftSession.sendSign(vector, TextComponent.of("id: " + id), TextComponent.of("data: " + i));
                 }
             } else if (args.length == 3) {
                 int data = Integer.parseInt(args[2]);
                 MaterialKey materialKey = MaterialKey.from(id, data);
-                sessionWrapper.sendUnsafeBlockChange(location.toVector(), materialKey);
+                minecraftSession.sendUnsafeBlockChange(location.toVector(), materialKey);
             }
 
 
@@ -84,14 +90,49 @@ public class PacketChatMessageHandler implements EventListener<PacketChatMessage
         } else if (event.getMessage().startsWith("bdblock")) {
             String[] args = event.getMessage().split(" ");
             int id = Integer.parseInt(args[1]);
-            SessionWrapper sessionWrapper = player.getSessionWrapper();
+            MinecraftSession minecraftSession = player.getMinecraftSession();
             int data = Integer.parseInt(args[2]);
             MaterialKey materialKey = MaterialKey.from(id, data);
-            sessionWrapper.sendUnsafeBlockChange(location.toVector().add(0, -1, 0), materialKey);
+            minecraftSession.sendUnsafeBlockChange(location.toVector().add(0, -1, 0), materialKey);
+            return;
+        } else if (event.getMessage().startsWith("virtualWorld")){
+            String[] args = event.getMessage().split(" ");
+            if (args.length <= 1) return;
+            String command = args[1];
+            if (command.equals("create")){
+                if (args.length == 3){
+                    String virtualWorldName = args[2];
+                    enderChest.getVirtualWorldManager().createVirtualWorld(virtualWorldName, location.getWorld());
+                    player.getMinecraftSession().sendMessage(ChatColor.GREEN + "Virtual world " + virtualWorldName + " created");
+                }
+            }else if (command.equals("list")) {
+                enderChest.getVirtualWorldManager().getVirtualWorlds().forEach(virtualWorld -> {
+                    player.getMinecraftSession().sendMessage(ChatColor.GREEN + virtualWorld.getName());
+                });
+            }else if (command.equals("join")){
+                if (args.length == 3){
+                    String virtualWorldName = args[2];
+                    VirtualWorld virtualWorld = enderChest.getVirtualWorldManager().getVirtualWorld(virtualWorldName);
+                    if (virtualWorld == null){
+                        player.getMinecraftSession().sendMessage(ChatColor.RED + "Virtual world not found");
+                        return;
+                    }
+                    CompletableFuture.runAsync(() -> {
+                            player.joinWorld(virtualWorld);
+                        player.getMinecraftSession().sendMessage(ChatColor.GREEN + "Joined virtual world " + virtualWorldName);
+                    });
+
+                }
+            }else if (command.equals("leave")){
+                CompletableFuture.runAsync(() -> {
+                    player.getMinecraftSession().sendMessage(ChatColor.GREEN + "Left virtual world "+ player.getLocation().getWorld().getName());
+                    player.joinWorld(WorldRepository.INSTANCE.getWorld("world"));
+                });
+            }
             return;
         }
 
-        enderChest.getPlayers().forEach(each -> each.getSessionWrapper().sendMessage(player.getDisplayName() + " : " + ChatColor.translateAlternateColorCodes('&', event.getMessage())));
+        enderChest.getPlayers().forEach(each -> each.getMinecraftSession().sendMessage(player.getDisplayName() + " : " + ChatColor.translateAlternateColorCodes('&', event.getMessage())));
         System.out.println(player.getDisplayName() + " : " + event.getMessage());
     }
 }

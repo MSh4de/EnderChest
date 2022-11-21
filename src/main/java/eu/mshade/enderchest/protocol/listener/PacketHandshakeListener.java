@@ -2,14 +2,14 @@ package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderframe.mojang.chat.TextComponent;
-import eu.mshade.enderframe.packetevent.PacketHandshakeEvent;
+import eu.mshade.enderframe.packetevent.MinecraftPacketHandshakeEvent;
 import eu.mshade.enderframe.protocol.*;
 import eu.mshade.enderframe.protocol.packet.MinecraftPacketOutDisconnect;
 import eu.mshade.mwork.event.EventListener;
 import io.netty.channel.Channel;
 
 
-public class PacketHandshakeListener implements EventListener<PacketHandshakeEvent> {
+public class PacketHandshakeListener implements EventListener<MinecraftPacketHandshakeEvent> {
 
 
     private EnderChest enderChest;
@@ -19,32 +19,33 @@ public class PacketHandshakeListener implements EventListener<PacketHandshakeEve
     }
 
     @Override
-    public void onEvent(PacketHandshakeEvent event) {
-        ProtocolPipeline protocolPipeline = ProtocolPipeline.get();
-        SessionWrapper sessionWrapper = event.getSessionWrapper();
-        Channel channel = sessionWrapper.getChannel();
-        Handshake handshake = event.getHandshake();
-        HandshakeStatus handshakeStatus = handshake.getHandshakeStatus();
-        MinecraftProtocolVersion minecraftProtocolVersion = handshake.getVersion();
+    public void onEvent(MinecraftPacketHandshakeEvent event) {
+        MinecraftProtocolPipeline minecraftProtocolPipeline = MinecraftProtocolPipeline.get();
+        MinecraftSession minecraftSession = event.getSessionWrapper();
+        Channel channel = minecraftSession.getChannel();
+        MinecraftHandshake minecraftHandshake = event.getHandshake();
+        MinecraftHandshakeStatus minecraftHandshakeStatus = minecraftHandshake.getHandshakeStatus();
+        MinecraftProtocolVersion minecraftProtocolVersion = minecraftHandshake.getVersion();
 
-        if (handshakeStatus == HandshakeStatus.STATUS){
-            sessionWrapper.toggleProtocolStatus(ProtocolStatus.STATUS);
+        if (minecraftHandshakeStatus == MinecraftHandshakeStatus.STATUS){
+            minecraftSession.toggleProtocolStatus(MinecraftProtocolStatus.STATUS);
         }else {
-            sessionWrapper.toggleProtocolStatus(ProtocolStatus.LOGIN);
+            minecraftSession.toggleProtocolStatus(MinecraftProtocolStatus.LOGIN);
             if (minecraftProtocolVersion != MinecraftProtocolVersion.UNKNOWN) {
-                Protocol protocol = enderChest.getProtocolRepository().getProtocolFrameByVersion(minecraftProtocolVersion);
-                if (protocol != null) {
-                    sessionWrapper = protocol.getSessionWrapper(channel);
-                    protocolPipeline.setSessionWrapper(channel, sessionWrapper);
-                    sessionWrapper.toggleProtocol(protocol);
-                    sessionWrapper.toggleProtocolStatus(ProtocolStatus.LOGIN);
+                MinecraftProtocol minecraftProtocol = enderChest.getMinecraftProtocolRepository().getProtocol(minecraftProtocolVersion);
+                if (minecraftProtocol != null) {
+                    minecraftSession = minecraftProtocol.getSessionWrapper(channel);
+                    minecraftProtocolPipeline.setMinecraftSession(channel, minecraftSession);
+                    minecraftSession.toggleProtocol(minecraftProtocol);
+                    minecraftSession.toggleProtocolStatus(MinecraftProtocolStatus.LOGIN);
                 }else {
-                    sessionWrapper.sendPacketAndClose(new MinecraftPacketOutDisconnect(TextComponent.of("Your version is not supported by MShade")));
+                    minecraftSession.sendPacketAndClose(new MinecraftPacketOutDisconnect(TextComponent.of("Your version is not supported by MShade")));
                 }
             } else {
-                sessionWrapper.sendPacketAndClose(new MinecraftPacketOutDisconnect(TextComponent.of("Your version is not supported by MShade")));
+                minecraftSession.sendPacketAndClose(new MinecraftPacketOutDisconnect(TextComponent.of("Your version is not supported by MShade")));
             }
         }
-        sessionWrapper.setHandshake(handshake);
+        minecraftSession.setHandshake(minecraftHandshake);
+
     }
 }

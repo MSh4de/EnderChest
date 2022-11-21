@@ -1,25 +1,23 @@
 package eu.mshade.enderchest.marshal.metadata
 
 import eu.mshade.enderframe.metadata.MetadataKeyValue
-import eu.mshade.enderframe.world.Difficulty
-import eu.mshade.enderframe.world.Dimension
-import eu.mshade.enderframe.world.LevelType
-import eu.mshade.enderframe.world.metadata.*
+import eu.mshade.enderframe.metadata.MetadataKeyValueBuffer
+import eu.mshade.enderframe.world.*
 import eu.mshade.mwork.binarytag.BinaryTag
 import eu.mshade.mwork.binarytag.BinaryTagDriver
-import eu.mshade.mwork.binarytag.entity.LongBinaryTag
-import eu.mshade.mwork.binarytag.entity.StringBinaryTag
+import eu.mshade.mwork.binarytag.LongBinaryTag
+import eu.mshade.mwork.binarytag.StringBinaryTag
 
 class NameWorldMetadataBuffer : MetadataKeyValueBuffer {
 
     override fun read(binaryTag: BinaryTag<*>): MetadataKeyValue<*> {
         val stringBinaryTag = binaryTag as? StringBinaryTag
-        return NameWorldMetadata(stringBinaryTag?.value)
+        return NameWorldMetadata(stringBinaryTag!!.value)
     }
 
     override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
         val nameWorldMetadata = metadataKeyValue as? NameWorldMetadata
-        return StringBinaryTag(nameWorldMetadata?.metadataValue)
+        return StringBinaryTag(nameWorldMetadata!!.metadataValue)
     }
 
 }
@@ -28,7 +26,7 @@ class SeedWorldMetadataBuffer : MetadataKeyValueBuffer {
 
     override fun read(binaryTag: BinaryTag<*>): MetadataKeyValue<*> {
         val longBinaryTag = binaryTag as? LongBinaryTag
-        return SeedWorldMetadata(longBinaryTag?.value)
+        return SeedWorldMetadata(longBinaryTag!!.value)
     }
 
     override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
@@ -72,4 +70,14 @@ class DifficultyWorldMetadataBuffer(val binaryTagDriver: BinaryTagDriver): Metad
         return binaryTagDriver.marshal(metadataKeyValue.metadataValue)
     }
 
+}
+
+class ParentWorldMetadataBuffer: MetadataKeyValueBuffer {
+    override fun read(binaryTag: BinaryTag<*>): MetadataKeyValue<*> {
+        return ParentWorldMetadata(WorldRepository.getWorld(binaryTag.value as String))
+    }
+
+    override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
+        return StringBinaryTag((metadataKeyValue.metadataValue as World).name)
+    }
 }

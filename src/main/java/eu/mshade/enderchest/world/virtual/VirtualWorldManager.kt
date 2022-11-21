@@ -27,7 +27,7 @@ class VirtualWorldManager(private val chunkSafeguard: ChunkSafeguard, private va
     init {
         virtualWorldsFolder.mkdirs()
         for (file in this.virtualWorldsFolder.listFiles()!!) {
-            val world = VirtualWorldBinaryTagMarshal.read(binaryTagDriver, chunkSafeguard, file, EnderChest.metadataKeyValueBinaryTagMarshal)
+            val world = VirtualWorldBinaryTagMarshal.read(binaryTagDriver, chunkSafeguard, file, EnderChest.metadataKeyValueBufferRegistry)
             virtualWorlds[world.name] = world
             world.joinTickBus(tickBus)
         }

@@ -9,7 +9,7 @@ import eu.mshade.enderframe.world.block.BlockTransformerRepository;
 import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderframe.world.Vector;
 import eu.mshade.enderframe.world.World;
-import eu.mshade.enderman.EndermanProtocol;
+import eu.mshade.enderman.EndermanMinecraftProtocol;
 import eu.mshade.mwork.MWork;
 import eu.mshade.mwork.binarytag.BinaryTagDriver;
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
@@ -25,7 +25,7 @@ import java.util.zip.GZIPInputStream;
 
 public class SchematicLoader {
 
-    private static EndermanProtocol endermanProtocol = new EndermanProtocol();
+    private static EndermanMinecraftProtocol endermanProtocol = new EndermanMinecraftProtocol();
     private static Logger LOGGER = LoggerFactory.getLogger(SchematicLoader.class);
     private static final Block AIR = Material.AIR.toBlock();
 
@@ -109,26 +109,20 @@ public class SchematicLoader {
 
                     chunk.setBlock(chunk.getX() + middleX, maxY, chunk.getZ() + middleZ, Material.RED_WOOL);*/
 
-                    chunk.notify(agent -> {
-                        if (agent instanceof Player player) {
-                            player.getSessionWrapper().sendUnloadChunk(chunk);
-                        }
+                    chunk.notify(Player.class, player -> {
+                        player.getMinecraftSession().sendUnloadChunk(chunk);
                     });
                 });
 
                 updatedChunks.forEach(chunk -> {
-
-                    chunk.notify(agent -> {
-                        if (agent instanceof Player player) {
-                            player.getSessionWrapper().sendChunk(chunk);
-                        }
+                    chunk.notify(Player.class, player -> {
+                        player.getMinecraftSession().sendChunk(chunk);
                     });
-
                     schematicAgent.leaveWatch(chunk);
                 });
 
 
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 e.printStackTrace();
             }
 

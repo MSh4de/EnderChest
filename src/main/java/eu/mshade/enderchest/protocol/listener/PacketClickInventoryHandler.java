@@ -5,33 +5,33 @@ import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.inventory.*;
 import eu.mshade.enderframe.item.ItemStack;
 import eu.mshade.enderframe.item.Material;
-import eu.mshade.enderframe.packetevent.PacketClickInventoryEvent;
+import eu.mshade.enderframe.packetevent.MinecraftPacketClickInventoryEvent;
 import eu.mshade.mwork.event.EventListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PacketClickInventoryHandler implements EventListener<PacketClickInventoryEvent> {
+public class PacketClickInventoryHandler implements EventListener<MinecraftPacketClickInventoryEvent> {
 
     @Override
-    public void onEvent(PacketClickInventoryEvent event) {
+    public void onEvent(MinecraftPacketClickInventoryEvent event) {
         Player player = event.getPlayer();
 
         Inventory inventory = event.getInventory();
-        InventoryBufferStore inventoryBufferStore = player.getInventoryBufferStore();
+        InventoryClickStore inventoryClickStore = player.getInventoryBufferStore();
         ClickType clickType = event.getClickType();
         int slot = event.getSlot();
 
 
         switch (clickType) {
             case LEFT -> {
-                if (inventoryBufferStore.getPickedItemStack() == null) {
+                if (inventoryClickStore.getPickedItemStack() == null) {
                     ItemStack pickedItemStack = inventory.getItemStack(slot);
-                    inventoryBufferStore.setPickedItemStack(pickedItemStack);
+                    inventoryClickStore.setPickedItemStack(pickedItemStack);
                     inventory.deleteItemStack(slot);
                 } else {
                     ItemStack itemStack = inventory.getItemStack(slot);
-                    ItemStack pickedItemStack = inventoryBufferStore.getPickedItemStack();
+                    ItemStack pickedItemStack = inventoryClickStore.getPickedItemStack();
                     if (itemStack != null) {
                         if (itemStack.getMaterial().equals(pickedItemStack.getMaterial())) {
                             if (pickedItemStack.getAmount() != 64 || itemStack.getAmount() != 64) {
@@ -39,36 +39,36 @@ public class PacketClickInventoryHandler implements EventListener<PacketClickInv
                                 int remainAmount = totalAmount % 64;
                                 if (totalAmount >= 64) {
                                     itemStack.setAmount(64);
-                                    inventoryBufferStore.setPickedItemStack(pickedItemStack.clone().setAmount(remainAmount));
+                                    inventoryClickStore.setPickedItemStack(pickedItemStack.clone().setAmount(remainAmount));
                                 } else {
                                     itemStack.setAmount(totalAmount);
-                                    inventoryBufferStore.setPickedItemStack(null);
+                                    inventoryClickStore.setPickedItemStack(null);
                                 }
                             }
                         } else {
-                            inventoryBufferStore.setPickedItemStack(itemStack);
+                            inventoryClickStore.setPickedItemStack(itemStack);
                             inventory.setItemStack(slot, pickedItemStack);
                         }
                     } else {
-                        inventoryBufferStore.setPickedItemStack(null);
+                        inventoryClickStore.setPickedItemStack(null);
                         inventory.setItemStack(slot, pickedItemStack);
                     }
                 }
             }
             case RIGHT -> {
-                if (inventoryBufferStore.getPickedItemStack() == null) {
+                if (inventoryClickStore.getPickedItemStack() == null) {
                     ItemStack itemStack = inventory.getItemStack(slot);
                     if (itemStack != null) {
                         int amountOfPickedIemStack = itemStack.getAmount() / 2;
                         int amountOfInventoryItem = amountOfPickedIemStack - (itemStack.getAmount() % 2);
                         itemStack.modifyAmount(integer -> amountOfInventoryItem);
-                        inventoryBufferStore.setPickedItemStack(itemStack.clone().setAmount(amountOfPickedIemStack));
+                        inventoryClickStore.setPickedItemStack(itemStack.clone().setAmount(amountOfPickedIemStack));
                     }
                 } else {
-                    ItemStack pickedItemStack = inventoryBufferStore.getPickedItemStack();
+                    ItemStack pickedItemStack = inventoryClickStore.getPickedItemStack();
                     pickedItemStack.modifyAmount(integer -> integer - 1);
                     if (pickedItemStack.getAmount() <= 0) {
-                        inventoryBufferStore.setPickedItemStack(null);
+                        inventoryClickStore.setPickedItemStack(null);
                     }
                     ItemStack itemStack = inventory.getItemStack(slot);
                     if (itemStack == null) {
@@ -80,8 +80,8 @@ public class PacketClickInventoryHandler implements EventListener<PacketClickInv
                 }
             }
             case DOUBLE_CLICK -> {
-                if (inventoryBufferStore.getPickedItemStack() == null) return;
-                ItemStack pickedItemStack = inventoryBufferStore.getPickedItemStack();
+                if (inventoryClickStore.getPickedItemStack() == null) return;
+                ItemStack pickedItemStack = inventoryClickStore.getPickedItemStack();
                 int maxStackSize = pickedItemStack.getMaterial().getMaxStackSize();
                 if (player.getOpenedInventory() != null) {
                     if (pickedItemStack.getAmount() == maxStackSize) return;
@@ -94,21 +94,21 @@ public class PacketClickInventoryHandler implements EventListener<PacketClickInv
 
             }
             case ADD_ITEM_FROM_DRAG ->
-                    inventoryBufferStore.addPlacedItemStack(slot, inventory instanceof PlayerInventory);
-            case START_DRAG_LEFT -> inventoryBufferStore.setLastClickType(ClickType.START_DRAG_LEFT);
+                    inventoryClickStore.addPlacedItemStack(slot, inventory instanceof PlayerInventory);
+            case START_DRAG_LEFT -> inventoryClickStore.setLastClickType(ClickType.START_DRAG_LEFT);
             case END_DRAG_LEFT -> {
-                if (inventoryBufferStore.getLastClickType() != ClickType.START_DRAG_LEFT) return;
-                ItemStack pickedItemStack = inventoryBufferStore.getPickedItemStack();
+                if (inventoryClickStore.getLastClickType() != ClickType.START_DRAG_LEFT) return;
+                ItemStack pickedItemStack = inventoryClickStore.getPickedItemStack();
                 if (pickedItemStack == null) return;
 
-                int size = inventoryBufferStore.getPLacedItemStacks().size();
+                int size = inventoryClickStore.getPLacedItemStacks().size();
                 int amountOfPickedIemStack = pickedItemStack.getAmount() % size;
                 int amountOfInventoryItem = (pickedItemStack.getAmount() / size);
                 pickedItemStack.setAmount(amountOfPickedIemStack);
-                if (amountOfPickedIemStack == 0) inventoryBufferStore.setPickedItemStack(null);
+                if (amountOfPickedIemStack == 0) inventoryClickStore.setPickedItemStack(null);
 
 
-                for (InventoryBufferStore.PlacedItemStack placedItemStack : inventoryBufferStore.getPLacedItemStacks()) {
+                for (InventoryClickStore.PlacedItemStack placedItemStack : inventoryClickStore.getPLacedItemStacks()) {
                     Inventory inventoryTarget = (placedItemStack.isPlayerInventory() ? player.getInventory() : player.getOpenedInventory());
 
                     ItemStack itemStack = inventoryTarget.getItemStack(placedItemStack.getSlot());
@@ -122,17 +122,17 @@ public class PacketClickInventoryHandler implements EventListener<PacketClickInv
 
                 }
 
-                inventoryBufferStore.clearPLacedItemStacks();
+                inventoryClickStore.clearPLacedItemStacks();
             }
-            case START_DRAG_RIGHT -> inventoryBufferStore.setLastClickType(ClickType.START_DRAG_RIGHT);
+            case START_DRAG_RIGHT -> inventoryClickStore.setLastClickType(ClickType.START_DRAG_RIGHT);
             case END_DRAG_RIGHT -> {
-                if (inventoryBufferStore.getLastClickType() != ClickType.START_DRAG_RIGHT) return;
-                ItemStack pickedItemStack = inventoryBufferStore.getPickedItemStack();
-                int size = inventoryBufferStore.getPLacedItemStacks().size();
+                if (inventoryClickStore.getLastClickType() != ClickType.START_DRAG_RIGHT) return;
+                ItemStack pickedItemStack = inventoryClickStore.getPickedItemStack();
+                int size = inventoryClickStore.getPLacedItemStacks().size();
                 pickedItemStack.modifyAmount(integer -> integer - size);
-                if (pickedItemStack.getAmount() <= 0) inventoryBufferStore.setPickedItemStack(null);
+                if (pickedItemStack.getAmount() <= 0) inventoryClickStore.setPickedItemStack(null);
 
-                for (InventoryBufferStore.PlacedItemStack placedItemStack : inventoryBufferStore.getPLacedItemStacks()) {
+                for (InventoryClickStore.PlacedItemStack placedItemStack : inventoryClickStore.getPLacedItemStacks()) {
                     Inventory inventoryTarget = (placedItemStack.isPlayerInventory() ? player.getInventory() : player.getOpenedInventory());
 
                     ItemStack itemStack = inventoryTarget.getItemStack(placedItemStack.getSlot());
@@ -145,25 +145,25 @@ public class PacketClickInventoryHandler implements EventListener<PacketClickInv
 
                 }
 
-                inventoryBufferStore.clearPLacedItemStacks();
+                inventoryClickStore.clearPLacedItemStacks();
             }
-            case START_DRAG_MIDDLE -> inventoryBufferStore.setLastClickType(ClickType.START_DRAG_MIDDLE);
+            case START_DRAG_MIDDLE -> inventoryClickStore.setLastClickType(ClickType.START_DRAG_MIDDLE);
             case END_DRAG_MIDDLE -> {
-                if (inventoryBufferStore.getLastClickType() != ClickType.START_DRAG_MIDDLE) return;
-                ItemStack pickedItemStack = inventoryBufferStore.getPickedItemStack();
-                inventoryBufferStore.setPickedItemStack(null);
+                if (inventoryClickStore.getLastClickType() != ClickType.START_DRAG_MIDDLE) return;
+                ItemStack pickedItemStack = inventoryClickStore.getPickedItemStack();
+                inventoryClickStore.setPickedItemStack(null);
 
-                if (inventoryBufferStore.getPLacedItemStacks().size() == 1) {
-                    InventoryBufferStore.PlacedItemStack lastPlacedItemStack = inventoryBufferStore.getLastPlacedItemStack();
+                if (inventoryClickStore.getPLacedItemStacks().size() == 1) {
+                    InventoryClickStore.PlacedItemStack lastPlacedItemStack = inventoryClickStore.getLastPlacedItemStack();
                     Inventory inventoryTarget = (lastPlacedItemStack.isPlayerInventory() ? player.getInventory() : player.getOpenedInventory());
                     if (inventoryTarget.equals(inventory)) {
                         ItemStack itemStack = inventoryTarget.getItemStack(lastPlacedItemStack.getSlot());
                         inventoryTarget.setItemStack(lastPlacedItemStack.getSlot(), pickedItemStack);
-                        inventoryBufferStore.setPickedItemStack(itemStack);
+                        inventoryClickStore.setPickedItemStack(itemStack);
                     }
                 } else {
 
-                    for (InventoryBufferStore.PlacedItemStack placedItemStack : inventoryBufferStore.getPLacedItemStacks()) {
+                    for (InventoryClickStore.PlacedItemStack placedItemStack : inventoryClickStore.getPLacedItemStacks()) {
                         Inventory inventoryTarget = (placedItemStack.isPlayerInventory() ? player.getInventory() : player.getOpenedInventory());
                         ItemStack itemStack = inventoryTarget.getItemStack(placedItemStack.getSlot());
                         if (itemStack == null) {
@@ -173,14 +173,14 @@ public class PacketClickInventoryHandler implements EventListener<PacketClickInv
                         }
                     }
                 }
-                inventoryBufferStore.clearPLacedItemStacks();
+                inventoryClickStore.clearPLacedItemStacks();
             }
             case MIDDLE -> {
                 if (player.getGameMode() == GameMode.CREATIVE) {
                     ItemStack itemStack = inventory.getItemStack(slot);
                     if (itemStack != null && !itemStack.getMaterial().equals(Material.AIR)) {
-                        inventoryBufferStore.setLastPlacedItemStack(new InventoryBufferStore.PlacedItemStack(slot, inventory instanceof PlayerInventory));
-                        inventoryBufferStore.setPickedItemStack(itemStack
+                        inventoryClickStore.setLastPlacedItemStack(new InventoryClickStore.PlacedItemStack(slot, inventory instanceof PlayerInventory));
+                        inventoryClickStore.setPickedItemStack(itemStack
                                 .clone()
                                 .setAmount(itemStack.getMaterial().getMaxStackSize()));
                     }
@@ -290,24 +290,24 @@ public class PacketClickInventoryHandler implements EventListener<PacketClickInv
 
     private void onDoubleClick(ItemStack pickedItemStack, Inventory inventory) {
 
-        List<InventoryBufferStore.PlacedItemStack> placedItemStacks = new ArrayList<>();
+        List<InventoryClickStore.PlacedItemStack> placedItemStacks = new ArrayList<>();
         int size = (inventory instanceof PlayerInventory ? 4 * 9 : inventory.getItemStacks().length);
 
         for (int i = 0; i < size; i++) {
             ItemStack itemStackTarget = inventory.getItemStack(i);
             if (itemStackTarget != null && itemStackTarget.getMaterial().equals(pickedItemStack.getMaterial()) && itemStackTarget.getAmount() != pickedItemStack.getMaterial().getMaxStackSize()) {
-                placedItemStacks.add(new InventoryBufferStore.PlacedItemStack(i));
+                placedItemStacks.add(new InventoryClickStore.PlacedItemStack(i));
             }
         }
 
         for (int i = 0; i < size; i++) {
             ItemStack itemStackTarget = inventory.getItemStack(i);
             if (itemStackTarget != null && itemStackTarget.getMaterial().equals(pickedItemStack.getMaterial()) && itemStackTarget.getAmount() == pickedItemStack.getMaterial().getMaxStackSize()) {
-                placedItemStacks.add(new InventoryBufferStore.PlacedItemStack(i));
+                placedItemStacks.add(new InventoryClickStore.PlacedItemStack(i));
             }
         }
 
-        for (InventoryBufferStore.PlacedItemStack placedItemStack : placedItemStacks) {
+        for (InventoryClickStore.PlacedItemStack placedItemStack : placedItemStacks) {
             int slot = placedItemStack.getSlot();
             ItemStack itemStack = inventory.getItemStack(slot);
             int remainAmount = pickedItemStack.getMaterial().getMaxStackSize() - pickedItemStack.getAmount();

@@ -25,18 +25,16 @@ public class DefaultSection extends Section {
         palette.setBlock(0, 4096, Material.AIR.toBlock());
     }
 
-    public DefaultSection(Chunk chunk, int y, int realBlock, Palette palette, int[] blocks, UniqueId uniqueId, NibbleArray blockLight, NibbleArray skyLight) {
+    public DefaultSection(Chunk chunk, int y, Palette palette, int[] blocks, UniqueId uniqueId, NibbleArray blockLight, NibbleArray skyLight) {
         super(chunk, y, palette, blocks, uniqueId, blockLight, skyLight);
-        this.realBlock = realBlock;
     }
 
 
     @Override
     public String toString() {
-        return "DefaultSectionBuffer{" +
-                "chunkBuffer=" + chunk +
+        return "DefaultSection{" +
+                "chunk=" + chunk +
                 ", y=" + y +
-                ", realBlock=" + realBlock +
                 '}';
     }
 

@@ -1,15 +1,16 @@
 package eu.mshade.enderchest.protocol.listener;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.Property;
-import eu.mshade.enderframe.packetevent.PacketEncryptionEvent;
-import eu.mshade.enderframe.packetevent.PacketFinallyJoinEvent;
+import eu.mshade.enderframe.packetevent.MinecraftPacketEncryptionEvent;
+import eu.mshade.enderframe.packetevent.MinecraftPacketFinallyJoinEvent;
 import eu.mshade.enderframe.protocol.MinecraftEncryption;
-import eu.mshade.enderframe.protocol.SessionWrapper;
+import eu.mshade.enderframe.protocol.MinecraftSession;
+import eu.mshade.mwork.MWork;
 import eu.mshade.mwork.event.EventListener;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class PacketEncryptionHandler implements EventListener<PacketEncryptionEvent> {
+public class PacketEncryptionHandler implements EventListener<MinecraftPacketEncryptionEvent> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PacketEncryptionHandler.class);
     private final HttpClient httpClient = HttpClient.newHttpClient();
@@ -34,44 +35,44 @@ public class PacketEncryptionHandler implements EventListener<PacketEncryptionEv
     }
 
     @Override
-    public void onEvent(PacketEncryptionEvent event) {
-        SessionWrapper sessionWrapper = event.getSessionWrapper();
+    public void onEvent(MinecraftPacketEncryptionEvent event) {
+        MinecraftSession minecraftSession = event.getSessionWrapper();
         MinecraftEncryption minecraftEncryption = enderChest.getMinecraftEncryption();
 
         try {
             SecretKey secretKey = minecraftEncryption.getSecretKey(event.getSharedSecret());
-            sessionWrapper.enableEncryption(secretKey);
-            String hashServerId = minecraftEncryption.getHashServerId(sessionWrapper.getSessionId(), minecraftEncryption.getKeyPair().getPublic(), secretKey);
+            minecraftSession.enableEncryption(secretKey);
+            String hashServerId = minecraftEncryption.getHashServerId(minecraftSession.getSessionId(), minecraftEncryption.getKeyPair().getPublic(), secretKey);
 
             HttpRequest httpRequest = HttpRequest.newBuilder()
                     .GET()
-                    .uri(new URI("https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" + sessionWrapper.getGameProfile().getName() + "&serverId=" + hashServerId))
+                    .uri(new URI("https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" + minecraftSession.getGameProfile().getName() + "&serverId=" + hashServerId))
                     .build();
             String body = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString()).body();
             if (body.isEmpty() || body.isBlank()) {
-                sessionWrapper.sendDisconnect("You are not logged into Minecraft account. If you logged into you Minecraft account, try restarting you Minecraft client.");
+                minecraftSession.sendDisconnect("You are not logged into Minecraft account. If you logged into you Minecraft account, try restarting you Minecraft client.");
                 return;
             }
-            JSONObject jsonObject = new JSONObject(body);
-            String id = jsonObject.getString("id");
+
+            JsonNode jsonNode = MWork.get().getObjectMapper().readTree(body);
+            String id = jsonNode.get("id").asText();
             UUID uuid = UUID.fromString(id.substring(0, 8)
                     + "-" + id.substring(8, 12)
                     + "-" + id.substring(12, 16)
                     + "-" + id.substring(16, 20)
                     + "-" + id.substring(20, 32));
             List<Property> properties = new ArrayList<>();
-            for (Object obj : jsonObject.getJSONArray("properties")) {
-                JSONObject propJson = (JSONObject) obj;
-                String name = propJson.getString("name");
-                String value = propJson.getString("value");
-                String signature = (propJson.has("signature") ? propJson.getString("signature") : null);
+            jsonNode.get("properties").elements().forEachRemaining(property -> {
+                String name = property.get("name").asText();
+                String value = property.get("value").asText();
+                String signature = property.get("signature").asText();
                 properties.add(new Property(name, value, signature));
-            }
+            });
 
-            GameProfile gameProfile = new GameProfile(uuid, jsonObject.getString("name"), properties);
-            sessionWrapper.setGameProfile(gameProfile);
+            GameProfile gameProfile = new GameProfile(uuid, jsonNode.get("name").asText(), properties);
+            minecraftSession.setGameProfile(gameProfile);
 
-            EnderFrame.get().getPacketEventBus().publish(new PacketFinallyJoinEvent(sessionWrapper));
+            EnderFrame.get().getPacketEventBus().publish(new MinecraftPacketFinallyJoinEvent(minecraftSession));
         }catch (Exception e){
             LOGGER.error("", e);
         }

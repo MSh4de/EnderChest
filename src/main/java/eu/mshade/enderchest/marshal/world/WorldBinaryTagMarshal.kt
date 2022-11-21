@@ -1,8 +1,8 @@
 package eu.mshade.enderchest.marshal.world
 
-import eu.mshade.enderchest.marshal.metadata.MetadataKeyValueBinaryTagMarshal
+import eu.mshade.enderframe.metadata.MetadataKeyValueBufferRegistry
+import eu.mshade.enderchest.world.ChunkSafeguard
 import eu.mshade.enderchest.world.DefaultWorld
-import eu.mshade.enderchest.world.WorldManager
 import eu.mshade.enderframe.world.World
 import eu.mshade.mwork.binarytag.BinaryTag
 import eu.mshade.mwork.binarytag.BinaryTagDriver
@@ -15,32 +15,33 @@ object WorldBinaryTagMarshal {
 
     fun serialize(
         world: World,
-        metadataKeyValueBinaryTagMarshal: MetadataKeyValueBinaryTagMarshal
+        metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry
     ): CompoundBinaryTag {
-        return metadataKeyValueBinaryTagMarshal.serialize(world.metadataKeyValueBucket)
+        return metadataKeyValueBufferRegistry.serialize(world.metadataKeyValueBucket)
     }
 
     fun deserialize(
         binaryTag: BinaryTag<*>,
-        worldManager: WorldManager,
+        chunkSafeguard: ChunkSafeguard,
         worldFolder: File,
-        metadataKeyValueBinaryTagMarshal: MetadataKeyValueBinaryTagMarshal
+        metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry
     ): World {
         val metadataKeyValueBucket =
-            metadataKeyValueBinaryTagMarshal.deserialize((binaryTag as CompoundBinaryTag?)!!)
-        return DefaultWorld(worldManager, worldFolder, metadataKeyValueBucket)
+            metadataKeyValueBufferRegistry.deserialize((binaryTag as CompoundBinaryTag?)!!)
+        metadataKeyValueBucket.toggleTrackUpdates(true)
+        return DefaultWorld(chunkSafeguard, worldFolder, metadataKeyValueBucket)
     }
 
     fun write(
         binaryTagDriver: BinaryTagDriver,
         world: World,
-        metadataKeyValueBinaryTagMarshal: MetadataKeyValueBinaryTagMarshal
+        metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry
     ) {
         if (world.metadataKeyValueBucket.consumeUpdatedMetadataKeyValue().isEmpty()) return
         try {
             val fileOutputStream = FileOutputStream(File(world.worldFolder, "level.dat"))
             binaryTagDriver.writeCompoundBinaryTag(
-                serialize(world, metadataKeyValueBinaryTagMarshal),
+                serialize(world, metadataKeyValueBufferRegistry),
                 fileOutputStream
             )
             fileOutputStream.close()
@@ -52,10 +53,10 @@ object WorldBinaryTagMarshal {
     fun read(
         binaryTagDriver: BinaryTagDriver,
         file: File,
-        worldManager: WorldManager,
-        metadataKeyValueBinaryTagMarshal: MetadataKeyValueBinaryTagMarshal
+        chunkSafeguard: ChunkSafeguard,
+        metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry
     ): World {
         val compoundBinaryTag = binaryTagDriver.readCompoundBinaryTag(File(file, "level.dat"))
-        return deserialize(compoundBinaryTag, worldManager, file, metadataKeyValueBinaryTagMarshal)
+        return deserialize(compoundBinaryTag, chunkSafeguard, file, metadataKeyValueBufferRegistry)
     }
 }

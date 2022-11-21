@@ -1,15 +1,15 @@
 package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderframe.entity.Player;
-import eu.mshade.enderframe.packetevent.PacketLookEvent;
+import eu.mshade.enderframe.packetevent.MinecraftPacketLookEvent;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.mwork.event.EventListener;
 
-public class PacketLookHandler implements EventListener<PacketLookEvent> {
+public class PacketLookHandler implements EventListener<MinecraftPacketLookEvent> {
 
 
     @Override
-    public void onEvent(PacketLookEvent event) {
+    public void onEvent(MinecraftPacketLookEvent event) {
         Player player = event.getPlayer();
         Location location = player.getLocation().clone();
 

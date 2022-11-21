@@ -95,6 +95,11 @@
     <dependencies>
         <dependency>
             <groupId>eu.mshade</groupId>
+            <artifactId>stone</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.mshade</groupId>
             <artifactId>enderman</artifactId>
             <version>0.0.1</version>
         </dependency>
@@ -106,6 +111,11 @@
         <dependency>
             <groupId>eu.mshade</groupId>
             <artifactId>mwork</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.mshade</groupId>
+            <artifactId>axolotl</artifactId>
             <version>0.0.1</version>
         </dependency>
         <dependency>

@@ -1,6 +1,6 @@
 package eu.mshade.enderchest.marshal.world.virtual
 
-import eu.mshade.enderchest.marshal.metadata.MetadataKeyValueBinaryTagMarshal
+import eu.mshade.enderframe.metadata.MetadataKeyValueBufferRegistry
 import eu.mshade.enderchest.world.ChunkSafeguard
 import eu.mshade.enderchest.world.virtual.DefaultVirtualWorld
 import eu.mshade.enderframe.virtualserver.VirtualWorld
@@ -12,8 +12,8 @@ object VirtualWorldBinaryTagMarshal {
 
 
 
-    fun deserialize(binaryTag: BinaryTag<*>, chunkSafeguard: ChunkSafeguard, worldFolder: File, metadataKeyValueBinaryTagMarshal: MetadataKeyValueBinaryTagMarshal): VirtualWorld {
-        val metadataKeyValueBucket = metadataKeyValueBinaryTagMarshal.deserialize((binaryTag as CompoundBinaryTag?)!!)
+    fun deserialize(binaryTag: BinaryTag<*>, chunkSafeguard: ChunkSafeguard, worldFolder: File, metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry): VirtualWorld {
+        val metadataKeyValueBucket = metadataKeyValueBufferRegistry.deserialize((binaryTag as CompoundBinaryTag?)!!)
         return DefaultVirtualWorld(chunkSafeguard, worldFolder, metadataKeyValueBucket)
     }
 
@@ -21,9 +21,9 @@ object VirtualWorldBinaryTagMarshal {
         binaryTagDriver: BinaryTagDriver,
         chunkSafeguard: ChunkSafeguard,
         file: File,
-        metadataKeyValueBinaryTagMarshal: MetadataKeyValueBinaryTagMarshal
+        metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry
     ): VirtualWorld {
         val compoundBinaryTag = binaryTagDriver.readCompoundBinaryTag(File(file, "level.dat"))
-        return deserialize(compoundBinaryTag, chunkSafeguard, file, metadataKeyValueBinaryTagMarshal)
+        return deserialize(compoundBinaryTag, chunkSafeguard, file, metadataKeyValueBufferRegistry)
     }
 }

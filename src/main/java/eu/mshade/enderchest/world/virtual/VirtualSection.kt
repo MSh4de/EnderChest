@@ -11,7 +11,8 @@ class VirtualSection: Section {
 
     var virtualSectionStatus = VirtualSectionStatus.SAME
 
-    constructor(virtualChunk: VirtualChunk, y: Int): super(virtualChunk, y){
+    constructor(virtualChunk: VirtualChunk, y: Int, virtualSectionStatus: VirtualSectionStatus): super(virtualChunk, y){
+        this.virtualSectionStatus = virtualSectionStatus
         if (chunk.world.dimension == Dimension.OVERWORLD) {
             skyLight.fill(15.toByte())
         }

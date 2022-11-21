@@ -1,7 +1,6 @@
 package eu.mshade.enderchest.world.virtual
 
 import eu.mshade.enderchest.EnderChest
-import eu.mshade.enderchest.marshal.world.ChunkBinaryTagMarshal
 import eu.mshade.enderchest.marshal.world.virtual.VirtualChunkBinaryTagMarshal
 import eu.mshade.enderchest.marshal.world.WorldBinaryTagMarshal.write
 import eu.mshade.enderchest.world.ChunkSafeguard
@@ -9,7 +8,6 @@ import eu.mshade.enderchest.world.EmptyChunk
 import eu.mshade.enderframe.EnderFrame
 import eu.mshade.enderframe.entity.Entity
 import eu.mshade.enderframe.entity.EntityType
-import eu.mshade.enderframe.event.ChunkLoadEvent
 import eu.mshade.enderframe.item.MaterialKey
 import eu.mshade.enderframe.metadata.MetadataKeyValueBucket
 import eu.mshade.enderframe.virtualserver.VirtualWorld
@@ -20,7 +18,7 @@ import eu.mshade.enderframe.world.World
 import eu.mshade.enderframe.world.block.Block
 import eu.mshade.enderframe.world.chunk.Chunk
 import eu.mshade.mwork.binarytag.BinaryTagDriver
-import eu.mshade.mwork.binarytag.carbon.CarbonBinaryTag
+import eu.mshade.mwork.binarytag.segment.SegmentBinaryTag
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -36,10 +34,10 @@ class DefaultVirtualWorld(
     metadataKeyValueBucket: MetadataKeyValueBucket
 ) : VirtualWorld(worldDirectory, metadataKeyValueBucket) {
 
-    private val binaryTagPoetByRegion = ConcurrentHashMap<String, CarbonBinaryTag>()
-    private val chunksByRegion = ConcurrentHashMap<CarbonBinaryTag, Queue<Chunk>>()
-    private val lastUsageRegion = ConcurrentHashMap<CarbonBinaryTag, Long>()
-    private val regionByBinaryTagPoet = ConcurrentHashMap<CarbonBinaryTag, String>()
+    private val binaryTagPoetByRegion = ConcurrentHashMap<String, SegmentBinaryTag>()
+    private val chunksByRegion = ConcurrentHashMap<SegmentBinaryTag, Queue<Chunk>>()
+    private val lastUsageRegion = ConcurrentHashMap<SegmentBinaryTag, Long>()
+    private val regionByBinaryTagPoet = ConcurrentHashMap<SegmentBinaryTag, String>()
     private val binaryTagDriver = EnderFrame.get().binaryTagDriver
 
     init {
@@ -55,8 +53,8 @@ class DefaultVirtualWorld(
         val chunkStateStore = chunk.chunkStateStore
 
         chunkStateStore.setFinishWrite {
-            val carbonBinaryTag: CarbonBinaryTag = getCarbonBinaryTag(binaryTagDriver, this, chunk)
-            chunksByRegion[carbonBinaryTag]!!.remove(chunk)
+            val segmentBinaryTag: SegmentBinaryTag = getCarbonBinaryTag(binaryTagDriver, this, chunk)
+            chunksByRegion[segmentBinaryTag]!!.remove(chunk)
             chunkById.remove(chunk.id)
         }
 
@@ -75,7 +73,7 @@ class DefaultVirtualWorld(
         VirtualChunkBinaryTagMarshal.write(
             carbonBinaryTag,
             chunk as VirtualChunk,
-            EnderChest.metadataKeyValueBinaryTagMarshal
+            EnderChest.metadataKeyValueBufferRegistry
         )
         lastUsageRegion[carbonBinaryTag] = System.currentTimeMillis()
     }
@@ -105,7 +103,7 @@ class DefaultVirtualWorld(
                         this,
                         chunkX,
                         chunkZ,
-                        EnderChest.metadataKeyValueBinaryTagMarshal
+                        EnderChest.metadataKeyValueBufferRegistry
                     )
 
                     chunk.chunkStateStore.chunkStatus = ChunkStatus.LOADED
@@ -113,15 +111,13 @@ class DefaultVirtualWorld(
                     chunksByRegion.computeIfAbsent(carbonBinaryTag) { ConcurrentLinkedQueue() }.add(chunk)
                     lastUsageRegion[carbonBinaryTag] = System.currentTimeMillis()
                     return@completeAsync chunk
-                } catch (e: Exception) {
+                } catch (e: Throwable ) {
                     LOGGER.error("Can't read chunk x=$chunkX, z=$chunkZ from region=" + regionId(chunkX, chunkZ), e)
                 }
                 return@completeAsync EmptyChunk(chunkX, chunkZ, this)
             }
             return chunkCompletableFuture
         }
-
-        if(getParentWorld().isChunkExists(chunkX, chunkZ)){
             try {
                 val parentChunk = getParentWorld().getChunk(chunkX, chunkZ).get()
                 val chunk = toVirtualChunk(parentChunk)
@@ -131,20 +127,11 @@ class DefaultVirtualWorld(
                 chunksByRegion.computeIfAbsent(carbonBinaryTag) { ConcurrentLinkedQueue() }.add(chunk)
                 lastUsageRegion[carbonBinaryTag] = System.currentTimeMillis()
                 return chunkCompletableFuture
-            } catch (e: ExecutionException) {
-                e.printStackTrace()
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
+            } catch (e: Throwable ) {
+                LOGGER.error("Can't get parent chunk x=$chunkX, z=$chunkZ", e)
             }
-        }
 
-
-        val virtualChunk = VirtualChunk(chunkX, chunkZ, this)
-        virtualChunk.chunkStateStore.chunkStatus = ChunkStatus.LOADED
-        chunkCompletableFuture = CompletableFuture.completedFuture(virtualChunk)
-        chunkById[id] = chunkCompletableFuture
-
-        return chunkCompletableFuture
+        return CompletableFuture.completedFuture(EmptyChunk(chunkX, chunkZ, this))
 
     }
 
@@ -173,7 +160,7 @@ class DefaultVirtualWorld(
         TODO("Not yet implemented")
     }
 
-    override fun getRegionBinaryTagPoets(): MutableCollection<CarbonBinaryTag> {
+    override fun getRegions(): MutableCollection<SegmentBinaryTag> {
         return binaryTagPoetByRegion.values
     }
 
@@ -220,7 +207,7 @@ class DefaultVirtualWorld(
     }
 
     override fun saveWorld() {
-        write(binaryTagDriver, this, EnderChest.metadataKeyValueBinaryTagMarshal)
+        write(binaryTagDriver, this, EnderChest.metadataKeyValueBufferRegistry)
     }
 
     override fun tick() {
@@ -233,7 +220,7 @@ class DefaultVirtualWorld(
                         chunkSafeguard.addChunk(chunk)
                         chunkStateStore.resetAge()
                     }
-                    if (chunk.watching.isEmpty() && chunkStateStore.outdatedInteract(500)) {
+                    if (chunk.watcher.isEmpty() && chunkStateStore.outdatedInteract(500)) {
                         chunkStateStore.chunkStatus = ChunkStatus.PREPARE_TO_UNLOAD
                     }
                 }
@@ -284,22 +271,22 @@ class DefaultVirtualWorld(
     }
 
 
-    private fun getCarbonBinaryTag(binaryTagDriver: BinaryTagDriver, world: World, x: Int, z: Int): CarbonBinaryTag {
+    private fun getCarbonBinaryTag(binaryTagDriver: BinaryTagDriver, world: World, x: Int, z: Int): SegmentBinaryTag {
         val regionId = regionId(x, z)
         return binaryTagPoetByRegion.computeIfAbsent(regionId) { s: String ->
-            val carbonBinaryTag = CarbonBinaryTag(
+            val segmentBinaryTag = SegmentBinaryTag(
                 File(world.indicesFolder, "$regionId.dat"),
                 File(world.regionFolder, "$regionId.dat"),
                 binaryTagDriver
             )
-            chunksByRegion[carbonBinaryTag] = ConcurrentLinkedQueue()
-            regionByBinaryTagPoet[carbonBinaryTag] = s
-            lastUsageRegion[carbonBinaryTag] = System.currentTimeMillis()
-            return@computeIfAbsent carbonBinaryTag
+            chunksByRegion[segmentBinaryTag] = ConcurrentLinkedQueue()
+            regionByBinaryTagPoet[segmentBinaryTag] = s
+            lastUsageRegion[segmentBinaryTag] = System.currentTimeMillis()
+            return@computeIfAbsent segmentBinaryTag
         }
     }
 
-    private fun getCarbonBinaryTag(binaryTagDriver: BinaryTagDriver, world: World, chunk: Chunk): CarbonBinaryTag {
+    private fun getCarbonBinaryTag(binaryTagDriver: BinaryTagDriver, world: World, chunk: Chunk): SegmentBinaryTag {
         return getCarbonBinaryTag(binaryTagDriver, world, chunk.x, chunk.z)
     }
 

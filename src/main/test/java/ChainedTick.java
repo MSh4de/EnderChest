@@ -1,12 +1,12 @@
-import eu.mshade.enderframe.packetevent.PacketMoveAndLookEvent;
-import eu.mshade.enderframe.packetevent.PacketMoveEvent;
+import eu.mshade.enderframe.packetevent.MinecraftPacketMoveAndLookEvent;
+import eu.mshade.enderframe.packetevent.MinecraftPacketMoveEvent;
 
 public class ChainedTick {
 
     public static void main(String[] args) {
 
-        System.out.println(PacketMoveEvent.class.isAssignableFrom(PacketMoveAndLookEvent.class));
-        System.out.println(PacketMoveAndLookEvent.class.isAssignableFrom(PacketMoveEvent.class));
+        System.out.println(MinecraftPacketMoveEvent.class.isAssignableFrom(MinecraftPacketMoveAndLookEvent.class));
+        System.out.println(MinecraftPacketMoveAndLookEvent.class.isAssignableFrom(MinecraftPacketMoveEvent.class));
     }
 
 }

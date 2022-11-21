@@ -1,13 +1,14 @@
 package eu.mshade.enderchest.marshal.metadata
 
 import eu.mshade.enderframe.metadata.MetadataKeyValue
+import eu.mshade.enderframe.metadata.MetadataKeyValueBuffer
 import eu.mshade.enderframe.world.block.*
-import eu.mshade.mwork.binarytag.BinaryTag
-import eu.mshade.mwork.binarytag.BooleanBinaryTag
-import eu.mshade.mwork.binarytag.IntBinaryTag
+import eu.mshade.mwork.binarytag.*
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag
+import eu.mshade.mwork.binarytag.entity.ListBinaryTag
+import java.util.StringJoiner
 
-class ExtraBlockMetadataBuffer: MetadataKeyValueBuffer{
+class ExtraBlockMetadataBuffer: MetadataKeyValueBuffer {
 
     override fun read(binaryTag: BinaryTag<*>): MetadataKeyValue<*> {
         return ExtraBlockMetadata(binaryTag as CompoundBinaryTag)
@@ -127,3 +128,26 @@ class SeamlessBlockMetadataBuffer: MetadataKeyValueBuffer{
     }
 
 }
+
+
+class MultipleFaceBlockMetadataBuffer: MetadataKeyValueBuffer{
+
+    override fun read(binaryTag: BinaryTag<*>): MetadataKeyValue<*> {
+        binaryTag as ListBinaryTag
+        val list = mutableSetOf<BlockFace>()
+        for (binaryTag1 in binaryTag.value) {
+            list.add(BlockFace.fromId(binaryTag1.value as Int))
+        }
+        return MultipleFaceBlockMetadata(list)
+    }
+
+    override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
+        val list = mutableListOf<BinaryTag<*>>()
+        for (blockFace in (metadataKeyValue as MultipleFaceBlockMetadata).metadataValue) {
+            list.add(IntBinaryTag(blockFace.id))
+        }
+        return ListBinaryTag(BinaryTagType.INT, list)
+    }
+
+}
+

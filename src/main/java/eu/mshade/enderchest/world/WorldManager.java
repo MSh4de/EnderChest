@@ -3,73 +3,50 @@ package eu.mshade.enderchest.world;
 import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderchest.marshal.world.WorldBinaryTagMarshal;
 import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
-import eu.mshade.enderframe.metadata.world.WorldMetadataType;
+import eu.mshade.enderframe.tick.TickBus;
+import eu.mshade.enderframe.world.NameWorldMetadata;
 import eu.mshade.enderframe.world.World;
-import eu.mshade.enderframe.world.metadata.NameWorldMetadata;
+import eu.mshade.enderframe.world.WorldRepository;
 import eu.mshade.mwork.binarytag.BinaryTagDriver;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class WorldManager {
 
     private static Logger LOGGER = LoggerFactory.getLogger(WorldManager.class);
     private File worldsFolder = new File(System.getProperty("user.dir"), "worlds");
-    private Map<String, World> worlds = new ConcurrentHashMap<>();
-    private EnderChest enderChest;
-    private EventLoopGroup eventLoopGroup;
-    private final ChunkSafeguard chunkSafeguard = new ChunkSafeguard();
+    private final ChunkSafeguard chunkSafeguard;
+    private final TickBus tickBus;
 
-    public WorldManager(BinaryTagDriver binaryTagDriver, EnderChest enderChest) {
-        this.enderChest = enderChest;
+    public WorldManager(BinaryTagDriver binaryTagDriver, ChunkSafeguard chunkSafeguard, TickBus tickBus) {
+        this.chunkSafeguard = chunkSafeguard;
+        this.tickBus = tickBus;
         this.worldsFolder.mkdir();
-        this.eventLoopGroup = enderChest.getParentGroup();
-
-        chunkSafeguard.start();
-        LOGGER.info("Starting "+chunkSafeguard);
-
 
         for (File file : Objects.requireNonNull(this.worldsFolder.listFiles())) {
-            World world = WorldBinaryTagMarshal.INSTANCE.read(binaryTagDriver, file, this, EnderChest.INSTANCE.getMetadataKeyValueBinaryTagMarshal());
-            world.joinTickBus(enderChest.getTickBus());
-            worlds.put(world.getName(), world);
+            World world = WorldBinaryTagMarshal.INSTANCE.read(binaryTagDriver, file, chunkSafeguard, EnderChest.INSTANCE.getMetadataKeyValueBufferRegistry());
+            world.joinTickBus(tickBus);
+            WorldRepository.INSTANCE.addWorld(world);
         }
 
     }
 
-    public World createWorld(String name, Consumer<MetadataKeyValueBucket> bucketConsumer){
-        if (!this.worlds.containsKey(name)) {
-            File file = new File(worldsFolder, name);
-            file.mkdir();
-            DefaultWorld world = new DefaultWorld(this, file);
-            MetadataKeyValueBucket metadataKeyValueBucket = world.getMetadataKeyValueBucket();
-            metadataKeyValueBucket.setMetadataKeyValue(new NameWorldMetadata(name));
-            bucketConsumer.accept(metadataKeyValueBucket);
-            world.joinTickBus(enderChest.getTickBus());
-            worlds.put(name, world);
-            return world;
-        }
-        return getWorld(name);
-    }
-
-    public Collection<World> getWorlds() {
-        return worlds.values();
-    }
-
-    public World getWorld(String name){
-        return this.worlds.get(name);
-    }
-
-    public EventLoopGroup getEventLoopGroup() {
-        return eventLoopGroup;
+    public World createWorld(String name, Consumer<MetadataKeyValueBucket> bucketConsumer) {
+        World world = WorldRepository.INSTANCE.getWorld(name);
+        if (world != null) return world;
+        File file = new File(worldsFolder, name);
+        file.mkdir();
+        world = new DefaultWorld(chunkSafeguard, file);
+        MetadataKeyValueBucket metadataKeyValueBucket = world.getMetadataKeyValueBucket();
+        metadataKeyValueBucket.setMetadataKeyValue(new NameWorldMetadata(name));
+        bucketConsumer.accept(metadataKeyValueBucket);
+        world.joinTickBus(tickBus);
+        WorldRepository.INSTANCE.addWorld(world);
+        return world;
     }
 
     public ChunkSafeguard getChunkSafeguard() {

@@ -1,16 +1,16 @@
 package eu.mshade.enderchest.protocol;
 
-import eu.mshade.enderframe.protocol.Protocol;
-import eu.mshade.enderframe.protocol.temp.TempProtocol;
+import eu.mshade.enderframe.protocol.MinecraftProtocol;
+import eu.mshade.enderframe.protocol.temp.TempMinecraftProtocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
 
 import java.util.List;
 
-public class PacketAccuracy extends ByteToMessageCodec<ByteBuf> {
+public class MinecraftPacketAccuracy extends ByteToMessageCodec<ByteBuf> {
 
-    private Protocol protocol = TempProtocol.Companion.getINSTANCE();
+    private MinecraftProtocol minecraftProtocol = TempMinecraftProtocol.Companion.getINSTANCE();
 
     private static boolean readableVarInt(ByteBuf buf) {
         if (buf.readableBytes() > 5) {
@@ -34,7 +34,7 @@ public class PacketAccuracy extends ByteToMessageCodec<ByteBuf> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) throws Exception {
-        protocol.getProtocolBuffer(out).writeVarInt(msg.readableBytes());
+        minecraftProtocol.getProtocolBuffer(out).writeVarInt(msg.readableBytes());
         out.writeBytes(msg);
     }
 
@@ -48,7 +48,7 @@ public class PacketAccuracy extends ByteToMessageCodec<ByteBuf> {
         }
 
         // check for contents readability
-        int length = protocol.getProtocolBuffer(in).readVarInt();
+        int length = minecraftProtocol.getProtocolBuffer(in).readVarInt();
         if (in.readableBytes() < length) {
             in.resetReaderIndex();
             return;

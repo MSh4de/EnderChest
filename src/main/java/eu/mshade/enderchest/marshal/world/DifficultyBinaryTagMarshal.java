@@ -1,24 +1,21 @@
 package eu.mshade.enderchest.marshal.world;
 
 import eu.mshade.enderframe.world.Difficulty;
-import eu.mshade.mwork.ParameterContainer;
 import eu.mshade.mwork.binarytag.BinaryTag;
 import eu.mshade.mwork.binarytag.BinaryTagDriver;
-import eu.mshade.mwork.binarytag.entity.StringBinaryTag;
 import eu.mshade.mwork.binarytag.BinaryTagMarshal;
-
-import java.lang.reflect.Type;
+import eu.mshade.mwork.binarytag.StringBinaryTag;
 
 public class DifficultyBinaryTagMarshal implements BinaryTagMarshal<Difficulty> {
 
 
     @Override
-    public BinaryTag<?> serialize(BinaryTagDriver binaryTagDriver, Difficulty difficulty) throws Exception {
+    public BinaryTag<?> serialize(BinaryTagDriver binaryTagDriver, Difficulty difficulty) {
         return new StringBinaryTag(difficulty.name());
     }
 
     @Override
-    public Difficulty deserialize(BinaryTagDriver binaryTagDriver, BinaryTag<?> binaryTag) throws Exception {
+    public Difficulty deserialize(BinaryTagDriver binaryTagDriver, BinaryTag<?> binaryTag) {
         return Difficulty.valueOf((String) binaryTag.getValue());
     }
 }
