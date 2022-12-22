@@ -6,6 +6,7 @@ import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.metadata.EntityMetadataKey;
 import eu.mshade.enderframe.entity.metadata.FlyingEntityMetadata;
 import eu.mshade.enderframe.entity.metadata.SprintingEntityMetadata;
+import eu.mshade.enderframe.metadata.MetadataKeyValue;
 import eu.mshade.enderframe.mojang.chat.ChatColor;
 import eu.mshade.enderframe.mojang.chat.TextPosition;
 import eu.mshade.enderframe.protocol.SessionWrapper;
@@ -69,9 +70,11 @@ public class DefaultPlayer extends Player {
                 getSessionWrapper().sendUpdateLocation(entity, entity.getBeforeServerLocation(), entity.getServerLocation());
             });
 
+            MetadataKeyValue<?> sprintingMetadata = getMetadataKeyValueBucket().getMetadataKeyValue(EntityMetadataKey.INSTANCE.getSPRINTING());
+            MetadataKeyValue<?> flyingMetadata = getMetadataKeyValueBucket().getMetadataKeyValue(EntityMetadataKey.INSTANCE.getFLYING());
 
-            boolean sprinting = this.getMetadataKeyValueBucket().getMetadataKeyValueOrDefault(EntityMetadataKey.INSTANCE.getSPRINTING(), new SprintingEntityMetadata(false)).getMetadataValue();
-            double vMax = this.getMetadataKeyValueBucket().getMetadataKeyValueOrDefault(EntityMetadataKey.INSTANCE.getFLYING(), new FlyingEntityMetadata(false)).getMetadataValue() ? (sprinting ? 78.40 : 39.20) : (sprinting ? 20.20 : 15.54);
+            boolean sprinting = (boolean) (sprintingMetadata != null ? sprintingMetadata : new SprintingEntityMetadata(false)).getMetadataValue();
+            double vMax = (boolean) (flyingMetadata != null ? flyingMetadata : new FlyingEntityMetadata(false)).getMetadataValue() ? (sprinting ? 78.40 : 39.20) : (sprinting ? 20.20 : 15.54);
 
             boolean hasChangeChunk =  lastServerChunkLocation == null || (this.lastServerChunkLocation.getChunkX() != this.getLocation().getChunkX() || this.lastServerChunkLocation.getChunkZ() != this.getLocation().getChunkZ());
             boolean hasChangeSpeedInChunk = lastServerChunkLocation == null || (this.lastServerChunkLocation.getChunkX() == this.getLocation().getChunkX() && this.lastServerChunkLocation.getChunkZ() == this.getLocation().getChunkZ() && !updateChunkBySpeed && lastUpdateByChangeChunk && (lastSpeedInChunk >= speed));

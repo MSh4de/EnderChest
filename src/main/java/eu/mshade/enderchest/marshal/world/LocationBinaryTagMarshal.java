@@ -13,7 +13,7 @@ public class LocationBinaryTagMarshal implements BinaryTagDynamicMarshal {
     public BinaryTag<?> serialize(Location location) {
         CompoundBinaryTag compoundBinaryTag = new CompoundBinaryTag();
         World world = location.getWorld();
-        String name = world.getMetadataKeyValueBucket().getValueOfMetadataKeyValue(WorldMetadataType.NAME, String.class);
+        String name = (String) world.getMetadataKeyValueBucket().getMetadataKeyValue(WorldMetadataType.NAME).getMetadataValue();
 
         compoundBinaryTag.putString("world", name);
         compoundBinaryTag.putDouble("x", location.getX());
