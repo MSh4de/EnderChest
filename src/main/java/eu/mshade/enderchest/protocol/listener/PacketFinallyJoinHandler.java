@@ -5,10 +5,8 @@ import eu.mshade.enderchest.entity.*;
 import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
-import eu.mshade.enderframe.entity.Entity;
-import eu.mshade.enderframe.entity.EntityIdProvider;
-import eu.mshade.enderframe.entity.metadata.EntityMetadataKey;
-import eu.mshade.enderframe.entity.metadata.SkinPartEntityMetadata;
+import eu.mshade.enderframe.entity.*;
+import eu.mshade.enderframe.entity.metadata.*;
 import eu.mshade.enderframe.inventory.EquipmentSlot;
 import eu.mshade.enderframe.inventory.Inventory;
 import eu.mshade.enderframe.inventory.InventoryType;
@@ -55,10 +53,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoinEvent> {
 
@@ -132,13 +127,13 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         world.putEntity(player);
 
         Location entityLocation = player.getLocation().clone().add(1, 0, 0);
-        entityLocation.getChunk().thenAccept(chunk -> {
-            Entity entity = new DefaultEnderDragon(entityLocation, EntityIdProvider.INSTANCE.getFreeId());
 
+        entityLocation.getChunk().thenAccept(chunk -> {
+            Entity entity = new DefaultGuardian(entityLocation, EntityIdProvider.INSTANCE.getFreeId());
             MetadataKeyValueBucket bucket = entity.getMetadataKeyValueBucket();
 
-
-            LOGGER.info("Test");
+//            bucket.setMetadataKeyValue(new IsElderlyEntityMetadata(false));
+            bucket.setMetadataKeyValue(new IsElderlyEntityMetadata(true));
 
             bucket.getMetadataKeyValues().forEach(metadataKeyValue -> LOGGER.info("Key=" + metadataKeyValue.getMetadataKey() + " Value=" + metadataKeyValue.getMetadataValue()));
 
@@ -150,7 +145,6 @@ public class PacketFinallyJoinHandler implements EventListener<PacketFinallyJoin
         });
 
         player.joinTickBus(enderChest.getTickBus());
-
 
         ItemStack grassItemStack = new ItemStack(Material.GRASS);
 

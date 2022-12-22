@@ -19,6 +19,7 @@ public class DefaultVillagerTypeMarshal implements BinaryTagMarshal<VillagerType
     @Override
     public VillagerType deserialize(BinaryTagDriver binaryTagDriver, BinaryTag<?> binaryTag) {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
-        return VillagerType.valueOf(compoundBinaryTag.getString("villagerType"));
+        //return VillagerType.valueOf(compoundBinaryTag.getString("villagerType"));
+        return null; //TODO LA PUTAIN DE TA GRAND MERE
     }
 }

@@ -22,6 +22,7 @@ public class DefaultCreeperStateMarshal implements BinaryTagMarshal<CreeperState
     @Override
     public CreeperState deserialize(BinaryTagDriver binaryTagDriver, BinaryTag<?> binaryTag) throws Exception {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
-        return CreeperState.valueOf(compoundBinaryTag.getString("creeperState"));
+        //return CreeperState.valueOf(compoundBinaryTag.getString("creeperState"));
+        return null; //TODO LA PUTAIN DE TA GRAND MERE
     }
 }

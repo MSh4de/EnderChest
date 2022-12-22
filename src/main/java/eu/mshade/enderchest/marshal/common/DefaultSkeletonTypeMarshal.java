@@ -19,6 +19,7 @@ public class DefaultSkeletonTypeMarshal implements BinaryTagMarshal<SkeletonType
     @Override
     public SkeletonType deserialize(BinaryTagDriver binaryTagDriver, BinaryTag<?> binaryTag) {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
-        return SkeletonType.valueOf(compoundBinaryTag.getString("skeletonType"));
+        //return SkeletonType.valueOf(compoundBinaryTag.getString("skeletonType"));
+        return null; //TODO LA PUTAIN DE TA GRAND MERE
     }
 }
