@@ -71,6 +71,6 @@ object TextComponentBinaryTagMarshal {
     }
 
     private fun deserializeTextHoverEvent(compoundBinaryTag: CompoundBinaryTag): TextHoverEvent {
-        return TextHoverEvent.from(compoundBinaryTag.getString("value"), TextHoverEventType.valueOf(compoundBinaryTag.getString("action")))
+        return TextHoverEvent.from(compoundBinaryTag.getString("value"), TextHoverEventType.valueOf(compoundBinaryTag.getString("action")!!))
     }
 }

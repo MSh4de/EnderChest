@@ -3,9 +3,11 @@ package eu.mshade.enderchest
 import com.fasterxml.jackson.databind.module.SimpleModule
 import eu.mshade.axolotl.Axolotl
 import eu.mshade.axolotl.event.HandshakeAxolotlEvent
+import eu.mshade.axolotl.event.ChatMessageAxolotlEvent
 import eu.mshade.axolotl.protocol.AxolotlProtocolRepository
 import eu.mshade.enderchest.axolotl.AxolotlChannelInitializer
 import eu.mshade.enderchest.axolotl.listener.HandshakeAxolotlListener
+import eu.mshade.enderchest.axolotl.listener.MessageAxolotlListener
 import eu.mshade.enderchest.listener.*
 import eu.mshade.enderchest.marshal.common.*
 import eu.mshade.enderchest.marshal.item.LoreItemStackMetadataBuffer
@@ -15,9 +17,7 @@ import eu.mshade.enderchest.marshal.world.DifficultyBinaryTagMarshal
 import eu.mshade.enderchest.marshal.world.DimensionBinaryTagMarshal
 import eu.mshade.enderchest.marshal.world.LevelTypeBinaryTagMarshal
 import eu.mshade.enderchest.protocol.listener.*
-import eu.mshade.enderchest.world.ChunkSafeguard
-import eu.mshade.enderchest.world.DefaultChunkGenerator
-import eu.mshade.enderchest.world.WorldManager
+import eu.mshade.enderchest.world.*
 import eu.mshade.enderchest.world.virtual.VirtualWorldManager
 import eu.mshade.enderframe.EnderFrame
 import eu.mshade.enderframe.GameMode
@@ -25,6 +25,7 @@ import eu.mshade.enderframe.entity.CreeperState
 import eu.mshade.enderframe.entity.Player
 import eu.mshade.enderframe.entity.VillagerType
 import eu.mshade.enderframe.event.*
+import eu.mshade.enderframe.inventory.InventoryTracker
 import eu.mshade.enderframe.item.ItemStackMetadataKey
 import eu.mshade.enderframe.metadata.MetadataKeyValueBufferRegistry
 import eu.mshade.enderframe.mojang.GameProfile
@@ -40,8 +41,6 @@ import eu.mshade.enderframe.world.chunk.Chunk
 import eu.mshade.enderman.EndermanMinecraftProtocol
 import eu.mshade.mwork.MWork
 import eu.mshade.mwork.binarytag.segment.SegmentBinaryTag
-import eu.mshade.mwork.event.EventFilter
-import eu.mshade.mwork.event.EventPriorities
 import eu.mshade.stone.StoneAxolotlProtocol
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelOption
@@ -86,8 +85,8 @@ object EnderChest {
                 "███████╗██║░╚███║██████╔╝███████╗██║░░██║╚█████╔╝██║░░██║███████╗██████╔╝░░░██║░░░\n" +
                 "╚══════╝╚═╝░░╚══╝╚═════╝░╚══════╝╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝╚══════╝╚═════╝░░░░╚═╝░░░")
         LOGGER.info("Starting EnderChest")
-        childGroup = NioEventLoopGroup()
-        parentGroup = NioEventLoopGroup()
+        childGroup = NioEventLoopGroup(Runtime.getRuntime().availableProcessors())
+        parentGroup = NioEventLoopGroup(Runtime.getRuntime().availableProcessors())
 
         //register minecraft protocol 1.8 to 1.19
         minecraftProtocolRepository.register(EndermanMinecraftProtocol())
@@ -105,30 +104,57 @@ object EnderChest {
         val packetEventBus = enderFrame.packetEventBus
         val binaryTagDriver = enderFrame.binaryTagDriver
 
-        packetEventBus.subscribe(MinecraftPacketHandshakeEvent::class.java, PacketHandshakeListener(this))
-        packetEventBus.subscribe(ServerPingEventMinecraft::class.java, ServerPingListener())
-        packetEventBus.subscribe(ServerStatusEventMinecraft::class.java, ServerStatusListener())
-        packetEventBus.subscribe(MinecraftPacketLoginEvent::class.java, PacketLoginHandler(this))
-        packetEventBus.subscribe(MinecraftPacketEncryptionEvent::class.java, PacketEncryptionHandler(this))
-        packetEventBus.subscribe(MinecraftPacketKeepAliveEvent::class.java, PacketKeepAliveHandler(this))
-        packetEventBus.subscribe(MinecraftPacketClientSettingsEvent::class.java, PacketClientSettingsHandler())
-        packetEventBus.subscribe(MinecraftPacketChatMessageEvent::class.java, PacketChatMessageHandler(this))
-        packetEventBus.subscribe(MinecraftPacketFinallyJoinEvent::class.java, PacketFinallyJoinHandler(this))
-        packetEventBus.subscribe(MinecraftPacketEntityActionEvent::class.java, PacketEntityActionHandler())
-        packetEventBus.subscribe(MinecraftPacketMoveEvent::class.java, PacketMoveHandler())
-        packetEventBus.subscribe(MinecraftPacketLookEvent::class.java, PacketLookHandler())
-        packetEventBus.subscribe(MinecraftPacketMoveAndLookEvent::class.java, PacketMoveAndLookHandler())
-        packetEventBus.subscribe(
-            MinecraftPacketMoveEvent::class.java,
-            PacketRequestChunkHandler(),
-            eventFilter = EventFilter.DERIVE,
-            eventPriority = EventPriorities.LOW
+        packetEventBus.subscribe(MinecraftPacketHandshakeEvent::class.java,
+            MinecraftPacketHandshakeListener(this)
         )
-        packetEventBus.subscribe(MinecraftPacketToggleFlyingEvent::class.java, PacketToggleFlyingListener())
-        packetEventBus.subscribe(MinecraftPacketBlockPlaceEvent::class.java, PacketBlockPlaceListener())
-        packetEventBus.subscribe(MinecraftPacketPlayerDiggingEvent::class.java, PacketPlayerDiggingListener())
-        packetEventBus.subscribe(MinecraftPacketCloseInventoryEvent::class.java, PacketCloseInventoryHandler())
-        packetEventBus.subscribe(MinecraftPacketClickInventoryEvent::class.java, PacketClickInventoryHandler())
+        packetEventBus.subscribe(
+            MinecraftPacketServerPingEvent::class.java,
+            MinecraftServerPingListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketServerStatusEvent::class.java, ServerStatusListener())
+        packetEventBus.subscribe(MinecraftPacketLoginEvent::class.java,
+            MinecraftPacketLoginListener(this)
+        )
+        packetEventBus.subscribe(MinecraftPacketEncryptionEvent::class.java,
+            MinecraftPacketEncryptionListener(this)
+        )
+        packetEventBus.subscribe(MinecraftPacketKeepAliveEvent::class.java,
+            MinecraftPacketKeepAliveListener(this)
+        )
+        packetEventBus.subscribe(MinecraftPacketClientSettingsEvent::class.java,
+            MinecraftPacketClientSettingsListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketChatMessageEvent::class.java,
+            MinecraftPacketChatMessageListener(this)
+        )
+        packetEventBus.subscribe(MinecraftPacketEntityActionEvent::class.java,
+            MinecraftPacketEntityActionListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketMoveEvent::class.java,
+            MinecraftPacketMoveListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketLookEvent::class.java,
+            MinecraftPacketLookListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketMoveAndLookEvent::class.java,
+            MinecraftPacketMoveAndLookListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketToggleFlyingEvent::class.java,
+            MinecraftPacketToggleFlyingListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketBlockPlaceEvent::class.java,
+            MinecraftPacketBlockPlaceListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketPlayerDiggingEvent::class.java,
+            MinecraftPacketPlayerDiggingListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketCloseInventoryEvent::class.java,
+            MinecraftPacketCloseInventoryListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketClickInventoryEvent::class.java,
+            MinecraftPacketClickInventoryListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketClientStatusEvent::class.java, MinecraftPacketClientStatusListener())
 
         val enderFrameEventBus = enderFrame.enderFrameEventBus
         enderFrameEventBus.subscribe(EntityUnseeEvent::class.java, EntityUnseeHandler())
@@ -141,8 +167,10 @@ object EnderChest {
         enderFrameEventBus.subscribe(ChunkUnloadEvent::class.java, ChunkUnloadHandler())
         enderFrameEventBus.subscribe(ChunkLoadEvent::class.java, ChunkLoadHandler())
         enderFrameEventBus.subscribe(WatchdogSeeEvent::class.java, WatchdogSeeHandler())
+        enderFrameEventBus.subscribe(ChunkCreateEvent::class.java, ChunkCreateListener())
         enderFrameEventBus.subscribe(WatchdogUnseeEvent::class.java, WatchdogUnseeHandler())
         enderFrameEventBus.subscribe(PlayerQuitEvent::class.java, PlayerQuitHandler(this))
+        enderFrameEventBus.subscribe(FinallyJoinEvent::class.java, FinallyJoinListener(this))
 
         metadataKeyValueBufferRegistry = MetadataKeyValueBufferRegistry()
         metadataKeyValueBufferRegistry.register(WorldMetadataType.NAME, NameWorldMetadataBuffer())
@@ -194,12 +222,20 @@ object EnderChest {
             metadataKeyValueBucket.setMetadataKeyValue(DimensionWorldMetadata(Dimension.OVERWORLD))
             metadataKeyValueBucket.setMetadataKeyValue(DifficultyWorldMetadata(Difficulty.NORMAL))
         }
-        world.chunkGenerator = DefaultChunkGenerator(world)
+        world.chunkGenerator = WinterChunkGenerator(world)
 
         val threadTickBus = Thread(tickBus, "TickBus")
         threadTickBus.start()
 
+        InventoryTracker.joinTickBus(tickBus)
+        LOGGER.info("InventoryTracker joined TickBus")
+
         LOGGER.info("Starting $threadTickBus")
+
+        /**
+         * @TODO later delete this
+         */
+        SchematicLoader.SCHEMATIC_FOLDER.mkdir()
 
         Runtime.getRuntime().addShutdownHook(Thread {
             LOGGER.warn("Beginning save of server don't close the console !")
@@ -245,13 +281,19 @@ object EnderChest {
 
         val axolotlPacketInEventBus = Axolotl.eventBus
         axolotlPacketInEventBus.subscribe(HandshakeAxolotlEvent::class.java, HandshakeAxolotlListener())
+        axolotlPacketInEventBus.subscribe(ChatMessageAxolotlEvent::class.java, MessageAxolotlListener())
+/*        axolotlPacketInEventBus.subscribe(AxolotlEvent::class.java, object : EventListener<AxolotlEvent> {
+            override fun onEvent(event: AxolotlEvent) {
+                LOGGER.info("Received event $event")
+            }
+        }, eventFilter = EventFilter.DERIVE)*/
 
         val axolotlProtocolRepository = AxolotlProtocolRepository
         axolotlProtocolRepository.register(StoneAxolotlProtocol())
 
 
         val axolotlServer = ServerBootstrap()
-            .group(parentGroup, childGroup)
+            .group(NioEventLoopGroup(), NioEventLoopGroup())
             .channel(NioServerSocketChannel::class.java)
             .childHandler(AxolotlChannelInitializer())
             .localAddress("0.0.0.0", 25656)

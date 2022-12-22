@@ -3,10 +3,10 @@ package eu.mshade.enderchest.protocol.listener;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderframe.EnderFrame;
+import eu.mshade.enderframe.event.FinallyJoinEvent;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.Property;
 import eu.mshade.enderframe.packetevent.MinecraftPacketEncryptionEvent;
-import eu.mshade.enderframe.packetevent.MinecraftPacketFinallyJoinEvent;
 import eu.mshade.enderframe.protocol.MinecraftEncryption;
 import eu.mshade.enderframe.protocol.MinecraftSession;
 import eu.mshade.mwork.MWork;
@@ -23,20 +23,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class PacketEncryptionHandler implements EventListener<MinecraftPacketEncryptionEvent> {
+public class MinecraftPacketEncryptionListener implements EventListener<MinecraftPacketEncryptionEvent> {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(PacketEncryptionHandler.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(MinecraftPacketEncryptionListener.class);
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
     private EnderChest enderChest;
 
-    public PacketEncryptionHandler(EnderChest enderChest) {
+    public MinecraftPacketEncryptionListener(EnderChest enderChest) {
         this.enderChest = enderChest;
     }
 
     @Override
     public void onEvent(MinecraftPacketEncryptionEvent event) {
-        MinecraftSession minecraftSession = event.getSessionWrapper();
+        MinecraftSession minecraftSession = event.getMinecraftSession();
         MinecraftEncryption minecraftEncryption = enderChest.getMinecraftEncryption();
 
         try {
@@ -72,7 +72,7 @@ public class PacketEncryptionHandler implements EventListener<MinecraftPacketEnc
             GameProfile gameProfile = new GameProfile(uuid, jsonNode.get("name").asText(), properties);
             minecraftSession.setGameProfile(gameProfile);
 
-            EnderFrame.get().getPacketEventBus().publish(new MinecraftPacketFinallyJoinEvent(minecraftSession));
+            EnderFrame.get().getEnderFrameEventBus().publish(new FinallyJoinEvent(minecraftSession));
         }catch (Exception e){
             LOGGER.error("", e);
         }

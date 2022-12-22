@@ -24,7 +24,7 @@ object LocationBinaryTagMarshal {
 
     fun deserialize(binaryTag: BinaryTag<*>): Location {
         val compoundBinaryTag = binaryTag as CompoundBinaryTag
-        val world = WorldRepository.getWorld(compoundBinaryTag.getString("world"))
+        val world = WorldRepository.getWorld(compoundBinaryTag.getString("world")!!)
         val x = compoundBinaryTag.getDouble("x")
         val y = compoundBinaryTag.getDouble("y")
         val z = compoundBinaryTag.getDouble("z")

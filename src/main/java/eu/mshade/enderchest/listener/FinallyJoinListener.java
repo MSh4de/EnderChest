@@ -1,4 +1,4 @@
-package eu.mshade.enderchest.protocol.listener;
+package eu.mshade.enderchest.listener;
 
 import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderchest.axolotl.AxololtConnection;
@@ -7,24 +7,16 @@ import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
 import eu.mshade.enderframe.entity.metadata.SkinPartEntityMetadata;
-import eu.mshade.enderframe.inventory.EquipmentSlot;
-import eu.mshade.enderframe.inventory.Inventory;
-import eu.mshade.enderframe.inventory.InventoryType;
-import eu.mshade.enderframe.inventory.NamedInventory;
+import eu.mshade.enderframe.event.FinallyJoinEvent;
+import eu.mshade.enderframe.inventory.*;
 import eu.mshade.enderframe.item.*;
 import eu.mshade.enderframe.item.metadata.*;
 import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
-import eu.mshade.enderframe.metadata.attribute.Attribute;
-import eu.mshade.enderframe.metadata.attribute.AttributeModifier;
-import eu.mshade.enderframe.metadata.attribute.AttributeOperation;
 import eu.mshade.enderframe.metadata.entity.EntityMetadataKey;
-import eu.mshade.enderframe.mojang.Color;
 import eu.mshade.enderframe.mojang.GameProfile;
-import eu.mshade.enderframe.mojang.Property;
 import eu.mshade.enderframe.mojang.SkinPart;
 import eu.mshade.enderframe.mojang.chat.ChatColor;
 import eu.mshade.enderframe.mojang.chat.TextComponent;
-import eu.mshade.enderframe.packetevent.MinecraftPacketFinallyJoinEvent;
 import eu.mshade.enderframe.particle.Particle;
 import eu.mshade.enderframe.particle.ParticleBlockCrack;
 import eu.mshade.enderframe.protocol.MinecraftProtocolPipeline;
@@ -53,27 +45,25 @@ import eu.mshade.mwork.event.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.*;
 
-public class PacketFinallyJoinHandler implements EventListener<MinecraftPacketFinallyJoinEvent> {
+public class FinallyJoinListener implements EventListener<FinallyJoinEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PacketFinallyJoinHandler.class);
-    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FinallyJoinListener.class);
+//    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private EnderChest enderChest;
     private Chunk chunk = null;
 
-    public PacketFinallyJoinHandler(EnderChest enderChest) {
+    public FinallyJoinListener(EnderChest enderChest) {
         this.enderChest = enderChest;
     }
 
     @Override
-    public void onEvent(MinecraftPacketFinallyJoinEvent event) {
+    public void onEvent(FinallyJoinEvent event) {
         MinecraftProtocolPipeline minecraftProtocolPipeline = MinecraftProtocolPipeline.get();
-        MinecraftSession minecraftSession = event.getSessionWrapper();
+        MinecraftSession minecraftSession = event.getMinecraftSession();
         GameProfile gameProfile = minecraftSession.getGameProfile();
 
         minecraftSession.sendCompression(256);
@@ -93,7 +83,7 @@ public class PacketFinallyJoinHandler implements EventListener<MinecraftPacketFi
 
         DefaultPlayer player = new DefaultPlayer(location, gameProfile.getId().hashCode(), minecraftSession);
         player.setInetSocketAddress(minecraftSession.getRemoteAddress());
-        player.setGameMode(GameMode.SURVIVAL);
+        player.setGameMode(GameMode.CREATIVE);
         minecraftProtocolPipeline.setPlayer(minecraftSession.getChannel(), player);
 
 
@@ -128,37 +118,34 @@ public class PacketFinallyJoinHandler implements EventListener<MinecraftPacketFi
 
         MetadataKeyValueBucket metadataKeyValueBucket = grassItemStack.getMetadataKeyValueBucket();
         metadataKeyValueBucket.setMetadataKeyValue(new NameItemStackMetadata("Petit test de mort"));
-//        metadataKeyValueBucket.setMetadataKeyValue(new LoreItemStackMetadata(List.of("Ca fonctionne ?", "ALORS", "Es que ça fonctionne ?", "Du coup ?", "Oui ça fonctionne pd")));
+//        metadataKeyValueBucket.setMetadataKeyValue(new LoreItemStackMetadata(List.of("Ca fonctionne ?", "ALORS", "Es que ça fonctionne ?", "Du coup ?", "Oui ça fonctionne")));
         //metadataKeyValueBucket.setMetadataKeyValue(new UnbreakableItemStackMetadata(true));
         metadataKeyValueBucket.setMetadataKeyValue(new CanPlaceOnItemStackMetadata(List.of(Material.GRANITE)));
         metadataKeyValueBucket.setMetadataKeyValue(new CanDestroyItemStackMetadata(List.of(Material.GRASS)));
         metadataKeyValueBucket.setMetadataKeyValue(new HideFlagsItemStackMetadata(Set.of(ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_DESTROYS)));
-        metadataKeyValueBucket.setMetadataKeyValue(new ColorItemStackMetadata(Color.BLUE));
-        metadataKeyValueBucket.setMetadataKeyValue(new SkullOwnerItemStackMetadata(new GameProfile(UUID.randomUUID(), "okok", List.of(new Property("textures", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTkxYTc3OThkZDBhNDZiNmIzZjE3YmIwMzBhNmFkZjZlNDkwNjRjNGI5M2QxZDlkNTYzNDc4OWM4OTQ5In19fQ==")))));
-
-
-        metadataKeyValueBucket.setMetadataKeyValue(new AttributeModifiersItemStackMetadata(List.of(new ItemStackAttributeModifier(Attribute.MAX_HEALTH, "test", EquipmentSlot.MAIN_HAND, new AttributeModifier(UUID.randomUUID(), 10, AttributeOperation.ADD_NUMBER)))));
 
 
         Inventory playerInventory = player.getInventory();
+        InventoryTracker.INSTANCE.add(playerInventory);
 
 /*        playerInventory.setItemStack(40, new ItemStack(Material.OAK_LOG));
         playerInventory.setItemStack(41, new ItemStack(Material.OAK_LOG));
         playerInventory.setItemStack(42, new ItemStack(Material.OAK_LOG));
         playerInventory.setItemStack(43, new ItemStack(Material.OAK_LOG));*/
-        playerInventory.setItemStack(44, new ItemStack(Material.OAK_WOOD_PLANKS));
-        playerInventory.setItemStack(1, new ItemStack(Material.OAK_WOOD_PLANKS, 64));
+//        playerInventory.setItemStack(44, new ItemStack(Material.OAK_WOOD_PLANKS));
+/*        playerInventory.setItemStack(1, new ItemStack(Material.OAK_WOOD_PLANKS, 64));
         playerInventory.setItemStack(2, new ItemStack(Material.OAK_WOOD_PLANKS, 32));
         playerInventory.setItemStack(3, new ItemStack(Material.OAK_WOOD_PLANKS, 64));
-        playerInventory.setItemStack(4, new ItemStack(Material.OAK_WOOD_PLANKS, 64));
+        playerInventory.setItemStack(4, new ItemStack(Material.OAK_WOOD_PLANKS, 64));*/
 
-        minecraftSession.sendItemStacks(player.getInventory());
+//        minecraftSession.sendItemStacks(player.getInventory());
 
 
         LOGGER.info(String.format("%s join server", player.getGameProfile().getName()));
 
         // write TextComponent with rainbow color using CharColor
-        TextComponent textComponent = TextComponent.of("§1c§2o§3r§4t§5i§6n§7g§8e§9r§a");
+        TextComponent textComponent = TextComponent.of("coucou")
+                .withColor(ChatColor.RED);
         minecraftSession.sendMessage(textComponent);
 
         // send TextComponent to player
@@ -167,24 +154,15 @@ public class PacketFinallyJoinHandler implements EventListener<MinecraftPacketFi
 
 
         NamedInventory inventory = new NamedInventory("test", InventoryType.CHEST);
-        int slot = 0;
+//        InventoryTracker.INSTANCE.add(inventory);
 
-        for (MaterialKey materialKey : Material.getRegisteredMaterials()) {
-            if (slot == inventory.getInventoryKey().getDefaultSlot()) {
-                break;
-            }
-            inventory.setItemStack(slot++, new ItemStack(materialKey));
-        }
+        inventory.setItemStack(1, grassItemStack);
 
-/*        for (ItemStack itemStack : inventory.getItemStacks()) {
-            if (itemStack == null) {
-                continue;
-            }
-            LOGGER.info(itemStack.getMaterial().getNamespacedKey().toString());
-        }
+//        player.openInventory(inventory);
 
-        minecraftSession.sendOpenInventory(inventory);
-        minecraftSession.sendItemStacks(inventory);*/
+/*        executorService.scheduleAtFixedRate(() -> {
+            grassItemStack.getMetadataKeyValueBucket().setMetadataKeyValue(new NameItemStackMetadata(ChatColor.values()[ThreadLocalRandom.current().nextInt(15)]+"Hello World"));
+        },0, 1, TimeUnit.SECONDS);*/
 
         Scoreboard<String> scoreboard = new Scoreboard<String>(TextComponent.of(ChatColor.BLUE + "Scoreboard"))
                 .setScoreboardPosition(ScoreboardPosition.SIDEBAR)
@@ -202,7 +180,7 @@ public class PacketFinallyJoinHandler implements EventListener<MinecraftPacketFi
                 .setSubtitle(TextComponent.of("Test du sous titre"))
                 .setTitleTime(new TitleTime(10, 100, 10));
 
-        title.showTitle(player);
+//        title.showTitle(player);
 
         WorldBorder worldBorder = new WorldBorder()
                 .setWorldBorderCenter(new WorldBorderCenter(7d, 7d))
@@ -239,9 +217,9 @@ public class PacketFinallyJoinHandler implements EventListener<MinecraftPacketFi
 
         Particle particle = new ParticleBlockCrack(false, new Vector(7, highest + 2, 7), new Vector(0, 0, 0), 1F, 100, Material.GRASS, 0);
         //Particle particle = new Particle(ParticleType.FIREWORK, false, new Vector(7, highest + 2, 7), new Vector(0, 0, 0), 1F, 100);
-        executorService.scheduleAtFixedRate(() -> {
+/*        executorService.scheduleAtFixedRate(() -> {
 //            sessionWrapper.sendTeams(team);
-        }, 0, 1000, TimeUnit.MILLISECONDS);
+        }, 0, 1000, TimeUnit.MILLISECONDS);*/
 
     }
 }

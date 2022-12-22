@@ -6,6 +6,7 @@ import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.event.PlayerQuitEvent;
+import eu.mshade.enderframe.inventory.InventoryTracker;
 import eu.mshade.enderframe.scoreboard.Scoreboard;
 import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderframe.world.border.WorldBorder;
@@ -51,6 +52,8 @@ public class PlayerQuitHandler implements EventListener<PlayerQuitEvent> {
         enderChest.getPlayers().forEach(target -> {
             target.getMinecraftSession().sendPlayerInfo(playerInfoBuilder);
         });
+
+        InventoryTracker.INSTANCE.remove(player.getInventory());
 
 
         AxololtConnection.INSTANCE.send(axolotlSession -> {

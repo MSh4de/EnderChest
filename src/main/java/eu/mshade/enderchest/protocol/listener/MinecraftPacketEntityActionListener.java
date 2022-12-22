@@ -6,7 +6,7 @@ import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
 import eu.mshade.enderframe.packetevent.MinecraftPacketEntityActionEvent;
 import eu.mshade.mwork.event.EventListener;
 
-public class PacketEntityActionHandler implements EventListener<MinecraftPacketEntityActionEvent> {
+public class MinecraftPacketEntityActionListener implements EventListener<MinecraftPacketEntityActionEvent> {
 
     @Override
     public void onEvent(MinecraftPacketEntityActionEvent event) {

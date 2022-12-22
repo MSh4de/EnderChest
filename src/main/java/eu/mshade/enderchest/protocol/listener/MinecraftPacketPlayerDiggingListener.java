@@ -10,7 +10,7 @@ import eu.mshade.enderframe.world.block.BlockFace;
 import eu.mshade.enderframe.world.block.DiggingStatus;
 import eu.mshade.mwork.event.EventListener;
 
-public class PacketPlayerDiggingListener implements EventListener<MinecraftPacketPlayerDiggingEvent> {
+public class MinecraftPacketPlayerDiggingListener implements EventListener<MinecraftPacketPlayerDiggingEvent> {
 
     @Override
     public void onEvent(MinecraftPacketPlayerDiggingEvent event) {

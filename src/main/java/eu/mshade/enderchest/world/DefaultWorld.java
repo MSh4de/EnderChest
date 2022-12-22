@@ -4,11 +4,16 @@ import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderchest.entity.EntityFactory;
 import eu.mshade.enderchest.marshal.world.ChunkBinaryTagMarshal;
 import eu.mshade.enderchest.marshal.world.WorldBinaryTagMarshal;
+import eu.mshade.enderframe.Agent;
 import eu.mshade.enderframe.EnderFrame;
+import eu.mshade.enderframe.Watchable;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.EntityType;
 import eu.mshade.enderframe.event.ChunkCreateEvent;
 import eu.mshade.enderframe.event.ChunkLoadEvent;
+import eu.mshade.enderframe.event.ChunkUnloadEvent;
+import eu.mshade.enderframe.inventory.Inventory;
+import eu.mshade.enderframe.inventory.InventoryRepository;
 import eu.mshade.enderframe.item.MaterialKey;
 import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
 import eu.mshade.enderframe.world.*;
@@ -59,6 +64,16 @@ public class DefaultWorld extends World {
             SegmentBinaryTag segmentBinaryTag = getCarbonBinaryTag(binaryTagDriver, this, chunk);
             this.chunksByRegion.get(segmentBinaryTag).remove(chunk);
             this.chunkById.remove(chunk.getId());
+            EnderFrame.get().getEnderFrameEventBus().publish(new ChunkUnloadEvent(chunk));
+
+            Agent agent = chunk.getAgent();
+            for (Watchable watchable : agent.getWatchings()) {
+                if (watchable instanceof Inventory inventory) {
+                    agent.leaveWatch(inventory);
+                    InventoryRepository.INSTANCE.remove(inventory);
+                }
+            }
+
         });
 
         if (save && !chunkStateStore.isInChunkSafeguard()) {
@@ -262,7 +277,7 @@ public class DefaultWorld extends World {
                         chunkStateStore.resetAge();
                     }
 
-                    if (chunk.getWatcher().isEmpty() && chunkStateStore.outdatedInteract(500)) {
+                    if (chunk.getWatchers().isEmpty() && chunkStateStore.outdatedInteract(500)) {
                         chunkStateStore.setChunkStatus(ChunkStatus.PREPARE_TO_UNLOAD);
                     }
                 }

@@ -8,17 +8,17 @@ import eu.mshade.enderframe.packetevent.MinecraftPacketKeepAliveEvent;
 import eu.mshade.enderframe.protocol.MinecraftSession;
 import eu.mshade.mwork.event.EventListener;
 
-public class PacketKeepAliveHandler implements EventListener<MinecraftPacketKeepAliveEvent> {
+public class MinecraftPacketKeepAliveListener implements EventListener<MinecraftPacketKeepAliveEvent> {
 
     private EnderChest enderChest;
 
-    public PacketKeepAliveHandler(EnderChest enderChest) {
+    public MinecraftPacketKeepAliveListener(EnderChest enderChest) {
         this.enderChest = enderChest;
     }
 
     @Override
     public void onEvent(MinecraftPacketKeepAliveEvent event) {
-        MinecraftSession minecraftSession = event.getSessionWrapper();
+        MinecraftSession minecraftSession = event.getMinecraftSession();
         Player player = minecraftSession.getPlayer();
 
         int ping = (int) (System.currentTimeMillis() - event.getThreshold());

@@ -9,19 +9,19 @@ import eu.mshade.mwork.event.EventListener;
 import io.netty.channel.Channel;
 
 
-public class PacketHandshakeListener implements EventListener<MinecraftPacketHandshakeEvent> {
+public class MinecraftPacketHandshakeListener implements EventListener<MinecraftPacketHandshakeEvent> {
 
 
     private EnderChest enderChest;
 
-    public PacketHandshakeListener(EnderChest enderChest) {
+    public MinecraftPacketHandshakeListener(EnderChest enderChest) {
         this.enderChest = enderChest;
     }
 
     @Override
     public void onEvent(MinecraftPacketHandshakeEvent event) {
         MinecraftProtocolPipeline minecraftProtocolPipeline = MinecraftProtocolPipeline.get();
-        MinecraftSession minecraftSession = event.getSessionWrapper();
+        MinecraftSession minecraftSession = event.getMinecraftSession();
         Channel channel = minecraftSession.getChannel();
         MinecraftHandshake minecraftHandshake = event.getHandshake();
         MinecraftHandshakeStatus minecraftHandshakeStatus = minecraftHandshake.getHandshakeStatus();

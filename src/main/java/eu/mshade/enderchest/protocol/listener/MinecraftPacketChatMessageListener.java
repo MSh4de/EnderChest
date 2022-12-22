@@ -18,12 +18,12 @@ import eu.mshade.mwork.event.EventListener;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 
-public class PacketChatMessageHandler implements EventListener<MinecraftPacketChatMessageEvent> {
+public class MinecraftPacketChatMessageListener implements EventListener<MinecraftPacketChatMessageEvent> {
 
 
     private EnderChest enderChest;
 
-    public PacketChatMessageHandler(EnderChest enderChest) {
+    public MinecraftPacketChatMessageListener(EnderChest enderChest) {
         this.enderChest = enderChest;
     }
 
@@ -32,7 +32,7 @@ public class PacketChatMessageHandler implements EventListener<MinecraftPacketCh
         Player player = event.getPlayer();
         Location location = player.getLocation();
 
-        //AxololtConnection.INSTANCE.send(new AxolotlPacketOutChatMessage(player, event.getMessage()));
+        AxololtConnection.INSTANCE.send(axolotlSession -> axolotlSession.sendChatMessage(player, event.getMessage()));
 
         if (event.getMessage().startsWith("schematic")) {
             String[] args = event.getMessage().split(" ");
@@ -40,7 +40,7 @@ public class PacketChatMessageHandler implements EventListener<MinecraftPacketCh
                 String schematicPath = args[1];
                 player.getMinecraftSession().sendMessage(ChatColor.GREEN + "Loading schematic " + schematicPath);
                 ForkJoinPool.commonPool().execute(() -> {
-                    SchematicLoader.placeSchematic(location.getWorld(), this.getClass().getClassLoader().getResourceAsStream("./" + schematicPath), new Vector(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+                    SchematicLoader.placeSchematic(location.getWorld(),  schematicPath, new Vector(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
                 });
             }
             return;

@@ -6,7 +6,7 @@ import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
 import eu.mshade.enderframe.packetevent.MinecraftPacketToggleFlyingEvent;
 import eu.mshade.mwork.event.EventListener;
 
-public class PacketToggleFlyingListener implements EventListener<MinecraftPacketToggleFlyingEvent> {
+public class MinecraftPacketToggleFlyingListener implements EventListener<MinecraftPacketToggleFlyingEvent> {
 
     @Override
     public void onEvent(MinecraftPacketToggleFlyingEvent event) {

@@ -1,7 +1,6 @@
 package eu.mshade.enderchest;
 
-import eu.mshade.enderchest.protocol.MinecraftPacketAccuracy;
-import eu.mshade.enderchest.protocol.VoidHandler;
+import eu.mshade.enderframe.protocol.MinecraftPacketAccuracy;
 import eu.mshade.enderframe.protocol.MinecraftPacketCodec;
 import eu.mshade.enderframe.protocol.MinecraftProtocol;
 import eu.mshade.enderframe.protocol.MinecraftProtocolPipeline;
@@ -23,9 +22,9 @@ public class EnderChestChannelInitializer extends ChannelInitializer<Channel> {
         minecraftProtocolPipeline.setMinecraftSession(ch, tempMinecraftProtocol.getSessionWrapper(ch));
         ch.pipeline()
                 //.addLast("legacy_ping", new LegacyPingHandler())
-                .addLast("encryption", VoidHandler.INSTANCE)
+                .addLast("encryption", VoidChannelHandlerAdapter.INSTANCE)
                 .addLast("accuracy", new MinecraftPacketAccuracy())
-                .addLast("compression", VoidHandler.INSTANCE)
+                .addLast("compression", VoidChannelHandlerAdapter.INSTANCE)
                 .addLast("codecs", new MinecraftPacketCodec())
                 .addLast("timeout", new ReadTimeoutHandler(30, TimeUnit.SECONDS))
                 //.addLast("readtimeout", new ReadTimeoutHandler(20))

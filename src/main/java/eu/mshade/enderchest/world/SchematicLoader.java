@@ -16,8 +16,7 @@ import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -28,6 +27,15 @@ public class SchematicLoader {
     private static EndermanMinecraftProtocol endermanProtocol = new EndermanMinecraftProtocol();
     private static Logger LOGGER = LoggerFactory.getLogger(SchematicLoader.class);
     private static final Block AIR = Material.AIR.toBlock();
+    public static File SCHEMATIC_FOLDER = new File(System.getProperty("user.dir") , "schematics");
+
+    public static void placeSchematic(World world, String schematic, Vector start){
+        try {
+            placeSchematic(world, new FileInputStream(new File(SCHEMATIC_FOLDER, schematic)), start);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static void placeSchematic(World world, InputStream inputStream, Vector start) {
         BlockTransformerRepository blockTransformerRepository = endermanProtocol.getBlockTransformerRepository();

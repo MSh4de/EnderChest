@@ -34,7 +34,7 @@ object VirtualSectionBinaryTagMarshal {
         val blocks = compoundBinaryTag.getIntArray("blocks")
         val blockLight = NibbleArray(*compoundBinaryTag.getByteArray("blockLight"))
         val skyLight = NibbleArray(*compoundBinaryTag.getByteArray("skyLight"))
-        val status = VirtualSectionStatus.valueOf(compoundBinaryTag.getString("status"))
+        val status = VirtualSectionStatus.valueOf(compoundBinaryTag.getString("status")!!)
 
         return VirtualSection(chunk, y, status, palette, blocks, uniqueId, blockLight, skyLight)
     }

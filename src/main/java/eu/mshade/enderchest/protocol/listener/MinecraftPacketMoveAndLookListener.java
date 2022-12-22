@@ -1,18 +1,21 @@
 package eu.mshade.enderchest.protocol.listener;
 
 import eu.mshade.enderframe.entity.Player;
-import eu.mshade.enderframe.packetevent.MinecraftPacketLookEvent;
+import eu.mshade.enderframe.packetevent.MinecraftPacketMoveAndLookEvent;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.mwork.event.EventListener;
 
-public class PacketLookHandler implements EventListener<MinecraftPacketLookEvent> {
+public class MinecraftPacketMoveAndLookListener implements EventListener<MinecraftPacketMoveAndLookEvent> {
 
 
     @Override
-    public void onEvent(MinecraftPacketLookEvent event) {
+    public void onEvent(MinecraftPacketMoveAndLookEvent event) {
         Player player = event.getPlayer();
         Location location = player.getLocation().clone();
 
+        location.setX(event.getX());
+        location.setY(event.getY());
+        location.setZ(event.getZ());
         location.setYaw(event.getYaw());
         location.setPitch(event.getPitch());
 
@@ -25,15 +28,13 @@ public class PacketLookHandler implements EventListener<MinecraftPacketLookEvent
             viewerEnderFrameSession.sendHeadLook(player);
         }
 
-         */
-
-        /*
         Emerald emerald = enderChest.getEmerald();
-        Topic topic = emerald.getTopicRepository().createTopic(ShulkerPacketType.ENTITY_LOOK);
-        emerald.sendPacket(topic, new ShulkerPacketEntityLook(player.getUniqueId(), player.getLocation()));
+        Topic topic = emerald.getTopicRepository().createTopic(ShulkerPacketType.ENTITY_MOVE_LOOK);
+        emerald.sendPacket(topic, new ShulkerPacketEntityMoveAndLook(player.getUniqueId(), player.getLocation()));
 
          */
 
-        //enderChest.getDedicatedShulker().getShulkerSession().sendPacket(new ShulkerPacketLook(player.getUniqueId(), player.getLocation()));
+        //enderChest.getDedicatedShulker().getShulkerSession().sendPacket(new ShulkerPacketMoveAndLook(player.getUniqueId(), player.getLocation()));
     }
+
 }

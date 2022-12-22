@@ -2,6 +2,7 @@ package eu.mshade.enderchest.marshal.world
 
 import eu.mshade.enderframe.metadata.MetadataKeyValueBufferRegistry
 import eu.mshade.enderchest.world.DefaultChunk
+import eu.mshade.enderframe.inventory.Inventory
 import eu.mshade.enderframe.world.World
 import eu.mshade.enderframe.world.chunk.Chunk
 import eu.mshade.mwork.binarytag.*
@@ -61,6 +62,16 @@ object ChunkBinaryTagMarshal {
                 SectionBinaryTagMarshal.deserialize(sectionBinaryTag, chunk, metadataKeyValueBufferRegistry)
             sections[section.y] = section
         }
+
+        chunk.blocks.forEach { block ->
+            block.getMetadataKeyValueBucket().metadataKeyValues.forEach { metadataKeyValue ->
+                val inventory = metadataKeyValue.metadataValue
+                if (inventory is Inventory) {
+                    chunk.agent.joinWatch(inventory)
+                }
+            }
+        }
+
 
         /*
     entityBinaryTags.forEach(entityBinaryTag ->{

@@ -7,9 +7,9 @@ import eu.mshade.mwork.event.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PacketMoveHandler implements EventListener<MinecraftPacketMoveEvent> {
+public class MinecraftPacketMoveListener implements EventListener<MinecraftPacketMoveEvent> {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PacketMoveHandler.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(MinecraftPacketMoveListener.class);
 
     @Override
     public void onEvent(MinecraftPacketMoveEvent event) {

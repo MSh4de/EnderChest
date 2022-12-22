@@ -21,10 +21,10 @@ public class EnderChestChannelInboundHandlerAdapter extends ChannelInboundHandle
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof MinecraftPacketIn minecraftPacketIn){
-            if (!(minecraftPacketIn instanceof MinecraftPacketInKeepAlive || minecraftPacketIn instanceof MinecraftPacketInPlayerGround)){
+/*            if (!(minecraftPacketIn instanceof MinecraftPacketInKeepAlive || minecraftPacketIn instanceof MinecraftPacketInPlayerGround)){
                 System.out.println(minecraftPacketIn);
 
-            }
+            }*/
             MinecraftProtocolPipeline minecraftProtocolPipeline = MinecraftProtocolPipeline.get();
             minecraftProtocolPipeline.getProtocol(channel).getEventBus().publish(minecraftPacketIn);
         }

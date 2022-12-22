@@ -21,7 +21,7 @@ public class DefaultSection extends Section {
             skyLight.fill((byte) 15);
         }
 
-        blockLight.fill((byte) 15);
+//        blockLight.fill((byte) 15);
         palette.setBlock(0, 4096, Material.AIR.toBlock());
     }
 

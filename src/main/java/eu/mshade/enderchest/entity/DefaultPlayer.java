@@ -7,6 +7,7 @@ import eu.mshade.enderframe.Watchable;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.metadata.FlyingEntityMetadata;
 import eu.mshade.enderframe.entity.metadata.SprintingEntityMetadata;
+import eu.mshade.enderframe.inventory.PlayerInventory;
 import eu.mshade.enderframe.metadata.entity.EntityMetadataKey;
 import eu.mshade.enderframe.mojang.chat.ChatColor;
 import eu.mshade.enderframe.mojang.chat.TextPosition;
@@ -41,6 +42,13 @@ public class DefaultPlayer extends Player {
 
     public DefaultPlayer(Location location, Vector velocity, int entityId, UUID uuid, MinecraftSession minecraftSession) {
         super(location, velocity, entityId, uuid);
+
+        /**
+         * At future set player inventory from read data
+         */
+        this.setPlayerInventory(new PlayerInventory(getUniqueId()));
+        this.getInventory().addWatcher(this);
+
         this.setGameProfile(minecraftSession.getGameProfile());
         this.setDisplayName(getGameProfile().getName());
         this.setMinecraftProtocolVersion(minecraftSession.getHandshake().getVersion());
@@ -264,6 +272,9 @@ public class DefaultPlayer extends Player {
         watchable.removeWatcher(this);
     }
 
+    public void setPlayerInventory(PlayerInventory playerInventory) {
+        this.playerInventory = playerInventory;
+    }
 
     public void sendSections(Map<Chunk, List<Integer>> chunkListMap) {
 

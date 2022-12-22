@@ -10,14 +10,14 @@ import eu.mshade.mwork.event.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PacketBlockPlaceListener implements EventListener<MinecraftPacketBlockPlaceEvent> {
+public class MinecraftPacketBlockPlaceListener implements EventListener<MinecraftPacketBlockPlaceEvent> {
 
     //logger with logback
-    private static final Logger LOGGER = LoggerFactory.getLogger(PacketBlockPlaceListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MinecraftPacketBlockPlaceListener.class);
 
     private final BlockRuleRepository blockRuleRepository = new BlockRuleRepository();
 
-    public PacketBlockPlaceListener() {
+    public MinecraftPacketBlockPlaceListener() {
         this.blockRuleRepository.register(MaterialCategory.LOG, new LogBlockRule());
         this.blockRuleRepository.register(MaterialCategory.STAIRS, new StairsBlockRule());
         this.blockRuleRepository.register(MaterialCategory.BUTTON, new ButtonBlockRule());

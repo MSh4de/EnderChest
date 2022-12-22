@@ -11,7 +11,7 @@ import eu.mshade.mwork.event.EventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PacketClickInventoryHandler implements EventListener<MinecraftPacketClickInventoryEvent> {
+public class MinecraftPacketClickInventoryListener implements EventListener<MinecraftPacketClickInventoryEvent> {
 
     @Override
     public void onEvent(MinecraftPacketClickInventoryEvent event) {
@@ -22,13 +22,14 @@ public class PacketClickInventoryHandler implements EventListener<MinecraftPacke
         ClickType clickType = event.getClickType();
         int slot = event.getSlot();
 
-
         switch (clickType) {
             case LEFT -> {
                 if (inventoryClickStore.getPickedItemStack() == null) {
                     ItemStack pickedItemStack = inventory.getItemStack(slot);
-                    inventoryClickStore.setPickedItemStack(pickedItemStack);
-                    inventory.deleteItemStack(slot);
+                    if (pickedItemStack != null) {
+                        inventoryClickStore.setPickedItemStack(pickedItemStack);
+                        inventory.deleteItemStack(slot);
+                    }
                 } else {
                     ItemStack itemStack = inventory.getItemStack(slot);
                     ItemStack pickedItemStack = inventoryClickStore.getPickedItemStack();
@@ -162,7 +163,6 @@ public class PacketClickInventoryHandler implements EventListener<MinecraftPacke
                         inventoryClickStore.setPickedItemStack(itemStack);
                     }
                 } else {
-
                     for (InventoryClickStore.PlacedItemStack placedItemStack : inventoryClickStore.getPLacedItemStacks()) {
                         Inventory inventoryTarget = (placedItemStack.isPlayerInventory() ? player.getInventory() : player.getOpenedInventory());
                         ItemStack itemStack = inventoryTarget.getItemStack(placedItemStack.getSlot());
@@ -225,7 +225,17 @@ public class PacketClickInventoryHandler implements EventListener<MinecraftPacke
                 inventory.deleteItemStack(slot);
                 moveItemStack(itemStack, inventory, player);
             }
+            case CREATIVE -> {
+                if (player.getGameMode() == GameMode.CREATIVE) {
+                    if (event.getItemStack() == null) {
+                        System.out.println("slot: " + slot);
+                    }
+                    inventory.setItemStack(slot, event.getItemStack());
+                }
+            }
         }
+
+
     }
 
     private void moveItemStackIntoInventory(int start, ItemStack itemStack, PlayerInventory playerInventory) {
