@@ -131,3 +131,14 @@ class DefaultSquid: Squid {
 
     }
 }
+
+class DefaultVillager: Villager {
+    constructor(location: Location, velocity: Vector, entityId: Int, uuid: UUID) : super(
+        location,
+        velocity,
+        entityId,
+        uuid
+    )
+
+    constructor(location: Location, entityId: Int) : super(location, entityId)
+}
