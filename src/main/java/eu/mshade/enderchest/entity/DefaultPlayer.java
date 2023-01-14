@@ -3,10 +3,13 @@ package eu.mshade.enderchest.entity;
 import eu.mshade.enderchest.axolotl.AxololtConnection;
 import eu.mshade.enderchest.world.virtual.VirtualSection;
 import eu.mshade.enderchest.world.virtual.VirtualSectionStatus;
+import eu.mshade.enderframe.Agent;
+import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.Watchable;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.metadata.FlyingEntityMetadata;
 import eu.mshade.enderframe.entity.metadata.SprintingEntityMetadata;
+import eu.mshade.enderframe.event.PlayerMoveEvent;
 import eu.mshade.enderframe.inventory.PlayerInventory;
 import eu.mshade.enderframe.metadata.entity.EntityMetadataKey;
 import eu.mshade.enderframe.mojang.chat.ChatColor;
@@ -37,6 +40,7 @@ public class DefaultPlayer extends Player {
     private Location lastServerChunkLocation;
     private double speed, lastSpeedInChunk;
     private boolean updateChunkBySpeed, lastUpdateByChangeChunk;
+    private final Queue<Watchable> watchables = new ConcurrentLinkedQueue<>();
 
     private long lastElapsedTick;
 
@@ -118,6 +122,8 @@ public class DefaultPlayer extends Player {
 
         //check if player are moved
         if(!this.getBeforeServerLocation().equals(this.getServerLocation())) {
+            EnderFrame.get().getEnderFrameEventBus().publish(new PlayerMoveEvent(this, this.getBeforeServerLocation(), this.getServerLocation()));
+
             AxololtConnection.INSTANCE.send(axolotlSession -> axolotlSession.sendEntityLocation(this));
         }
 
@@ -203,7 +209,7 @@ public class DefaultPlayer extends Player {
 
                 });
 
-                this.getMinecraftSession().sendMessage(ChatColor.GREEN + "Chunk loaded in " + (System.currentTimeMillis() - start) + "ms, there are " + world.getChunks().size() + " chunks in all, new chunk " + newChunks.size(), TextPosition.HOT_BAR);
+//                this.getMinecraftSession().sendMessage(ChatColor.GREEN + "Chunk loaded in " + (System.currentTimeMillis() - start) + "ms, there are " + world.getChunks().size() + " chunks in all, new chunk " + newChunks.size(), TextPosition.HOT_BAR);
             } catch (InterruptedException | ExecutionException e) {
                 LOGGER.error("", e);
             }
@@ -265,11 +271,18 @@ public class DefaultPlayer extends Player {
     @Override
     public void joinWatch(Watchable watchable) {
         watchable.addWatcher(this);
+        watchables.add(watchable);
     }
 
     @Override
     public void leaveWatch(Watchable watchable) {
         watchable.removeWatcher(this);
+        watchables.remove(watchable);
+    }
+
+    @Override
+    public Collection<Watchable> getWatchings() {
+        return this.watchables;
     }
 
     public void setPlayerInventory(PlayerInventory playerInventory) {

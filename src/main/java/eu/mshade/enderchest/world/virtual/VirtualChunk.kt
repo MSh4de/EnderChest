@@ -123,12 +123,12 @@ class VirtualChunk(x: Int, z: Int, private val virtualWorld: VirtualWorld) : Chu
         agents.remove(agent)
     }
 
-    override fun getWatcher(): Collection<Agent?> {
-        return agents
-    }
-
     override fun isWatching(agent: Agent?): Boolean {
         return agents.contains(agent)
+    }
+
+    override fun getWatchers(): MutableCollection<Agent> {
+        return agents
     }
 
     override fun notify(consumer: Consumer<Agent>) {

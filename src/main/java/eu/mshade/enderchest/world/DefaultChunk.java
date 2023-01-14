@@ -190,13 +190,13 @@ public class DefaultChunk extends Chunk {
     }
 
     @Override
-    public Collection<Agent> getWatcher() {
-        return agents;
+    public boolean isWatching(Agent agent) {
+        return agents.contains(agent);
     }
 
     @Override
-    public boolean isWatching(Agent agent) {
-        return agents.contains(agent);
+    public Collection<Agent> getWatchers() {
+        return this.agents;
     }
 
     @Override

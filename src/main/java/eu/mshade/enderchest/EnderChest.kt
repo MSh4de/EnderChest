@@ -2,13 +2,14 @@ package eu.mshade.enderchest
 
 import com.fasterxml.jackson.databind.module.SimpleModule
 import eu.mshade.axolotl.Axolotl
-import eu.mshade.axolotl.event.HandshakeAxolotlEvent
 import eu.mshade.axolotl.event.ChatMessageAxolotlEvent
+import eu.mshade.axolotl.event.HandshakeAxolotlEvent
 import eu.mshade.axolotl.protocol.AxolotlProtocolRepository
 import eu.mshade.enderchest.axolotl.AxolotlChannelInitializer
 import eu.mshade.enderchest.axolotl.listener.HandshakeAxolotlListener
 import eu.mshade.enderchest.axolotl.listener.MessageAxolotlListener
 import eu.mshade.enderchest.listener.*
+import eu.mshade.enderchest.listener.packet.*
 import eu.mshade.enderchest.marshal.common.*
 import eu.mshade.enderchest.marshal.item.LoreItemStackMetadataBuffer
 import eu.mshade.enderchest.marshal.item.NameItemStackMetadataBuffer
@@ -16,8 +17,10 @@ import eu.mshade.enderchest.marshal.metadata.*
 import eu.mshade.enderchest.marshal.world.DifficultyBinaryTagMarshal
 import eu.mshade.enderchest.marshal.world.DimensionBinaryTagMarshal
 import eu.mshade.enderchest.marshal.world.LevelTypeBinaryTagMarshal
-import eu.mshade.enderchest.protocol.listener.*
-import eu.mshade.enderchest.world.*
+import eu.mshade.enderchest.world.ChunkSafeguard
+import eu.mshade.enderchest.world.DefaultChunkGenerator
+import eu.mshade.enderchest.world.SchematicLoader
+import eu.mshade.enderchest.world.WorldManager
 import eu.mshade.enderchest.world.virtual.VirtualWorldManager
 import eu.mshade.enderframe.EnderFrame
 import eu.mshade.enderframe.GameMode
@@ -104,17 +107,14 @@ object EnderChest {
         val packetEventBus = enderFrame.packetEventBus
         val binaryTagDriver = enderFrame.binaryTagDriver
 
-        packetEventBus.subscribe(MinecraftPacketHandshakeEvent::class.java,
-            MinecraftPacketHandshakeListener(this)
+        packetEventBus.subscribe(MinecraftPacketHandshakeEvent::class.java, MinecraftPacketHandshakeListener(this))
+        packetEventBus.subscribe(MinecraftPacketServerPingEvent::class.java,
+            MinecraftPacketServerPingListener()
         )
-        packetEventBus.subscribe(
-            MinecraftPacketServerPingEvent::class.java,
-            MinecraftServerPingListener()
+        packetEventBus.subscribe(MinecraftPacketServerStatusEvent::class.java,
+            MinecraftPacketServerStatusListener()
         )
-        packetEventBus.subscribe(MinecraftPacketServerStatusEvent::class.java, ServerStatusListener())
-        packetEventBus.subscribe(MinecraftPacketLoginEvent::class.java,
-            MinecraftPacketLoginListener(this)
-        )
+        packetEventBus.subscribe(MinecraftPacketLoginEvent::class.java, MinecraftPacketLoginListener(this))
         packetEventBus.subscribe(MinecraftPacketEncryptionEvent::class.java,
             MinecraftPacketEncryptionListener(this)
         )
@@ -124,9 +124,7 @@ object EnderChest {
         packetEventBus.subscribe(MinecraftPacketClientSettingsEvent::class.java,
             MinecraftPacketClientSettingsListener()
         )
-        packetEventBus.subscribe(MinecraftPacketChatMessageEvent::class.java,
-            MinecraftPacketChatMessageListener(this)
-        )
+        packetEventBus.subscribe(MinecraftPacketChatMessageEvent::class.java, MinecraftPacketChatMessageListener(this))
         packetEventBus.subscribe(MinecraftPacketEntityActionEvent::class.java,
             MinecraftPacketEntityActionListener()
         )
@@ -139,9 +137,7 @@ object EnderChest {
         packetEventBus.subscribe(MinecraftPacketMoveAndLookEvent::class.java,
             MinecraftPacketMoveAndLookListener()
         )
-        packetEventBus.subscribe(MinecraftPacketToggleFlyingEvent::class.java,
-            MinecraftPacketToggleFlyingListener()
-        )
+        packetEventBus.subscribe(MinecraftPacketToggleFlyingEvent::class.java, MinecraftPacketToggleFlyingListener())
         packetEventBus.subscribe(MinecraftPacketBlockPlaceEvent::class.java,
             MinecraftPacketBlockPlaceListener()
         )
@@ -157,20 +153,47 @@ object EnderChest {
         packetEventBus.subscribe(MinecraftPacketClientStatusEvent::class.java, MinecraftPacketClientStatusListener())
 
         val enderFrameEventBus = enderFrame.enderFrameEventBus
-        enderFrameEventBus.subscribe(EntityUnseeEvent::class.java, EntityUnseeHandler())
-        enderFrameEventBus.subscribe(EntitySeeEvent::class.java, EntitySeeHandler())
-        enderFrameEventBus.subscribe(ChunkSeeEvent::class.java, ChunkSeeHandler())
-        enderFrameEventBus.subscribe(ChunkUnseeEvent::class.java, ChunkUnseeHandler())
-        enderFrameEventBus.subscribe(EntityMoveEvent::class.java, EntityMoveHandler())
-        enderFrameEventBus.subscribe(EntityTeleportEvent::class.java, EntityTeleportHandler())
-        enderFrameEventBus.subscribe(EntityChunkChangeEvent::class.java, EntityChunkChangeHandler())
-        enderFrameEventBus.subscribe(ChunkUnloadEvent::class.java, ChunkUnloadHandler())
-        enderFrameEventBus.subscribe(ChunkLoadEvent::class.java, ChunkLoadHandler())
-        enderFrameEventBus.subscribe(WatchdogSeeEvent::class.java, WatchdogSeeHandler())
+        enderFrameEventBus.subscribe(EntityUnseeEvent::class.java,
+            EntityUnseeListener()
+        )
+        enderFrameEventBus.subscribe(EntitySeeEvent::class.java,
+            EntitySeeListener()
+        )
+        enderFrameEventBus.subscribe(ChunkSeeEvent::class.java,
+            ChunkSeeListener()
+        )
+        enderFrameEventBus.subscribe(ChunkUnseeEvent::class.java,
+            ChunkUnseeListener()
+        )
+        enderFrameEventBus.subscribe(EntityMoveEvent::class.java,
+            EntityMoveListener()
+        )
+        enderFrameEventBus.subscribe(EntityTeleportEvent::class.java,
+            EntityTeleportListener()
+        )
+        enderFrameEventBus.subscribe(EntityChunkChangeEvent::class.java,
+            EntityChunkChangeListener()
+        )
+        enderFrameEventBus.subscribe(ChunkUnloadEvent::class.java,
+            ChunkUnloadListener()
+        )
+        enderFrameEventBus.subscribe(ChunkLoadEvent::class.java,
+            ChunkLoadListener()
+        )
+        enderFrameEventBus.subscribe(WatchdogSeeEvent::class.java,
+            WatchdogSeeListener()
+        )
         enderFrameEventBus.subscribe(ChunkCreateEvent::class.java, ChunkCreateListener())
-        enderFrameEventBus.subscribe(WatchdogUnseeEvent::class.java, WatchdogUnseeHandler())
-        enderFrameEventBus.subscribe(PlayerQuitEvent::class.java, PlayerQuitHandler(this))
-        enderFrameEventBus.subscribe(FinallyJoinEvent::class.java, FinallyJoinListener(this))
+        enderFrameEventBus.subscribe(WatchdogUnseeEvent::class.java,
+            WatchdogUnseeListener()
+        )
+        enderFrameEventBus.subscribe(
+            PlayerDisconnectEvent::class.java,
+            PlayerDisconnectListener(this)
+        )
+        enderFrameEventBus.subscribe(PrePlayerJoinEvent::class.java,
+            PrePlayerJoinListener(this)
+        )
 
         metadataKeyValueBufferRegistry = MetadataKeyValueBufferRegistry()
         metadataKeyValueBufferRegistry.register(WorldMetadataType.NAME, NameWorldMetadataBuffer())
@@ -222,7 +245,7 @@ object EnderChest {
             metadataKeyValueBucket.setMetadataKeyValue(DimensionWorldMetadata(Dimension.OVERWORLD))
             metadataKeyValueBucket.setMetadataKeyValue(DifficultyWorldMetadata(Difficulty.NORMAL))
         }
-        world.chunkGenerator = WinterChunkGenerator(world)
+        world.chunkGenerator = DefaultChunkGenerator(world)
 
         val threadTickBus = Thread(tickBus, "TickBus")
         threadTickBus.start()

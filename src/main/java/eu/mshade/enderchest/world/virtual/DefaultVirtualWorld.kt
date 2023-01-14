@@ -220,7 +220,7 @@ class DefaultVirtualWorld(
                         chunkSafeguard.addChunk(chunk)
                         chunkStateStore.resetAge()
                     }
-                    if (chunk.watcher.isEmpty() && chunkStateStore.outdatedInteract(500)) {
+                    if (chunk.watchers.isEmpty() && chunkStateStore.outdatedInteract(500)) {
                         chunkStateStore.chunkStatus = ChunkStatus.PREPARE_TO_UNLOAD
                     }
                 }
