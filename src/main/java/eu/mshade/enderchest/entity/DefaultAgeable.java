@@ -1,8 +1,6 @@
 package eu.mshade.enderchest.entity;
 
-import eu.mshade.enderframe.entity.Ageable;
-
-public class DefaultAgeable implements Ageable {
+public class DefaultAgeable {
 
     private int age;
     private boolean ageLocked;

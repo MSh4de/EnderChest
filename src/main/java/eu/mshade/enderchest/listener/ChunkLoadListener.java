@@ -1,7 +1,6 @@
 package eu.mshade.enderchest.listener;
 
 import eu.mshade.enderchest.axolotl.AxololtConnection;
-import eu.mshade.enderframe.event.ChunkLoadEvent;
 import eu.mshade.mwork.event.EventListener;
 
 import java.util.concurrent.CompletableFuture;

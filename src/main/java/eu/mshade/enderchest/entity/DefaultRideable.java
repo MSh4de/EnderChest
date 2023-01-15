@@ -1,8 +1,6 @@
 package eu.mshade.enderchest.entity;
 
-import eu.mshade.enderframe.entity.Rideable;
-
-public class DefaultRideable implements Rideable {
+public class DefaultRideable {
 
     private boolean hasSaddle;
 

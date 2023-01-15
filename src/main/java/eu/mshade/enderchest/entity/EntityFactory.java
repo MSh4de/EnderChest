@@ -1,11 +1,5 @@
 package eu.mshade.enderchest.entity;
 
-import eu.mshade.enderframe.entity.Entity;
-import eu.mshade.enderframe.entity.EntityType;
-
-import java.util.HashMap;
-import java.util.Map;
-
 public class EntityFactory {
 
     private static EntityFactory entityFactory;

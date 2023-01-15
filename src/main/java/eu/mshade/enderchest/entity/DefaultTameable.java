@@ -1,8 +1,6 @@
 package eu.mshade.enderchest.entity;
 
-import eu.mshade.enderframe.entity.Tameable;
-
-public class DefaultTameable implements Tameable {
+public class DefaultTameable {
 
     private boolean isSitting;
     private boolean isTame;

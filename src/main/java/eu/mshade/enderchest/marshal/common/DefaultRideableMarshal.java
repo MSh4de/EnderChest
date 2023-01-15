@@ -1,7 +1,6 @@
 package eu.mshade.enderchest.marshal.common;
 
 import eu.mshade.enderchest.entity.DefaultRideable;
-import eu.mshade.enderframe.entity.Rideable;
 import eu.mshade.mwork.binarytag.BinaryTag;
 import eu.mshade.mwork.binarytag.BinaryTagDriver;
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
