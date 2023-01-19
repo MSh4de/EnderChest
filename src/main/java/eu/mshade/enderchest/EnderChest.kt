@@ -1,5 +1,6 @@
 package eu.mshade.enderchest
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
 import eu.mshade.axolotl.Axolotl
 import eu.mshade.axolotl.event.ChatMessageAxolotlEvent
@@ -31,7 +32,11 @@ import eu.mshade.enderframe.event.*
 import eu.mshade.enderframe.inventory.InventoryTracker
 import eu.mshade.enderframe.item.ItemStackMetadataKey
 import eu.mshade.enderframe.metadata.MetadataKeyValueBufferRegistry
+import eu.mshade.enderframe.item.Material
+import eu.mshade.enderframe.item.MaterialKey.DefaultMaterialKey
+import eu.mshade.enderframe.metadata.MetadataKeyValueBucket
 import eu.mshade.enderframe.mojang.GameProfile
+import eu.mshade.enderframe.mojang.NamespacedKey
 import eu.mshade.enderframe.mojang.Property
 import eu.mshade.enderframe.mojang.chat.*
 import eu.mshade.enderframe.packetevent.*
@@ -231,13 +236,23 @@ object EnderChest {
         binaryTagDriver.registerMarshal(LevelType::class.java, LevelTypeBinaryTagMarshal())
 
 
-
-
         chunkSafeguard.start()
         LOGGER.info("ChunkSafeGuard started")
 
         worldManager = WorldManager(binaryTagDriver, chunkSafeguard, tickBus)
         virtualWorldManager = VirtualWorldManager(chunkSafeguard, tickBus)
+
+        val mapper = ObjectMapper()
+        val materialsId = mapper.readTree(this::class.java.getResourceAsStream("/materials.json"))
+        materialsId.fields().forEach { (key, value) ->
+            val material = Material.fromNamespacedKey(NamespacedKey.minecraft(key))
+            if(material == null){
+                LOGGER.warn("Material $key not found")
+                return@forEach
+            }
+            (material as DefaultMaterialKey).id = value.asInt()
+            Material.registerMaterialKey(material)
+        }
         
 
         val world = worldManager.createWorld("world") { metadataKeyValueBucket ->
@@ -286,7 +301,6 @@ object EnderChest {
             parentGroup.shutdownGracefully()
             childGroup.shutdownGracefully()
         })
-
 
         //this.emerald = new Emerald(parentGroup);
         val channelFuture = ServerBootstrap()
