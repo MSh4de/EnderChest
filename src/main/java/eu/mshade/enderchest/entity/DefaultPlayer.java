@@ -6,14 +6,14 @@ import eu.mshade.enderchest.world.virtual.VirtualSectionStatus;
 import eu.mshade.enderframe.Agent;
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.Watchable;
+import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.entity.metadata.FlyingEntityMetadata;
 import eu.mshade.enderframe.entity.metadata.SprintingEntityMetadata;
 import eu.mshade.enderframe.event.PlayerMoveEvent;
 import eu.mshade.enderframe.inventory.PlayerInventory;
-import eu.mshade.enderframe.metadata.entity.EntityMetadataKey;
-import eu.mshade.enderframe.mojang.chat.ChatColor;
-import eu.mshade.enderframe.mojang.chat.TextPosition;
+import eu.mshade.enderframe.entity.metadata.EntityMetadataKey;
+import eu.mshade.enderframe.metadata.MetadataKeyValue;
 import eu.mshade.enderframe.protocol.MinecraftSession;
 import eu.mshade.enderframe.virtualserver.VirtualWorld;
 import eu.mshade.enderframe.world.chunk.Chunk;
@@ -38,8 +38,6 @@ public class DefaultPlayer extends Player {
 
     private final MinecraftSession minecraftSession;
     private Location lastServerChunkLocation;
-    private double speed, lastSpeedInChunk;
-    private boolean updateChunkBySpeed, lastUpdateByChangeChunk;
     private final Queue<Watchable> watchables = new ConcurrentLinkedQueue<>();
 
     private long lastElapsedTick;
@@ -121,50 +119,28 @@ public class DefaultPlayer extends Player {
     public void tick() {
 
         //check if player are moved
-        if(!this.getBeforeServerLocation().equals(this.getServerLocation())) {
-            EnderFrame.get().getEnderFrameEventBus().publish(new PlayerMoveEvent(this, this.getBeforeServerLocation(), this.getServerLocation()));
+        if(!this.getTickBeforeLocation().equals(this.getTickLocation())) {
+            EnderFrame.get().getEnderFrameEventBus().publish(new PlayerMoveEvent(this, this.getTickBeforeLocation(), this.getTickBeforeLocation()));
 
             AxololtConnection.INSTANCE.send(axolotlSession -> axolotlSession.sendEntityLocation(this));
         }
 
-        long now = System.currentTimeMillis();
-        speed = this.getBeforeServerLocation().distanceXZ(getServerLocation()) / ((now - lastElapsedTick) * 1E-3);
-        lastElapsedTick = now;
-        setServerLocation(getLocation());
+        setTickLocation(getLocation());
 
 
         getLookAtEntity().forEach(entity -> {
-            getMinecraftSession().sendUpdateLocation(entity, entity.getBeforeServerLocation(), entity.getServerLocation());
+            getMinecraftSession().sendUpdateLocation(entity, entity.getTickBeforeLocation(), entity.getTickLocation());
         });
 
 
-        boolean sprinting = this.getMetadataKeyValueBucket().getMetadataKeyValueOrDefault(EntityMetadataKey.SPRINTING, SprintingEntityMetadata.DEFAULT).getMetadataValue();
-        double vMax = this.getMetadataKeyValueBucket().getMetadataKeyValueOrDefault(EntityMetadataKey.FLYING, FlyingEntityMetadata.DEFAULT).getMetadataValue() ? (sprinting ? 78.40 : 39.20) : (sprinting ? 20.20 : 15.54);
-
         boolean hasChangeChunk = lastServerChunkLocation == null || (this.lastServerChunkLocation.getChunkX() != this.getLocation().getChunkX() || this.lastServerChunkLocation.getChunkZ() != this.getLocation().getChunkZ());
-        boolean hasChangeSpeedInChunk = lastServerChunkLocation == null || (this.lastServerChunkLocation.getChunkX() == this.getLocation().getChunkX() && this.lastServerChunkLocation.getChunkZ() == this.getLocation().getChunkZ() && !updateChunkBySpeed && lastUpdateByChangeChunk && (lastSpeedInChunk >= speed));
 
         if (hasChangeChunk) {
             Location location = this.getLocation();
             World world = location.getWorld();
 
-            int radiusMax = 10;
-            //int radius = (int) Math.max(3, Math.round(radiusMax - (memoryEfficiency * radiusMax)));
-
-
             int radius = 10;
-            //int radius = (int) Math.max(3, Math.round(radiusMax - (speed / vMax)));
 
-            if (hasChangeChunk) {
-                lastUpdateByChangeChunk = true;
-                updateChunkBySpeed = false;
-            }
-
-            if (hasChangeSpeedInChunk) {
-                lastUpdateByChangeChunk = false;
-                updateChunkBySpeed = true;
-                lastSpeedInChunk = speed;
-            }
 
             long start = System.currentTimeMillis();
             Queue<CompletableFuture<Chunk>> askChunks = new ConcurrentLinkedQueue<>();
@@ -215,15 +191,14 @@ public class DefaultPlayer extends Player {
             }
 
 
-                /*
                 Set<Entity> entities = new HashSet<>();
 
                 for (int x = chunkX - 5; x <= chunkX + 5; x++) {
                     for (int z = chunkZ - 5; z <= chunkZ + 5; z++) {
                         if ((chunkX - x) * (chunkX - x) + (chunkZ - z) * (chunkZ - z) <= 5 * 5) {
-                            Chunk chunkBuffer = world.getChunk(x, z);
-                            entities.addAll(chunkBuffer.getEntities());
-                            chunkBuffer.getViewers().stream().filter(target -> !target.equals(this)).forEach(entities::add);
+                            Chunk chunk = world.getChunk(x, z).join();
+                            entities.addAll(chunk.getEntities());
+                            chunk.getWatchers().stream().filter(target -> !target.equals(this) && target instanceof Entity).forEach(entity -> entities.add((Entity) entity));
                         }
                     }
                 }
@@ -232,19 +207,17 @@ public class DefaultPlayer extends Player {
 
                 for (Entity entity : collect) {
                     if (!containsLookAtEntity(entity)) {
-                        getSessionWrapper().sendEntity(entity);
+                        getMinecraftSession().sendEntity(entity);
                         this.addLookAtEntity(entity);
                     }
                 }
 
-
                 getLookAtEntity().stream().filter(entity -> !collect.contains(entity)).forEach(entity -> {
                     this.removeLookAtEntity(entity);
-                    getSessionWrapper().removeEntity(entity);
+                    getMinecraftSession().removeEntity(entity);
                 });
+            }
 
-                 */
-        }
 
 
         if (isPeriod(20)) {

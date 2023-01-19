@@ -43,8 +43,10 @@ import eu.mshade.enderframe.world.block.BlockMetadataType
 import eu.mshade.enderframe.world.chunk.Chunk
 import eu.mshade.enderman.EndermanMinecraftProtocol
 import eu.mshade.mwork.MWork
+
 import eu.mshade.mwork.binarytag.segment.SegmentBinaryTag
 import eu.mshade.stone.StoneAxolotlProtocol
+
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelOption
 import io.netty.channel.EventLoopGroup
@@ -224,7 +226,6 @@ object EnderChest {
         binaryTagDriver.registerMarshal(Property::class.java, DefaultPropertyMarshal())
         binaryTagDriver.registerMarshal(VillagerType::class.java, DefaultVillagerTypeMarshal())
         binaryTagDriver.registerMarshal(Rotation::class.java, DefaultRotationMarshal())
-        binaryTagDriver.registerMarshal(CreeperState::class.java, DefaultCreeperStateMarshal())
         binaryTagDriver.registerMarshal(Difficulty::class.java, DifficultyBinaryTagMarshal())
         binaryTagDriver.registerMarshal(Dimension::class.java, DimensionBinaryTagMarshal())
         binaryTagDriver.registerMarshal(LevelType::class.java, LevelTypeBinaryTagMarshal())
@@ -391,6 +392,7 @@ object EnderChest {
 
         //print length of chunk of the worlds
 /*        parentGroup.scheduleAtFixedRate({
+
             worldManager.worlds.forEach(Consumer { w: World ->
                 LOGGER.info("World " + w.name + " has " + w.chunks.size + " chunks")
             })

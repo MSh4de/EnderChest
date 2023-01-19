@@ -1,5 +1,9 @@
 package eu.mshade.enderchest.marshal.common;
 
+<<<<<<< HEAD
+=======
+import eu.mshade.enderframe.entity.VillagerType;
+>>>>>>> rework-entities
 import eu.mshade.mwork.binarytag.BinaryTag;
 import eu.mshade.mwork.binarytag.BinaryTagDriver;
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
@@ -18,6 +22,7 @@ public class DefaultVillagerTypeMarshal implements BinaryTagMarshal<VillagerType
     @Override
     public VillagerType deserialize(BinaryTagDriver binaryTagDriver, BinaryTag<?> binaryTag) {
         CompoundBinaryTag compoundBinaryTag = (CompoundBinaryTag) binaryTag;
-        return VillagerType.valueOf(compoundBinaryTag.getString("villagerType"));
+        //return VillagerType.valueOf(compoundBinaryTag.getString("villagerType"));
+        return null; //TODO LA PUTAIN DE TA GRAND MERE
     }
 }

@@ -8,9 +8,13 @@ import eu.mshade.enderframe.Agent;
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.Watchable;
 import eu.mshade.enderframe.entity.Entity;
+import eu.mshade.enderframe.entity.EntityKey;
+import eu.mshade.enderframe.entity.EntityType;
 import eu.mshade.enderframe.event.ChunkCreateEvent;
+import eu.mshade.enderframe.event.ChunkLoadEvent;
 import eu.mshade.enderframe.event.ChunkUnloadEvent;
 import eu.mshade.enderframe.inventory.Inventory;
+import eu.mshade.enderframe.inventory.InventoryRepository;
 import eu.mshade.enderframe.item.MaterialKey;
 import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
 import eu.mshade.enderframe.world.*;
@@ -185,31 +189,10 @@ public class DefaultWorld extends World {
     }
 
     @Override
-    public Entity spawnEntity(EntityType entityType, Location location) {
-        if (location == null)
-            throw new NullPointerException("Location cannot be null when trying to spawn an entity.");
-
-        EntityFactory entityFactory = EntityFactory.get();
-        Location entityLocation = location.clone();
-
-        try {
-
-            /*
-
-            location.getChunkBuffer().addEntity(entity);
-            location.getChunkBuffer().getViewers().stream()
-                    .filter(player -> player.getLocation().distance(entityLocation) <= 64)
-                    .forEach(entity::addViewer);
-
-             */
-
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+    public Entity spawnEntity(EntityKey entityType, Location location) {
         return null;
     }
+
 
     @Override
     public void setBlock(int x, int y, int z, MaterialKey materialKey) {
@@ -299,6 +282,14 @@ public class DefaultWorld extends World {
 
             saveWorld();
         }
+
+        this.getChunks().forEach(chunkCompletableFuture -> {
+            Chunk chunk = chunkCompletableFuture.join();
+            if (chunk == null)
+                return;
+
+            chunk.getEntities().forEach(Entity::tick);
+        });
     }
 
     private String regionId(Chunk chunk) {
