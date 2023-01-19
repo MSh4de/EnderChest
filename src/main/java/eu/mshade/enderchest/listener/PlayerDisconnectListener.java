@@ -34,15 +34,15 @@ public class PlayerDisconnectListener implements EventListener<PlayerDisconnectE
         }
 
         for (Scoreboard<?> scoreboard : player.getLookAtScoreboard()) {
-            scoreboard.getViewers().remove(player);
+            scoreboard.removeWatcher(player);
+        }
+
+        for (WorldBorder worldBorder : player.getLookAtWorldBorders()) {
+            worldBorder.removeWatcher(player);
         }
 
         player.getLookAtScoreboard().clear();
         player.getLookAtChunks().clear();
-
-        for (WorldBorder worldBorder : player.getLookAtWorldBorders()) {
-            worldBorder.getViewers().remove(player);
-        }
         player.getLookAtWorldBorders().clear();
 
         enderChest.removePlayer(player);
