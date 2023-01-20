@@ -39,11 +39,13 @@ class SeedWorldMetadataBuffer : MetadataKeyValueBuffer {
 class DimensionWorldMetadataBuffer(val binaryTagDriver: BinaryTagDriver) : MetadataKeyValueBuffer {
 
     override fun read(binaryTag: BinaryTag<*>): MetadataKeyValue<*> {
-        return DimensionWorldMetadata(binaryTagDriver.unMarshal(binaryTag, Dimension::class.java))
+       val dimension = Dimension.valueOf(binaryTag.value as String)
+        return DimensionWorldMetadata(dimension)
     }
 
     override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
-        return binaryTagDriver.marshal(metadataKeyValue.metadataValue)
+        val dimensionWorldMetadata = metadataKeyValue as? DimensionWorldMetadata
+        return StringBinaryTag(dimensionWorldMetadata!!.metadataValue.name)
     }
 
 }
@@ -51,11 +53,13 @@ class DimensionWorldMetadataBuffer(val binaryTagDriver: BinaryTagDriver) : Metad
 class LevelTypeWorldMetadataBuffer(val binaryTagDriver: BinaryTagDriver): MetadataKeyValueBuffer {
 
     override fun read(binaryTag: BinaryTag<*>): MetadataKeyValue<*> {
-        return LevelTypeWorldMetadata(binaryTagDriver.unMarshal(binaryTag, LevelType::class.java))
+        val levelType = LevelType.valueOf(binaryTag.value as String)
+        return LevelTypeWorldMetadata(levelType)
     }
 
     override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
-        return binaryTagDriver.marshal(metadataKeyValue.metadataValue)
+        val levelTypeWorldMetadata = metadataKeyValue as? LevelTypeWorldMetadata
+        return StringBinaryTag(levelTypeWorldMetadata!!.metadataValue.name)
     }
 
 }
@@ -63,16 +67,19 @@ class LevelTypeWorldMetadataBuffer(val binaryTagDriver: BinaryTagDriver): Metada
 class DifficultyWorldMetadataBuffer(val binaryTagDriver: BinaryTagDriver): MetadataKeyValueBuffer {
 
     override fun read(binaryTag: BinaryTag<*>): MetadataKeyValue<*> {
-        return DifficultyWorldMetadata(binaryTagDriver.unMarshal(binaryTag, Difficulty::class.java))
+        val difficulty = Difficulty.valueOf(binaryTag.value as String)
+        return DifficultyWorldMetadata(difficulty)
     }
 
     override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
-        return binaryTagDriver.marshal(metadataKeyValue.metadataValue)
+        val difficultyWorldMetadata = metadataKeyValue as? DifficultyWorldMetadata
+        return StringBinaryTag(difficultyWorldMetadata!!.metadataValue.name)
     }
 
 }
 
 class ParentWorldMetadataBuffer: MetadataKeyValueBuffer {
+
     override fun read(binaryTag: BinaryTag<*>): MetadataKeyValue<*> {
         return ParentWorldMetadata(WorldRepository.getWorld(binaryTag.value as String))
     }

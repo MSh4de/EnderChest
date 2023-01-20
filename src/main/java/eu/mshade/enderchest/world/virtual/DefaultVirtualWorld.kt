@@ -7,6 +7,7 @@ import eu.mshade.enderchest.world.ChunkSafeguard
 import eu.mshade.enderchest.world.EmptyChunk
 import eu.mshade.enderframe.EnderFrame
 import eu.mshade.enderframe.entity.Entity
+import eu.mshade.enderframe.entity.EntityKey
 import eu.mshade.enderframe.entity.EntityType
 import eu.mshade.enderframe.item.MaterialKey
 import eu.mshade.enderframe.metadata.MetadataKeyValueBucket
@@ -156,7 +157,7 @@ class DefaultVirtualWorld(
         TODO("Not yet implemented")
     }
 
-    override fun spawnEntity(entityType: EntityType?, location: Location?): Entity {
+    override fun spawnEntity(entityType: EntityKey?, location: Location?): Entity {
         TODO("Not yet implemented")
     }
 

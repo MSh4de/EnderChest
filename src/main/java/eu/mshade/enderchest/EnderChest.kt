@@ -11,13 +11,9 @@ import eu.mshade.enderchest.axolotl.listener.HandshakeAxolotlListener
 import eu.mshade.enderchest.axolotl.listener.MessageAxolotlListener
 import eu.mshade.enderchest.listener.*
 import eu.mshade.enderchest.listener.packet.*
-import eu.mshade.enderchest.marshal.common.*
 import eu.mshade.enderchest.marshal.item.LoreItemStackMetadataBuffer
 import eu.mshade.enderchest.marshal.item.NameItemStackMetadataBuffer
 import eu.mshade.enderchest.marshal.metadata.*
-import eu.mshade.enderchest.marshal.world.DifficultyBinaryTagMarshal
-import eu.mshade.enderchest.marshal.world.DimensionBinaryTagMarshal
-import eu.mshade.enderchest.marshal.world.LevelTypeBinaryTagMarshal
 import eu.mshade.enderchest.world.ChunkSafeguard
 import eu.mshade.enderchest.world.DefaultChunkGenerator
 import eu.mshade.enderchest.world.SchematicLoader
@@ -25,7 +21,6 @@ import eu.mshade.enderchest.world.WorldManager
 import eu.mshade.enderchest.world.virtual.VirtualWorldManager
 import eu.mshade.enderframe.EnderFrame
 import eu.mshade.enderframe.GameMode
-import eu.mshade.enderframe.entity.CreeperState
 import eu.mshade.enderframe.entity.Player
 import eu.mshade.enderframe.entity.VillagerType
 import eu.mshade.enderframe.event.*
@@ -34,7 +29,6 @@ import eu.mshade.enderframe.item.ItemStackMetadataKey
 import eu.mshade.enderframe.metadata.MetadataKeyValueBufferRegistry
 import eu.mshade.enderframe.item.Material
 import eu.mshade.enderframe.item.MaterialKey.DefaultMaterialKey
-import eu.mshade.enderframe.metadata.MetadataKeyValueBucket
 import eu.mshade.enderframe.mojang.GameProfile
 import eu.mshade.enderframe.mojang.NamespacedKey
 import eu.mshade.enderframe.mojang.Property
@@ -226,15 +220,6 @@ object EnderChest {
         metadataKeyValueBufferRegistry.register(ItemStackMetadataKey.LORE, LoreItemStackMetadataBuffer())
 
 
-        binaryTagDriver.registerMarshal(GameMode::class.java, DefaultGameModeMarshal())
-        binaryTagDriver.registerMarshal(GameProfile::class.java, DefaultGameProfileMarshal())
-        binaryTagDriver.registerMarshal(Property::class.java, DefaultPropertyMarshal())
-        binaryTagDriver.registerMarshal(VillagerType::class.java, DefaultVillagerTypeMarshal())
-        binaryTagDriver.registerMarshal(Rotation::class.java, DefaultRotationMarshal())
-        binaryTagDriver.registerMarshal(Difficulty::class.java, DifficultyBinaryTagMarshal())
-        binaryTagDriver.registerMarshal(Dimension::class.java, DimensionBinaryTagMarshal())
-        binaryTagDriver.registerMarshal(LevelType::class.java, LevelTypeBinaryTagMarshal())
-
 
         chunkSafeguard.start()
         LOGGER.info("ChunkSafeGuard started")
@@ -244,16 +229,17 @@ object EnderChest {
 
         val mapper = ObjectMapper()
         val materialsId = mapper.readTree(this::class.java.getResourceAsStream("/materials.json"))
-        materialsId.fields().forEach { (key, value) ->
-            val material = Material.fromNamespacedKey(NamespacedKey.minecraft(key))
-            if(material == null){
+        LOGGER.info("Loaded materials.json")
+        Material.getRegisteredNamespacedKeys().forEach { key ->
+            val id = materialsId[key.key]
+            if (id == null) {
                 LOGGER.warn("Material $key not found")
                 return@forEach
             }
-            (material as DefaultMaterialKey).id = value.asInt()
+            val material = Material.fromNamespacedKey(key)
+            (material as DefaultMaterialKey).id = id.asInt()
             Material.registerMaterialKey(material)
         }
-        
 
         val world = worldManager.createWorld("world") { metadataKeyValueBucket ->
             metadataKeyValueBucket.setMetadataKeyValue(SeedWorldMetadata(-4975988339999789512L))

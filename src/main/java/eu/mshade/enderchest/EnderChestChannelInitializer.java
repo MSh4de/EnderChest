@@ -19,7 +19,7 @@ public class EnderChestChannelInitializer extends ChannelInitializer<Channel> {
     @Override
     protected void initChannel(Channel ch) throws Exception {
         minecraftProtocolPipeline.setProtocol(ch, tempMinecraftProtocol);
-        minecraftProtocolPipeline.setMinecraftSession(ch, tempMinecraftProtocol.getSessionWrapper(ch));
+        minecraftProtocolPipeline.setMinecraftSession(ch, tempMinecraftProtocol.getMinecraftSession(ch));
         ch.pipeline()
                 //.addLast("legacy_ping", new LegacyPingHandler())
                 .addLast("encryption", VoidChannelHandlerAdapter.INSTANCE)

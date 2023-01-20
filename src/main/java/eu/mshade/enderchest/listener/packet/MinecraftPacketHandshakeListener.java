@@ -34,7 +34,7 @@ public class MinecraftPacketHandshakeListener implements EventListener<Minecraft
             if (minecraftProtocolVersion != MinecraftProtocolVersion.UNKNOWN) {
                 MinecraftProtocol minecraftProtocol = enderChest.getMinecraftProtocolRepository().getProtocol(minecraftProtocolVersion);
                 if (minecraftProtocol != null) {
-                    minecraftSession = minecraftProtocol.getSessionWrapper(channel);
+                    minecraftSession = minecraftProtocol.getMinecraftSession(channel);
                     minecraftProtocolPipeline.setMinecraftSession(channel, minecraftSession);
                     minecraftSession.toggleProtocol(minecraftProtocol);
                     minecraftSession.toggleProtocolStatus(MinecraftProtocolStatus.LOGIN);
