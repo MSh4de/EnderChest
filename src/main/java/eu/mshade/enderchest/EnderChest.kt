@@ -20,18 +20,13 @@ import eu.mshade.enderchest.world.SchematicLoader
 import eu.mshade.enderchest.world.WorldManager
 import eu.mshade.enderchest.world.virtual.VirtualWorldManager
 import eu.mshade.enderframe.EnderFrame
-import eu.mshade.enderframe.GameMode
 import eu.mshade.enderframe.entity.Player
-import eu.mshade.enderframe.entity.VillagerType
 import eu.mshade.enderframe.event.*
 import eu.mshade.enderframe.inventory.InventoryTracker
 import eu.mshade.enderframe.item.ItemStackMetadataKey
-import eu.mshade.enderframe.metadata.MetadataKeyValueBufferRegistry
 import eu.mshade.enderframe.item.Material
 import eu.mshade.enderframe.item.MaterialKey.DefaultMaterialKey
-import eu.mshade.enderframe.mojang.GameProfile
-import eu.mshade.enderframe.mojang.NamespacedKey
-import eu.mshade.enderframe.mojang.Property
+import eu.mshade.enderframe.metadata.MetadataKeyValueBufferRegistry
 import eu.mshade.enderframe.mojang.chat.*
 import eu.mshade.enderframe.packetevent.*
 import eu.mshade.enderframe.protocol.MinecraftEncryption
@@ -42,10 +37,8 @@ import eu.mshade.enderframe.world.block.BlockMetadataType
 import eu.mshade.enderframe.world.chunk.Chunk
 import eu.mshade.enderman.EndermanMinecraftProtocol
 import eu.mshade.mwork.MWork
-
 import eu.mshade.mwork.binarytag.segment.SegmentBinaryTag
 import eu.mshade.stone.StoneAxolotlProtocol
-
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelOption
 import io.netty.channel.EventLoopGroup
@@ -91,6 +84,21 @@ object EnderChest {
         LOGGER.info("Starting EnderChest")
         childGroup = NioEventLoopGroup(Runtime.getRuntime().availableProcessors())
         parentGroup = NioEventLoopGroup(Runtime.getRuntime().availableProcessors())
+
+        val mapper = ObjectMapper()
+        val materialsId = mapper.readTree(this::class.java.getResourceAsStream("/materials.json"))
+        LOGGER.info("Loading ids from materials.json")
+        Material.getRegisteredNamespacedKeys().forEach { key ->
+            val id = materialsId[key.key]
+            if (id == null) {
+                LOGGER.warn("Material $key not found")
+                return@forEach
+            }
+            val material = Material.fromNamespacedKey(key)
+            (material as DefaultMaterialKey).id = id.asInt()
+            Material.registerMaterialKey(material)
+        }
+        LOGGER.info("Loaded ids from materials.json")
 
         //register minecraft protocol 1.8 to 1.19
         minecraftProtocolRepository.register(EndermanMinecraftProtocol())
@@ -215,6 +223,7 @@ object EnderChest {
         metadataKeyValueBufferRegistry.register(BlockMetadataType.CHECK_DECAY, CheckDecayBlockMetadataBuffer())
         metadataKeyValueBufferRegistry.register(BlockMetadataType.SEAMLESS, SeamlessBlockMetadataBuffer())
         metadataKeyValueBufferRegistry.register(BlockMetadataType.MULTIPLE_FACE, MultipleFaceBlockMetadataBuffer())
+        metadataKeyValueBufferRegistry.register(BlockMetadataType.SLAB_TYPE, SlabTypeBlockMetadataBuffer())
 
         metadataKeyValueBufferRegistry.register(ItemStackMetadataKey.NAME, NameItemStackMetadataBuffer())
         metadataKeyValueBufferRegistry.register(ItemStackMetadataKey.LORE, LoreItemStackMetadataBuffer())
@@ -227,19 +236,6 @@ object EnderChest {
         worldManager = WorldManager(binaryTagDriver, chunkSafeguard, tickBus)
         virtualWorldManager = VirtualWorldManager(chunkSafeguard, tickBus)
 
-        val mapper = ObjectMapper()
-        val materialsId = mapper.readTree(this::class.java.getResourceAsStream("/materials.json"))
-        LOGGER.info("Loaded materials.json")
-        Material.getRegisteredNamespacedKeys().forEach { key ->
-            val id = materialsId[key.key]
-            if (id == null) {
-                LOGGER.warn("Material $key not found")
-                return@forEach
-            }
-            val material = Material.fromNamespacedKey(key)
-            (material as DefaultMaterialKey).id = id.asInt()
-            Material.registerMaterialKey(material)
-        }
 
         val world = worldManager.createWorld("world") { metadataKeyValueBucket ->
             metadataKeyValueBucket.setMetadataKeyValue(SeedWorldMetadata(-4975988339999789512L))

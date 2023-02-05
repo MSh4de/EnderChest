@@ -24,7 +24,7 @@ public class DefaultChunkGenerator implements ChunkGenerator {
     public void generate(Chunk chunk) {
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                Block block = Material.GRASS.toBlock();
+                Block block = Material.GRASS_BLOCK.toBlock();
                     for (int i = 0; i < 4; i++) {
                         chunk.setBlock(x, i, z, block);
                     }

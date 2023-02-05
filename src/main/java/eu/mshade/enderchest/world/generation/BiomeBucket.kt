@@ -98,7 +98,7 @@ class PlainsBiome(seed: Long): Biome(seed, 12){
 
 
         temperatures.add(Material.DIRT.toBlock())
-        temperatures.add(Material.GRASS.toBlock())
+        temperatures.add(Material.GRASS_BLOCK.toBlock())
         temperatures.add(Material.STONE.toBlock())
     }
 
@@ -128,7 +128,7 @@ class IslandBiome(seed: Long): Biome(seed, 8) {
         roughness = 2.0
 
         temperatures.add(Material.SAND.toBlock())
-        temperatures.add(Material.GRASS.toBlock())
+        temperatures.add(Material.GRASS_BLOCK.toBlock())
     }
 }
 

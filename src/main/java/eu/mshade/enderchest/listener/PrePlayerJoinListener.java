@@ -3,11 +3,13 @@ package eu.mshade.enderchest.listener;
 import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderchest.axolotl.AxololtConnection;
 import eu.mshade.enderchest.entity.DefaultPlayer;
+import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
 import eu.mshade.enderframe.entity.metadata.EntityMetadataKey;
 import eu.mshade.enderframe.entity.metadata.SkinPartEntityMetadata;
+import eu.mshade.enderframe.event.PlayerJoinEvent;
 import eu.mshade.enderframe.event.PrePlayerJoinEvent;
 import eu.mshade.enderframe.inventory.Inventory;
 import eu.mshade.enderframe.inventory.InventoryTracker;
@@ -97,6 +99,9 @@ public class PrePlayerJoinListener implements EventListener<PrePlayerJoinEvent> 
 
 
         LOGGER.info(String.format("%s join server", player.getGameProfile().getName()));
+
+        PlayerJoinEvent playerJoinEvent = new PlayerJoinEvent(player);
+        EnderFrame.get().getEnderFrameEventBus().publish(playerJoinEvent);
 
     }
 }

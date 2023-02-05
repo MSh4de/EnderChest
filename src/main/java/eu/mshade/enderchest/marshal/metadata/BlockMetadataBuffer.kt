@@ -151,3 +151,15 @@ class MultipleFaceBlockMetadataBuffer: MetadataKeyValueBuffer{
 
 }
 
+class SlabTypeBlockMetadataBuffer: MetadataKeyValueBuffer{
+
+    override fun read(binaryTag: BinaryTag<*>): MetadataKeyValue<*> {
+        return SlabTypeBlockMetadata(SlabType.fromId(binaryTag.value as Int))
+    }
+
+    override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
+        return IntBinaryTag((metadataKeyValue as SlabTypeBlockMetadata).metadataValue.ordinal)
+    }
+
+}
+

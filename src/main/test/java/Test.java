@@ -25,7 +25,7 @@ public class Test {
         for (int i = 0; i < blocks.length; i++) {
             byte block = blocks[i];
             MaterialKey materialKey = MaterialKey.from(block);
-            MaterialKey reverse = endermanMaterialKeyWrapper.reverse(materialKey);
+            MaterialKey reverse = endermanMaterialKeyWrapper.reverseMap(materialKey);
             if (reverse == null){
                 unknown++;
                 System.out.println("Unknown block: " + materialKey);

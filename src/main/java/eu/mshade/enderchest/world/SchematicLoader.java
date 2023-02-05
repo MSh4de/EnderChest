@@ -5,7 +5,7 @@ import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.item.Material;
 import eu.mshade.enderframe.item.MaterialKey;
 import eu.mshade.enderframe.world.block.Block;
-import eu.mshade.enderframe.world.block.BlockTransformerRepository;
+import eu.mshade.enderframe.world.block.BlockTransformerController;
 import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderframe.world.Vector;
 import eu.mshade.enderframe.world.World;
@@ -38,7 +38,7 @@ public class SchematicLoader {
     }
 
     public static void placeSchematic(World world, InputStream inputStream, Vector start) {
-        BlockTransformerRepository blockTransformerRepository = endermanProtocol.getBlockTransformerRepository();
+        BlockTransformerController blockTransformerController = endermanProtocol.getBlockTransformerController();
         Block STONE = Material.STONE.toBlock();
         CompletableFuture.runAsync(() -> {
 
@@ -76,7 +76,7 @@ public class SchematicLoader {
                             }
                             Block reverse;
                             if (materialKey != Material.AIR) {
-                                reverse = blockTransformerRepository.reverse(materialKey);
+                                reverse = blockTransformerController.reverse(materialKey);
 
                             if (reverse == null) {
                                 unknown++;

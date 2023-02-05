@@ -22,6 +22,8 @@ public class MinecraftPacketClickInventoryListener implements EventListener<Mine
         ClickType clickType = event.getClickType();
         int slot = event.getSlot();
 
+
+
         switch (clickType) {
             case LEFT -> {
                 if (inventoryClickStore.getPickedItemStack() == null) {
@@ -227,9 +229,6 @@ public class MinecraftPacketClickInventoryListener implements EventListener<Mine
             }
             case CREATIVE -> {
                 if (player.getGameMode() == GameMode.CREATIVE) {
-                    if (event.getItemStack() == null) {
-                        System.out.println("slot: " + slot);
-                    }
                     inventory.setItemStack(slot, event.getItemStack());
                 }
             }

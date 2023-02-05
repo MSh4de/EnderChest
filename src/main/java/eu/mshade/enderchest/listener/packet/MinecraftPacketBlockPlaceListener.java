@@ -4,10 +4,13 @@ import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.event.BlockPlaceEvent;
 import eu.mshade.enderframe.item.*;
+import eu.mshade.enderframe.metadata.MetadataKeyValue;
+import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
 import eu.mshade.enderframe.packetevent.MinecraftPacketBlockPlaceEvent;
 import eu.mshade.enderframe.world.Vector;
 import eu.mshade.enderframe.world.World;
 import eu.mshade.enderframe.world.block.*;
+import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
 import eu.mshade.mwork.event.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,9 +46,22 @@ public class MinecraftPacketBlockPlaceListener implements EventListener<Minecraf
 
         if (material.equals(Material.AIR)){
             blockPosition = event.getBlockPosition();
+            Block block = world.getBlock(blockPosition);
 
+/*            MetadataKeyValueBucket metadataKeyValueBucket = block.getMetadataKeyValueBucket();
 
-            System.out.println(world.getBlock(blockPosition).getMetadataKeyValueBucket().toPrettyString(0));
+            MetadataKeyValue<?> metadataKeyValue = metadataKeyValueBucket.getMetadataKeyValue(BlockMetadataType.INSTANCE.getEXTRA());
+            CompoundBinaryTag compoundBinaryTag;
+            if (metadataKeyValue == null){
+                compoundBinaryTag = new CompoundBinaryTag();
+                metadataKeyValueBucket.setMetadataKeyValue(new ExtraBlockMetadata(compoundBinaryTag));
+            } else {
+                compoundBinaryTag = (CompoundBinaryTag) metadataKeyValue.getMetadataValue();
+            }
+
+            compoundBinaryTag.putInt("counter", compoundBinaryTag.getInt("counter") + 1);*/
+
+            System.out.println(block.getMetadataKeyValueBucket().toPrettyString(0));
             return;
         }
 
@@ -55,7 +71,7 @@ public class MinecraftPacketBlockPlaceListener implements EventListener<Minecraf
 
             Block block = material.toBlock();
 
-            BlockRule blockRule = this.blockRuleRepository.getBlockRule(block.getMaterialKey().getMaterialCategoryKey());
+            BlockRule blockRule = this.blockRuleRepository.getBlockRule(block.getMaterialKey().getTag());
             if (blockRule != null) {
                 block = blockRule.apply(player.getLocation(), blockPosition, blockFace, event.getCursorPosition(), block);
             }
@@ -63,13 +79,6 @@ public class MinecraftPacketBlockPlaceListener implements EventListener<Minecraf
             if (block == null) block = Material.AIR.toBlock();
 
 
-/*            MetadataKeyValueBucket metadataKeyValueBucket = block.getMetadataKeyValueBucket();
-            CompoundBinaryTag extra = new CompoundBinaryTag();
-            extra.putString("bvn","Wesh l'equipe comment ça va ??");
-            extra.putString("owner", player.getName());
-            extra.putLong("timeSet", System.currentTimeMillis());
-
-            metadataKeyValueBucket.setMetadataKeyValue(new ExtraBlockMetadata(extra));*/
 
 
             BlockPlaceEvent blockPlaceEvent = new BlockPlaceEvent(player, block, blockPosition);
