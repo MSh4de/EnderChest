@@ -1,0 +1,4 @@
+package interpolation
+
+class Generation {
+}

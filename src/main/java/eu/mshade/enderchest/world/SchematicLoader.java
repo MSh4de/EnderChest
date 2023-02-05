@@ -5,18 +5,18 @@ import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.item.Material;
 import eu.mshade.enderframe.item.MaterialKey;
 import eu.mshade.enderframe.world.block.Block;
-import eu.mshade.enderframe.world.block.BlockTransformerRepository;
+import eu.mshade.enderframe.world.block.BlockTransformerController;
 import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderframe.world.Vector;
 import eu.mshade.enderframe.world.World;
-import eu.mshade.enderman.EndermanProtocol;
+import eu.mshade.enderman.EndermanMinecraftProtocol;
 import eu.mshade.mwork.MWork;
 import eu.mshade.mwork.binarytag.BinaryTagDriver;
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
+import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -24,22 +24,31 @@ import java.util.zip.GZIPInputStream;
 
 public class SchematicLoader {
 
-    private static EndermanProtocol endermanProtocol = new EndermanProtocol();
+    private static EndermanMinecraftProtocol endermanProtocol = new EndermanMinecraftProtocol();
     private static Logger LOGGER = LoggerFactory.getLogger(SchematicLoader.class);
     private static final Block AIR = Material.AIR.toBlock();
+    public static File SCHEMATIC_FOLDER = new File(System.getProperty("user.dir") , "schematics");
+
+    public static void placeSchematic(World world, String schematic, Vector start){
+        try {
+            placeSchematic(world, new FileInputStream(new File(SCHEMATIC_FOLDER, schematic)), start);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static void placeSchematic(World world, InputStream inputStream, Vector start) {
-        BlockTransformerRepository blockTransformerRepository = endermanProtocol.getBlockTransformerRepository();
+        BlockTransformerController blockTransformerController = endermanProtocol.getBlockTransformerController();
         Block STONE = Material.STONE.toBlock();
         CompletableFuture.runAsync(() -> {
 
-            BinaryTagDriver binaryTagDriver = MWork.get().getBinaryTagDriver();
+            BinaryTagDriver binaryTagDriver = MWork.INSTANCE.getBinaryTagDriver();
             try {
                 Agent schematicAgent = Agent.from("SCHEMATIC");
 
                 long startTime = System.currentTimeMillis();
                 GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
-                CompoundBinaryTag compoundBinaryTag = binaryTagDriver.readCompoundBinaryTag(gzipInputStream);
+                CompoundBinaryTag compoundBinaryTag = binaryTagDriver.readCompoundBinaryTag(new ByteArrayInputStream(gzipInputStream.readAllBytes()));
                 short width = compoundBinaryTag.getShort("Width");
                 short length = compoundBinaryTag.getShort("Length");
                 short height = compoundBinaryTag.getShort("Height");
@@ -67,7 +76,7 @@ public class SchematicLoader {
                             }
                             Block reverse;
                             if (materialKey != Material.AIR) {
-                                reverse = blockTransformerRepository.reverse(materialKey);
+                                reverse = blockTransformerController.reverse(materialKey);
 
                             if (reverse == null) {
                                 unknown++;
@@ -108,26 +117,20 @@ public class SchematicLoader {
 
                     chunk.setBlock(chunk.getX() + middleX, maxY, chunk.getZ() + middleZ, Material.RED_WOOL);*/
 
-                    chunk.notify(agent -> {
-                        if (agent instanceof Player player) {
-                            player.getSessionWrapper().sendUnloadChunk(chunk);
-                        }
+                    chunk.notify(Player.class, player -> {
+                        player.getMinecraftSession().sendUnloadChunk(chunk);
                     });
                 });
 
                 updatedChunks.forEach(chunk -> {
-
-                    chunk.notify(agent -> {
-                        if (agent instanceof Player player) {
-                            player.getSessionWrapper().sendChunk(chunk);
-                        }
+                    chunk.notify(Player.class, player -> {
+                        player.getMinecraftSession().sendChunk(chunk);
                     });
-
                     schematicAgent.leaveWatch(chunk);
                 });
 
 
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 e.printStackTrace();
             }
 

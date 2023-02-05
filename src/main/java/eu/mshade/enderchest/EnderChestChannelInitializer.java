@@ -1,15 +1,12 @@
 package eu.mshade.enderchest;
 
-import eu.mshade.enderchest.protocol.PacketAccuracy;
-import eu.mshade.enderchest.protocol.VoidHandler;
-import eu.mshade.enderframe.protocol.PacketChannelInboundHandlerAdapter;
-import eu.mshade.enderframe.protocol.PacketCodec;
-import eu.mshade.enderframe.protocol.Protocol;
-import eu.mshade.enderframe.protocol.ProtocolPipeline;
-import eu.mshade.enderframe.protocol.temp.TempProtocol;
+import eu.mshade.enderframe.protocol.MinecraftPacketAccuracy;
+import eu.mshade.enderframe.protocol.MinecraftPacketCodec;
+import eu.mshade.enderframe.protocol.MinecraftProtocol;
+import eu.mshade.enderframe.protocol.MinecraftProtocolPipeline;
+import eu.mshade.enderframe.protocol.temp.TempMinecraftProtocol;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
-import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 
 import java.util.concurrent.TimeUnit;
@@ -17,22 +14,22 @@ import java.util.concurrent.TimeUnit;
 
 public class EnderChestChannelInitializer extends ChannelInitializer<Channel> {
 
-    private final ProtocolPipeline protocolPipeline = ProtocolPipeline.get();
-    private final Protocol tempProtocol = TempProtocol.Companion.getINSTANCE();
+    private final MinecraftProtocolPipeline minecraftProtocolPipeline = MinecraftProtocolPipeline.get();
+    private final MinecraftProtocol tempMinecraftProtocol = TempMinecraftProtocol.Companion.getINSTANCE();
     @Override
     protected void initChannel(Channel ch) throws Exception {
-        protocolPipeline.setProtocol(ch, tempProtocol);
-        protocolPipeline.setSessionWrapper(ch, tempProtocol.getSessionWrapper(ch));
+        minecraftProtocolPipeline.setProtocol(ch, tempMinecraftProtocol);
+        minecraftProtocolPipeline.setMinecraftSession(ch, tempMinecraftProtocol.getMinecraftSession(ch));
         ch.pipeline()
                 //.addLast("legacy_ping", new LegacyPingHandler())
-                .addLast("encryption", VoidHandler.INSTANCE)
-                .addLast("accuracy", new PacketAccuracy())
-                .addLast("compression", VoidHandler.INSTANCE)
-                .addLast("codecs", new PacketCodec())
+                .addLast("encryption", VoidChannelHandlerAdapter.INSTANCE)
+                .addLast("accuracy", new MinecraftPacketAccuracy())
+                .addLast("compression", VoidChannelHandlerAdapter.INSTANCE)
+                .addLast("codecs", new MinecraftPacketCodec())
                 .addLast("timeout", new ReadTimeoutHandler(30, TimeUnit.SECONDS))
                 //.addLast("readtimeout", new ReadTimeoutHandler(20))
                 //.addLast("writeidletimeout", new IdleStateHandler(0, P, 0))
-                .addLast("handler", new PacketChannelInboundHandlerAdapter(ch));
+                .addLast("handler", new EnderChestChannelInboundHandlerAdapter(ch));
         /*
         pipeline.addLast("timeout", new ReadTimeoutHandler(0, TimeUnit.MILLISECONDS));
         pipeline.addLast("frame_decoder", new VarIntFrameDecoder());

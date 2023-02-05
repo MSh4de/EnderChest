@@ -12,7 +12,7 @@ public class Test {
     public static void main(String[] args) throws InterruptedException, IOException {
         BinaryTagDriver binaryTagDriver = new BinaryTagDriver();
         GZIPInputStream gzipInputStream = new GZIPInputStream(new FileInputStream("C:/Users/reala/Downloads/spawn-e1930.schematic"));
-        CompoundBinaryTag compoundBinaryTag = binaryTagDriver.readCompoundBinaryTag(gzipInputStream);
+        CompoundBinaryTag compoundBinaryTag = binaryTagDriver.readCompoundBinaryTag(new ByteArrayInputStream(gzipInputStream.readAllBytes()));
         System.out.println(compoundBinaryTag.getValue().keySet());
         System.out.println(compoundBinaryTag.getBinaryTag("Platform"));
         System.out.println(compoundBinaryTag.getBinaryTag("Materials"));
@@ -25,7 +25,7 @@ public class Test {
         for (int i = 0; i < blocks.length; i++) {
             byte block = blocks[i];
             MaterialKey materialKey = MaterialKey.from(block);
-            MaterialKey reverse = endermanMaterialKeyWrapper.reverse(materialKey);
+            MaterialKey reverse = endermanMaterialKeyWrapper.reverseMap(materialKey);
             if (reverse == null){
                 unknown++;
                 System.out.println("Unknown block: " + materialKey);

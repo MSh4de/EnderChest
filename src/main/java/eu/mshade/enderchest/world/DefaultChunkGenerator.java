@@ -2,7 +2,7 @@ package eu.mshade.enderchest.world;
 
 import eu.mshade.enderchest.world.noise.SimplexOctaveGenerator;
 import eu.mshade.enderframe.item.Material;
-import eu.mshade.enderframe.metadata.world.WorldMetadataType;
+import eu.mshade.enderframe.world.WorldMetadataType;
 import eu.mshade.enderframe.world.block.Block;
 import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderframe.world.chunk.ChunkGenerator;
@@ -15,7 +15,7 @@ public class DefaultChunkGenerator implements ChunkGenerator {
 
     public DefaultChunkGenerator(World world) {
         this.world = world;
-        Long seed = world.getMetadataKeyValueBucket().getValueOfMetadataKeyValue(WorldMetadataType.SEED, Long.class);
+        Long seed = (Long) world.getMetadataKeyValueBucket().getMetadataKeyValue(WorldMetadataType.SEED).getMetadataValue();
         this.simplexOctaveGenerator = new SimplexOctaveGenerator(seed, 8);
         this.simplexOctaveGenerator.setScale(0.005D);
     }
@@ -24,7 +24,7 @@ public class DefaultChunkGenerator implements ChunkGenerator {
     public void generate(Chunk chunk) {
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                Block block = Material.GRASS.toBlock();
+                Block block = Material.GRASS_BLOCK.toBlock();
                     for (int i = 0; i < 4; i++) {
                         chunk.setBlock(x, i, z, block);
                     }

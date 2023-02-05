@@ -1,13 +1,14 @@
 package eu.mshade.enderchest.marshal.metadata
 
 import eu.mshade.enderframe.metadata.MetadataKeyValue
+import eu.mshade.enderframe.metadata.MetadataKeyValueBuffer
 import eu.mshade.enderframe.world.block.*
-import eu.mshade.mwork.binarytag.BinaryTag
-import eu.mshade.mwork.binarytag.entity.BooleanBinaryTag
+import eu.mshade.mwork.binarytag.*
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag
-import eu.mshade.mwork.binarytag.entity.IntegerBinaryTag
+import eu.mshade.mwork.binarytag.entity.ListBinaryTag
+import java.util.StringJoiner
 
-class ExtraBlockMetadataBuffer: MetadataKeyValueBuffer{
+class ExtraBlockMetadataBuffer: MetadataKeyValueBuffer {
 
     override fun read(binaryTag: BinaryTag<*>): MetadataKeyValue<*> {
         return ExtraBlockMetadata(binaryTag as CompoundBinaryTag)
@@ -26,7 +27,7 @@ class FaceBlockMetadataBuffer: MetadataKeyValueBuffer{
     }
 
     override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
-        return IntegerBinaryTag((metadataKeyValue as FaceBlockMetadata).metadataValue.id)
+        return IntBinaryTag((metadataKeyValue as FaceBlockMetadata).metadataValue.id)
     }
 
 }
@@ -38,7 +39,7 @@ class HalfBlockMetadataBuffer: MetadataKeyValueBuffer{
     }
 
     override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
-        return IntegerBinaryTag((metadataKeyValue as HalfBlockMetadata).metadataValue.id)
+        return IntBinaryTag((metadataKeyValue as HalfBlockMetadata).metadataValue.id)
     }
 
 }
@@ -50,7 +51,7 @@ class ShapeBlockMetadataBuffer: MetadataKeyValueBuffer{
     }
 
     override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
-        return IntegerBinaryTag((metadataKeyValue as ShapeBlockMetadata).metadataValue.id)
+        return IntBinaryTag((metadataKeyValue as ShapeBlockMetadata).metadataValue.id)
     }
 
 }
@@ -62,7 +63,7 @@ class AxisBlockMetadataBuffer: MetadataKeyValueBuffer{
     }
 
     override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
-        return IntegerBinaryTag((metadataKeyValue as AxisBlockMetadata).metadataValue.id)
+        return IntBinaryTag((metadataKeyValue as AxisBlockMetadata).metadataValue.id)
     }
 
 }
@@ -79,6 +80,7 @@ class PoweredBlockMetadataBuffer: MetadataKeyValueBuffer{
 
 }
 
+
 class PowerBlockMetadataBuffer: MetadataKeyValueBuffer{
 
     override fun read(binaryTag: BinaryTag<*>): MetadataKeyValue<*> {
@@ -86,7 +88,7 @@ class PowerBlockMetadataBuffer: MetadataKeyValueBuffer{
     }
 
     override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
-        return IntegerBinaryTag((metadataKeyValue as PowerBlockMetadata).metadataValue)
+        return IntBinaryTag((metadataKeyValue as PowerBlockMetadata).metadataValue)
     }
 
 }
@@ -126,3 +128,38 @@ class SeamlessBlockMetadataBuffer: MetadataKeyValueBuffer{
     }
 
 }
+
+
+class MultipleFaceBlockMetadataBuffer: MetadataKeyValueBuffer{
+
+    override fun read(binaryTag: BinaryTag<*>): MetadataKeyValue<*> {
+        binaryTag as ListBinaryTag
+        val list = mutableSetOf<BlockFace>()
+        for (binaryTag1 in binaryTag.value) {
+            list.add(BlockFace.fromId(binaryTag1.value as Int))
+        }
+        return MultipleFaceBlockMetadata(list)
+    }
+
+    override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
+        val list = mutableListOf<BinaryTag<*>>()
+        for (blockFace in (metadataKeyValue as MultipleFaceBlockMetadata).metadataValue) {
+            list.add(IntBinaryTag(blockFace.id))
+        }
+        return ListBinaryTag(BinaryTagType.INT, list)
+    }
+
+}
+
+class SlabTypeBlockMetadataBuffer: MetadataKeyValueBuffer{
+
+    override fun read(binaryTag: BinaryTag<*>): MetadataKeyValue<*> {
+        return SlabTypeBlockMetadata(SlabType.fromId(binaryTag.value as Int))
+    }
+
+    override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
+        return IntBinaryTag((metadataKeyValue as SlabTypeBlockMetadata).metadataValue.ordinal)
+    }
+
+}
+
