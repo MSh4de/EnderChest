@@ -35,7 +35,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Main-Class>eu.mshade.enderchest.EnderChest</Main-Class>
+                            <Main-Class>eu.mshade.enderchest.EnderChestKt</Main-Class>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -61,7 +61,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <jvmTarget>1.8</jvmTarget>
+                    <jvmTarget>17</jvmTarget>
                 </configuration>
             </plugin>
             <plugin>
