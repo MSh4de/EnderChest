@@ -42,7 +42,7 @@ public class SchematicLoader {
         Block STONE = Material.STONE.toBlock();
         CompletableFuture.runAsync(() -> {
 
-            BinaryTagDriver binaryTagDriver = MWork.get().getBinaryTagDriver();
+            BinaryTagDriver binaryTagDriver = MWork.INSTANCE.getBinaryTagDriver();
             try {
                 Agent schematicAgent = Agent.from("SCHEMATIC");
 

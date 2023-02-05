@@ -54,7 +54,7 @@ public class MinecraftPacketEncryptionListener implements EventListener<Minecraf
                 return;
             }
 
-            JsonNode jsonNode = MWork.get().getObjectMapper().readTree(body);
+            JsonNode jsonNode = MWork.INSTANCE.getObjectMapper().readTree(body);
             String id = jsonNode.get("id").asText();
             UUID uuid = UUID.fromString(id.substring(0, 8)
                     + "-" + id.substring(8, 12)

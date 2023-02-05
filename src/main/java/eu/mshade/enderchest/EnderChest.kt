@@ -104,7 +104,7 @@ object EnderChest {
         minecraftProtocolRepository.register(EndermanMinecraftProtocol())
 
         val textComponentSerializer = TextComponentSerializer()
-        val objectMapper = MWork.get().objectMapper
+        val objectMapper = MWork.getObjectMapper()
         val simpleModule = SimpleModule()
         simpleModule.addSerializer(TextComponentEntry::class.java, textComponentSerializer)
         simpleModule.addSerializer(TextComponent::class.java, textComponentSerializer)
