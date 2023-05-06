@@ -28,16 +28,10 @@ public class MinecraftPacketEncryptionListener implements EventListener<Minecraf
     private final static Logger LOGGER = LoggerFactory.getLogger(MinecraftPacketEncryptionListener.class);
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
-    private EnderChest enderChest;
-
-    public MinecraftPacketEncryptionListener(EnderChest enderChest) {
-        this.enderChest = enderChest;
-    }
-
     @Override
     public void onEvent(MinecraftPacketEncryptionEvent event) {
         MinecraftSession minecraftSession = event.getMinecraftSession();
-        MinecraftEncryption minecraftEncryption = enderChest.getMinecraftEncryption();
+        MinecraftEncryption minecraftEncryption = EnderChest.INSTANCE.getMinecraftEncryption();
 
         try {
             SecretKey secretKey = minecraftEncryption.getSecretKey(event.getSharedSecret());
@@ -46,7 +40,7 @@ public class MinecraftPacketEncryptionListener implements EventListener<Minecraf
 
             HttpRequest httpRequest = HttpRequest.newBuilder()
                     .GET()
-                    .uri(new URI("https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" + minecraftSession.getGameProfile().getName() + "&serverId=" + hashServerId))
+                    .uri(new URI("https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" + minecraftSession.gameProfile.getName() + "&serverId=" + hashServerId))
                     .build();
             String body = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString()).body();
             if (body.isEmpty() || body.isBlank()) {
@@ -70,9 +64,9 @@ public class MinecraftPacketEncryptionListener implements EventListener<Minecraf
             });
 
             GameProfile gameProfile = new GameProfile(uuid, jsonNode.get("name").asText(), properties);
-            minecraftSession.setGameProfile(gameProfile);
+            minecraftSession.gameProfile = gameProfile;
 
-            EnderFrame.get().getEnderFrameEventBus().publish(new PrePlayerJoinEvent(minecraftSession));
+            EnderFrame.get().getMinecraftEvents().publish(new PrePlayerJoinEvent(minecraftSession));
         }catch (Exception e){
             LOGGER.error("", e);
         }

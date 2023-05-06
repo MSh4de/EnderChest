@@ -1,6 +1,7 @@
 package eu.mshade.enderchest.listener.packet;
 
 import eu.mshade.enderframe.entity.Player;
+import eu.mshade.enderframe.entity.metadata.CrouchedEntityMetadata;
 import eu.mshade.enderframe.entity.metadata.SprintingEntityMetadata;
 import eu.mshade.enderframe.metadata.MetadataKeyValueBucket;
 import eu.mshade.enderframe.packetevent.MinecraftPacketEntityActionEvent;
@@ -11,43 +12,24 @@ public class MinecraftPacketEntityActionListener implements EventListener<Minecr
     @Override
     public void onEvent(MinecraftPacketEntityActionEvent event) {
         Player player = event.getPlayer();
-        MetadataKeyValueBucket metadataKeyValueBucket = player.getMetadataKeyValueBucket();
+        MetadataKeyValueBucket metadata = player.getMetadata();
 
 
         switch (event.getActionType()){
             case START_SNEAKING:
-                player.setSneaking(true);
+                metadata.setMetadataKeyValue(new CrouchedEntityMetadata(true));
                 break;
             case STOP_SNEAKING:
-                player.setSneaking(false);
+                metadata.setMetadataKeyValue(new CrouchedEntityMetadata(false));
                 break;
             case START_SPRINTING:
-                metadataKeyValueBucket.setMetadataKeyValue(new SprintingEntityMetadata(true));
+                metadata.setMetadataKeyValue(new SprintingEntityMetadata(true));
                 break;
             case STOP_SPRINTING:
-                metadataKeyValueBucket.setMetadataKeyValue(new SprintingEntityMetadata(false));
+                metadata.setMetadataKeyValue(new SprintingEntityMetadata(false));
                 break;
             default: break;
         }
 
-        /*
-        switch (event.getActionType()){
-            case START_SNEAKING:
-                player.setSneaking(true);
-                break;
-            case STOP_SNEAKING:
-                player.setSneaking(false);
-                break;
-            case START_SPRINTING:
-                player.setSprinting(true);
-                break;
-            case STOP_SPRINTING:
-                player.setSprinting(false);
-                break;
-            default: break;
-        }
-        player.getViewers().forEach(target -> target.getEnderFrameSessionHandler().getEnderFrameSession().sendMetadata(player, EntityMetadataType.ENTITY_PROPERTIES));
-
-         */
     }
 }

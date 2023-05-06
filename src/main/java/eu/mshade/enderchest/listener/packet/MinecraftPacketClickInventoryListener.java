@@ -255,7 +255,7 @@ public class MinecraftPacketClickInventoryListener implements EventListener<Mine
     private void moveItemStack(ItemStack itemStack, Inventory inventory, Player player) {
         ItemStack copyItemStack = itemStack.clone();
         if (inventory instanceof PlayerInventory) {
-            for (int i = 0; i < player.getOpenedInventory().getItemStacks().length; i++) {
+            for (int i = 0; i < player.getOpenedInventory().itemStacks.length; i++) {
                 ItemStack foundItemStack = player.getOpenedInventory().getItemStack(i);
                 dispatchItemIntoOtherItem(copyItemStack, foundItemStack);
             }
@@ -265,15 +265,15 @@ public class MinecraftPacketClickInventoryListener implements EventListener<Mine
                 player.getOpenedInventory().setItemStack(firstEmptySlot, copyItemStack);
             }
         } else {
-            int length = player.getInventory().getItemStacks().length - 1;
+            int length = player.getInventory().itemStacks.length - 1;
             for (int i = length; i > 9; i--) {
-                ItemStack foundItemStack = player.getInventory().getItemStacks()[i];
+                ItemStack foundItemStack = player.getInventory().itemStacks[i];
                 dispatchItemIntoOtherItem(copyItemStack, foundItemStack);
             }
 
             if (copyItemStack.getAmount() != 0) {
                 int firstEmptySlot = findFirstEmptySlotRawInventory(player.getInventory());
-                player.getInventory().getItemStacks()[firstEmptySlot] = copyItemStack;
+                player.getInventory().itemStacks[firstEmptySlot] = copyItemStack;
             }
 
         }
@@ -288,7 +288,7 @@ public class MinecraftPacketClickInventoryListener implements EventListener<Mine
     }
 
     private int findFirstEmptySlotRawInventory(PlayerInventory playerInventory) {
-        ItemStack[] itemStacks = playerInventory.getItemStacks();
+        ItemStack[] itemStacks = playerInventory.itemStacks;
         int length = itemStacks.length - 1;
         for (int i = length; i > 9; i--) {
             if (itemStacks[i] == null) return i;
@@ -300,7 +300,7 @@ public class MinecraftPacketClickInventoryListener implements EventListener<Mine
     private void onDoubleClick(ItemStack pickedItemStack, Inventory inventory) {
 
         List<InventoryClickStore.PlacedItemStack> placedItemStacks = new ArrayList<>();
-        int size = (inventory instanceof PlayerInventory ? 4 * 9 : inventory.getItemStacks().length);
+        int size = (inventory instanceof PlayerInventory ? 4 * 9 : inventory.itemStacks.length);
 
         for (int i = 0; i < size; i++) {
             ItemStack itemStackTarget = inventory.getItemStack(i);

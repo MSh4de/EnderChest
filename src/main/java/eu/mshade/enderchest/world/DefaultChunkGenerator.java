@@ -15,7 +15,7 @@ public class DefaultChunkGenerator implements ChunkGenerator {
 
     public DefaultChunkGenerator(World world) {
         this.world = world;
-        Long seed = (Long) world.getMetadataKeyValueBucket().getMetadataKeyValue(WorldMetadataType.SEED).getMetadataValue();
+        Long seed = (Long) world.getMetadatas().getMetadataKeyValue(WorldMetadataType.SEED).getMetadataValue();
         this.simplexOctaveGenerator = new SimplexOctaveGenerator(seed, 8);
         this.simplexOctaveGenerator.setScale(0.005D);
     }

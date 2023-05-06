@@ -11,18 +11,11 @@ import io.netty.channel.Channel;
 
 public class MinecraftPacketHandshakeListener implements EventListener<MinecraftPacketHandshakeEvent> {
 
-
-    private EnderChest enderChest;
-
-    public MinecraftPacketHandshakeListener(EnderChest enderChest) {
-        this.enderChest = enderChest;
-    }
-
     @Override
     public void onEvent(MinecraftPacketHandshakeEvent event) {
         MinecraftProtocolPipeline minecraftProtocolPipeline = MinecraftProtocolPipeline.get();
         MinecraftSession minecraftSession = event.getMinecraftSession();
-        Channel channel = minecraftSession.getChannel();
+        Channel channel = minecraftSession.channel;
         MinecraftHandshake minecraftHandshake = event.getHandshake();
         MinecraftHandshakeStatus minecraftHandshakeStatus = minecraftHandshake.getHandshakeStatus();
         MinecraftProtocolVersion minecraftProtocolVersion = minecraftHandshake.getVersion();
@@ -32,7 +25,7 @@ public class MinecraftPacketHandshakeListener implements EventListener<Minecraft
         }else {
             minecraftSession.toggleProtocolStatus(MinecraftProtocolStatus.LOGIN);
             if (minecraftProtocolVersion != MinecraftProtocolVersion.UNKNOWN) {
-                MinecraftProtocol minecraftProtocol = enderChest.getMinecraftProtocolRepository().getProtocol(minecraftProtocolVersion);
+                MinecraftProtocol minecraftProtocol = EnderChest.INSTANCE.getMinecraftServer().getMinecraftProtocols().getProtocol(minecraftProtocolVersion);
                 if (minecraftProtocol != null) {
                     minecraftSession = minecraftProtocol.getMinecraftSession(channel);
                     minecraftProtocolPipeline.setMinecraftSession(channel, minecraftSession);

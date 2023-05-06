@@ -10,12 +10,6 @@ import eu.mshade.mwork.event.EventListener;
 
 public class MinecraftPacketKeepAliveListener implements EventListener<MinecraftPacketKeepAliveEvent> {
 
-    private EnderChest enderChest;
-
-    public MinecraftPacketKeepAliveListener(EnderChest enderChest) {
-        this.enderChest = enderChest;
-    }
-
     @Override
     public void onEvent(MinecraftPacketKeepAliveEvent event) {
         MinecraftSession minecraftSession = event.getMinecraftSession();
@@ -25,7 +19,7 @@ public class MinecraftPacketKeepAliveListener implements EventListener<Minecraft
         player.setPing(ping);
         PlayerInfoBuilder playerInfoBuilder = PlayerInfoBuilder
                 .of(PlayerInfoType.UPDATE_LATENCY);
-        enderChest.getPlayers().forEach(playerInfoBuilder::withPlayer);
+        EnderChest.INSTANCE.getMinecraftServer().getOnlinePlayers().forEach(playerInfoBuilder::withPlayer);
         minecraftSession.sendPlayerInfo(playerInfoBuilder);
     }
 }

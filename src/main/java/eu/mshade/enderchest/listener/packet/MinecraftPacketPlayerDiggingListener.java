@@ -1,5 +1,6 @@
 package eu.mshade.enderchest.listener.packet;
 
+import eu.mshade.enderframe.GameMode;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.item.Material;
 import eu.mshade.enderframe.packetevent.MinecraftPacketPlayerDiggingEvent;
@@ -19,8 +20,10 @@ public class MinecraftPacketPlayerDiggingListener implements EventListener<Minec
         World world = player.getLocation().getWorld();
         BlockFace blockFace = event.getBlockFace();
         Vector blockPosition = event.getBlockPosition();
+        GameMode gameMode = player.getGameMode();
 
-        if (event.getDiggingStatus() == DiggingStatus.STARTED) {
+
+        if (gameMode == GameMode.CREATIVE) {
             Block block = world.getBlock(blockPosition);
             if (block == null || block.getMaterialKey().equals(Material.AIR)) return;
             world.setBlock(blockPosition, Material.AIR);
@@ -30,7 +33,23 @@ public class MinecraftPacketPlayerDiggingListener implements EventListener<Minec
                     target.getMinecraftSession().sendBlockChange(blockPosition, Material.AIR);
                 }
             });
+        }
 
+
+        if (gameMode == GameMode.SURVIVAL || gameMode == GameMode.ADVENTURE){
+            System.out.println(event.getDiggingStatus());
+
+            if (event.getDiggingStatus() == DiggingStatus.FINISHED) {
+                Block block = world.getBlock(blockPosition);
+                if (block == null || block.getMaterialKey().equals(Material.AIR)) return;
+                world.setBlock(blockPosition, Material.AIR);
+
+                player.getLocation().getChunk().join().notify(agent -> {
+                    if (agent instanceof Player target) {
+                        target.getMinecraftSession().sendBlockChange(blockPosition, Material.AIR);
+                    }
+                });
+            }
         }
     }
 }

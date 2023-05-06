@@ -36,7 +36,7 @@ class HandshakeAxolotlListener : EventListener<HandshakeAxolotlEvent> {
         try{
 
             runBlocking(Dispatchers.IO) {
-                axolotlSession.sendInitialization(WorldRepository.getWorlds(), EnderChest.players)
+                axolotlSession.sendInitialization(WorldRepository.getWorlds(), EnderChest.minecraftServer.getOnlinePlayers())
             }
         }catch (throwable: Throwable){
             throwable.printStackTrace()
