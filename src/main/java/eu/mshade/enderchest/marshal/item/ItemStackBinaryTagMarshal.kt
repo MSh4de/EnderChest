@@ -7,10 +7,7 @@ import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag
 
 object ItemStackBinaryTagMarshal {
 
-    fun serialize(itemStack: ItemStack?, metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry): CompoundBinaryTag {
-        if (itemStack == null) {
-            return CompoundBinaryTag()
-        }
+    fun serialize(itemStack: ItemStack, metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry): CompoundBinaryTag {
         val compoundBinaryTag = CompoundBinaryTag()
         compoundBinaryTag.putInt("type", itemStack.material.id)
         compoundBinaryTag.putInt("amount", itemStack.amount)

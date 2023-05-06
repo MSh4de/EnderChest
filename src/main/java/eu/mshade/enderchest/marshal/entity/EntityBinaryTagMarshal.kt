@@ -24,9 +24,9 @@ object EntityBinaryTagMarshal {
         val compound = CompoundBinaryTag()
 
         compound.putString("type", entity.entityKey.getName())
-        compound.putBinaryTag("location", LocationBinaryTagMarshal.serialize(entity.getLocation()))
-        compound.putBinaryTag("metadataKeyValueBucket", metadataKeyValueBinaryTagMarshal.serialize(entity.metadata))
-        compound.putBinaryTag("velocity", VectorBinaryTagMarshal.serialize(entity.getVelocity()))
+        compound.putBinaryTag("location", LocationBinaryTagMarshal.serialize(entity.location))
+        compound.putBinaryTag("metadataKeyValueBucket", metadataKeyValueBinaryTagMarshal.serialize(entity.metadataKeyValueBucket))
+        compound.putBinaryTag("velocity", VectorBinaryTagMarshal.serialize(entity.velocity))
         return compound
     }
 

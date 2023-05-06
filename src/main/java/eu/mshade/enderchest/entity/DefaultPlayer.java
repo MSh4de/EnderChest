@@ -3,11 +3,17 @@ package eu.mshade.enderchest.entity;
 import eu.mshade.enderchest.axolotl.AxololtConnection;
 import eu.mshade.enderchest.world.virtual.VirtualSection;
 import eu.mshade.enderchest.world.virtual.VirtualSectionStatus;
+import eu.mshade.enderframe.Agent;
 import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.Watchable;
+import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.Player;
+import eu.mshade.enderframe.entity.metadata.FlyingEntityMetadata;
+import eu.mshade.enderframe.entity.metadata.SprintingEntityMetadata;
 import eu.mshade.enderframe.event.PlayerMoveEvent;
 import eu.mshade.enderframe.inventory.PlayerInventory;
+import eu.mshade.enderframe.entity.metadata.EntityMetadataKey;
+import eu.mshade.enderframe.metadata.MetadataKeyValue;
 import eu.mshade.enderframe.protocol.MinecraftSession;
 import eu.mshade.enderframe.virtualserver.VirtualWorld;
 import eu.mshade.enderframe.world.chunk.Chunk;
@@ -31,8 +37,9 @@ public class DefaultPlayer extends Player {
     private static Logger LOGGER = LoggerFactory.getLogger(DefaultPlayer.class);
 
     private final MinecraftSession minecraftSession;
-    private final Queue<Watchable> watchables = new ConcurrentLinkedQueue<>();
     private Location lastServerChunkLocation;
+    private final Queue<Watchable> watchables = new ConcurrentLinkedQueue<>();
+
     private long lastElapsedTick;
 
     public DefaultPlayer(Location location, Vector velocity, int entityId, UUID uuid, MinecraftSession minecraftSession) {
@@ -44,14 +51,14 @@ public class DefaultPlayer extends Player {
         this.setPlayerInventory(new PlayerInventory(getUniqueId()));
         this.getInventory().addWatcher(this);
 
-        this.setGameProfile(minecraftSession.gameProfile);
-        this.setDisplayName(minecraftSession.gameProfile.getName());
-        this.setMinecraftProtocolVersion(minecraftSession.getProtocol().getMinecraftProtocolVersion());
+        this.setGameProfile(minecraftSession.getGameProfile());
+        this.setDisplayName(getGameProfile().getName());
+        this.setMinecraftProtocolVersion(minecraftSession.getHandshake().getVersion());
         this.minecraftSession = minecraftSession;
     }
 
     public DefaultPlayer(Location location, int entityId, MinecraftSession minecraftSession) {
-        this(location, new Vector(), entityId, minecraftSession.gameProfile.getId(), minecraftSession);
+        this(location, new Vector(), entityId, minecraftSession.getGameProfile().getId(), minecraftSession);
     }
 
     @Override
@@ -60,7 +67,7 @@ public class DefaultPlayer extends Player {
         try {
             if (world instanceof VirtualWorld) {
 
-                for (Chunk lookAtChunk : new ConcurrentLinkedQueue<>(this.getLookAtChunks())) {
+                for (Chunk lookAtChunk : new ConcurrentLinkedQueue<>(getLookAtChunks())) {
                     Chunk chunk = world.getChunk(lookAtChunk.getX(), lookAtChunk.getZ()).get();
                     this.getLookAtChunks().add(chunk);
                     lookAtChunk.removeWatcher(this);
@@ -73,7 +80,7 @@ public class DefaultPlayer extends Player {
                 sendSections(updateChunks);
 
                 this.setLocation(new Location(world, this.getLocation().getX(), this.getLocation().getY(), this.getLocation().getZ(), this.getLocation().getYaw(), this.getLocation().getPitch()));
-            } else {
+            }else {
 
                 for (Chunk lookAtChunk : new ConcurrentLinkedQueue<>(getLookAtChunks())) {
                     Chunk chunk = world.getChunk(lookAtChunk.getX(), lookAtChunk.getZ()).get();
@@ -89,7 +96,7 @@ public class DefaultPlayer extends Player {
 
                 this.setLocation(new Location(world, this.getLocation().getX(), this.getLocation().getY(), this.getLocation().getZ(), this.getLocation().getYaw(), this.getLocation().getPitch()));
             }
-        } catch (Exception e) {
+        }catch (Exception e){
             e.printStackTrace();
         }
 
@@ -112,8 +119,8 @@ public class DefaultPlayer extends Player {
     public void tick() {
 
         //check if player are moved
-        if (!this.getTickBeforeLocation().equals(this.getTickLocation())) {
-            EnderFrame.get().getMinecraftEvents().publish(new PlayerMoveEvent(this, this.getTickBeforeLocation(), this.getTickBeforeLocation()));
+        if(!this.getTickBeforeLocation().equals(this.getTickLocation())) {
+            EnderFrame.get().getEnderFrameEventBus().publish(new PlayerMoveEvent(this, this.getTickBeforeLocation(), this.getTickBeforeLocation()));
 
             AxololtConnection.INSTANCE.send(axolotlSession -> axolotlSession.sendEntityLocation(this));
         }
@@ -121,15 +128,14 @@ public class DefaultPlayer extends Player {
         setTickLocation(getLocation());
 
 
-/*        getLookAtEntity().forEach(entity -> {
+        getLookAtEntity().forEach(entity -> {
             getMinecraftSession().sendUpdateLocation(entity, entity.getTickBeforeLocation(), entity.getTickLocation());
-        });*/
+        });
 
 
         boolean hasChangeChunk = lastServerChunkLocation == null || (this.lastServerChunkLocation.getChunkX() != this.getLocation().getChunkX() || this.lastServerChunkLocation.getChunkZ() != this.getLocation().getChunkZ());
 
         if (hasChangeChunk) {
-            //print view chunk
             Location location = this.getLocation();
             World world = location.getWorld();
 
@@ -185,34 +191,42 @@ public class DefaultPlayer extends Player {
             }
 
 
-/*            Set<Entity> entities = new HashSet<>();
+                Set<Entity> entities = new HashSet<>();
 
-            for (int x = chunkX - 5; x <= chunkX + 5; x++) {
-                for (int z = chunkZ - 5; z <= chunkZ + 5; z++) {
-                    if ((chunkX - x) * (chunkX - x) + (chunkZ - z) * (chunkZ - z) <= 5 * 5) {
-                        Chunk chunk = world.getChunk(x, z).join();
-                        entities.addAll(chunk.getEntities());
-                        chunk.getWatchers().stream().filter(target -> !target.equals(this) && target instanceof Entity).forEach(entity -> entities.add((Entity) entity));
+                for (int x = chunkX - 5; x <= chunkX + 5; x++) {
+                    for (int z = chunkZ - 5; z <= chunkZ + 5; z++) {
+                        if ((chunkX - x) * (chunkX - x) + (chunkZ - z) * (chunkZ - z) <= 5 * 5) {
+                            Chunk chunk = world.getChunk(x, z).join();
+                            entities.addAll(chunk.getEntities());
+                            chunk.getWatchers().stream().filter(target -> !target.equals(this) && target instanceof Entity).forEach(entity -> entities.add((Entity) entity));
+                        }
                     }
                 }
+
+                Set<Entity> collect = entities.stream().filter(entity -> entity.getLocation().distanceXZ(this.getLocation()) <= 80).collect(Collectors.toSet());
+
+                for (Entity entity : collect) {
+                    if (!containsLookAtEntity(entity)) {
+                        getMinecraftSession().sendEntity(entity);
+                        this.addLookAtEntity(entity);
+                    }
+                }
+
+                getLookAtEntity().stream().filter(entity -> !collect.contains(entity)).forEach(entity -> {
+                    this.removeLookAtEntity(entity);
+                    getMinecraftSession().removeEntity(entity);
+                });
             }
 
-            Set<Entity> collect = entities.stream().filter(entity -> entity.getLocation().distanceXZ(this.getLocation()) <= 80).collect(Collectors.toSet());
-
-            for (Entity entity : collect) {
-                entity.addWatcher(this);
-            }
-
-            getLookAtEntity().stream().filter(entity -> !collect.contains(entity)).forEach(entity -> {
-                entity.removeWatcher(this);
-            });*/
-        }
 
 
         if (isPeriod(20)) {
             this.getMinecraftSession().sendKeepAlive((int) System.currentTimeMillis());
         }
     }
+
+
+
 
 
     @Override
@@ -245,16 +259,16 @@ public class DefaultPlayer extends Player {
     }
 
     public void setPlayerInventory(PlayerInventory playerInventory) {
-        this.setInventory(playerInventory);
+        this.playerInventory = playerInventory;
     }
 
     public void sendSections(Map<Chunk, List<Integer>> chunkListMap) {
 
-        chunkListMap.forEach((chunk, sections1) -> {
-            if (sections1.size() >= 3) {
+        chunkListMap.forEach((chunk, sections1) ->{
+            if (sections1.size() >= 3){
                 this.getMinecraftSession().sendUnloadChunk(chunk);
                 this.getMinecraftSession().sendChunk(chunk);
-            } else {
+            }else {
                 sections1.forEach(section -> {
                     Section sectionSend = chunk.getSection(section);
                     if (sectionSend == null) {

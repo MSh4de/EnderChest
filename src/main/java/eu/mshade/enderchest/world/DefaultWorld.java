@@ -1,6 +1,7 @@
 package eu.mshade.enderchest.world;
 
 import eu.mshade.enderchest.EnderChest;
+import eu.mshade.enderchest.entity.EntityFactory;
 import eu.mshade.enderchest.marshal.world.ChunkBinaryTagMarshal;
 import eu.mshade.enderchest.marshal.world.WorldBinaryTagMarshal;
 import eu.mshade.enderframe.Agent;
@@ -8,7 +9,7 @@ import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.Watchable;
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.entity.EntityKey;
-import eu.mshade.enderframe.entity.Player;
+import eu.mshade.enderframe.entity.EntityType;
 import eu.mshade.enderframe.event.ChunkCreateEvent;
 import eu.mshade.enderframe.event.ChunkLoadEvent;
 import eu.mshade.enderframe.event.ChunkUnloadEvent;
@@ -20,7 +21,6 @@ import eu.mshade.enderframe.world.*;
 import eu.mshade.enderframe.world.block.Block;
 import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderframe.world.chunk.ChunkStateStore;
-import eu.mshade.enderman.packet.play.world.MinecraftPacketOutTimeUpdate;
 import eu.mshade.mwork.binarytag.BinaryTagDriver;
 import eu.mshade.mwork.binarytag.segment.SegmentBinaryTag;
 import org.slf4j.Logger;
@@ -65,7 +65,7 @@ public class DefaultWorld extends World {
             SegmentBinaryTag segmentBinaryTag = getCarbonBinaryTag(binaryTagDriver, this, chunk);
             this.chunksByRegion.get(segmentBinaryTag).remove(chunk);
             this.chunkById.remove(chunk.getId());
-            EnderFrame.get().getMinecraftEvents().publish(new ChunkUnloadEvent(chunk));
+            EnderFrame.get().getEnderFrameEventBus().publish(new ChunkUnloadEvent(chunk));
 
             Agent agent = chunk.getAgent();
             for (Watchable watchable : agent.getWatchings()) {
@@ -117,7 +117,7 @@ public class DefaultWorld extends World {
             completableFuture.completeAsync(() -> {
                 DefaultChunk chunk = new DefaultChunk(x, z, this);
                 ChunkCreateEvent chunkCreateEvent = new ChunkCreateEvent(chunk);
-                EnderFrame.get().getMinecraftEvents().publish(chunkCreateEvent);
+                EnderFrame.get().getEnderFrameEventBus().publish(chunkCreateEvent);
                 if (!chunkCreateEvent.isCancelled()) {
                     if (getChunkGenerator() != null) getChunkGenerator().generate(chunk);
                     chunk.getChunkStateStore().setChunkStatus(ChunkStatus.LOADED);
@@ -137,7 +137,7 @@ public class DefaultWorld extends World {
                 try {
                     chunk = ChunkBinaryTagMarshal.INSTANCE.read(segmentBinaryTag, this, x, z, EnderChest.INSTANCE.getMetadataKeyValueBufferRegistry());
                     ChunkLoadEvent chunkLoadEvent = new ChunkLoadEvent(completableFuture);
-                    EnderFrame.get().getMinecraftEvents().publish(chunkLoadEvent);
+                    EnderFrame.get().getEnderFrameEventBus().publish(chunkLoadEvent);
 
                     if (!chunkLoadEvent.isCancelled()) {
                         chunk.getChunkStateStore().setChunkStatus(ChunkStatus.LOADED);
@@ -281,11 +281,6 @@ public class DefaultWorld extends World {
             }
 
             saveWorld();
-
-
-            for (Player onlinePlayer : EnderChest.INSTANCE.getMinecraftServer().getOnlinePlayers()) {
-                onlinePlayer.getMinecraftSession().sendPacket(new MinecraftPacketOutTimeUpdate(this.getTick()));
-            }
         }
 
         this.getChunks().forEach(chunkCompletableFuture -> {

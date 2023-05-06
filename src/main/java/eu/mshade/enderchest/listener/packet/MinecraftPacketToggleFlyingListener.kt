@@ -8,7 +8,7 @@ class MinecraftPacketToggleFlyingListener : EventListener<MinecraftPacketToggleF
 
     override fun onEvent(event: MinecraftPacketToggleFlyingEvent) {
         val player = event.player
-        val metadataKeyValueBucket = player.metadata
+        val metadataKeyValueBucket = player.metadataKeyValueBucket
         metadataKeyValueBucket.setMetadataKeyValue(FlyingEntityMetadata(event.isFlying))
     }
 

@@ -21,10 +21,15 @@ import java.util.concurrent.ForkJoinPool;
 public class MinecraftPacketChatMessageListener implements EventListener<MinecraftPacketChatMessageEvent> {
 
 
+    private EnderChest enderChest;
+
+    public MinecraftPacketChatMessageListener(EnderChest enderChest) {
+        this.enderChest = enderChest;
+    }
+
     @Override
     public void onEvent(MinecraftPacketChatMessageEvent event) {
         Player player = event.getPlayer();
-        MinecraftSession minecraftSession = player.getMinecraftSession();
         Location location = player.getLocation();
 
         AxololtConnection.INSTANCE.send(axolotlSession -> axolotlSession.sendChatMessage(player, event.getMessage()));
@@ -33,7 +38,7 @@ public class MinecraftPacketChatMessageListener implements EventListener<Minecra
             String[] args = event.getMessage().split(" ");
             if (args.length == 2) {
                 String schematicPath = args[1];
-                minecraftSession.sendMessage(ChatColor.GREEN + "Loading schematic " + schematicPath);
+                player.getMinecraftSession().sendMessage(ChatColor.GREEN + "Loading schematic " + schematicPath);
                 ForkJoinPool.commonPool().execute(() -> {
                     SchematicLoader.placeSchematic(location.getWorld(),  schematicPath, new Vector(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
                 });
@@ -45,18 +50,22 @@ public class MinecraftPacketChatMessageListener implements EventListener<Minecra
                 int x = Integer.parseInt(args[1]);
                 int y = Integer.parseInt(args[2]);
                 int z = Integer.parseInt(args[3]);
-                minecraftSession.teleport(new Location(location.getWorld(), x, y, z));
+                player.getMinecraftSession().teleport(new Location(location.getWorld(), x, y, z));
             } else if (args.length == 2) {
                 String name = args[1];
-                Player target = EnderChest.INSTANCE.getMinecraftServer().getPlayer(name);
-                if (target != null) {
-                    minecraftSession.teleport(target.getLocation());
-                }
+                enderChest.getPlayers().stream().filter(p -> p.getName().equals(name))
+                        .findFirst()
+                        .ifPresentOrElse((p -> {
+                            player.getMinecraftSession().teleport(p.getLocation());
+                        }), () -> {
+                            player.getMinecraftSession().sendMessage(ChatColor.RED + "Player not found");
+                });
             }
             return;
         } else if (event.getMessage().startsWith("dblock")) {
             String[] args = event.getMessage().split(" ");
             int id = Integer.parseInt(args[1]);
+            MinecraftSession minecraftSession = player.getMinecraftSession();
 
             if (args.length == 2) {
                 for (int i = 0; i < 16; i++) {
@@ -81,6 +90,7 @@ public class MinecraftPacketChatMessageListener implements EventListener<Minecra
         } else if (event.getMessage().startsWith("bdblock")) {
             String[] args = event.getMessage().split(" ");
             int id = Integer.parseInt(args[1]);
+            MinecraftSession minecraftSession = player.getMinecraftSession();
             int data = Integer.parseInt(args[2]);
             MaterialKey materialKey = MaterialKey.from(id, data);
             minecraftSession.sendUnsafeBlockChange(location.toVector().add(0, -1, 0), materialKey);
@@ -92,37 +102,37 @@ public class MinecraftPacketChatMessageListener implements EventListener<Minecra
             if (command.equals("create")){
                 if (args.length == 3){
                     String virtualWorldName = args[2];
-                    EnderChest.INSTANCE.getVirtualWorldManager().createVirtualWorld(virtualWorldName, location.getWorld());
-                    minecraftSession.sendMessage(ChatColor.GREEN + "Virtual world " + virtualWorldName + " created");
+                    enderChest.getVirtualWorldManager().createVirtualWorld(virtualWorldName, location.getWorld());
+                    player.getMinecraftSession().sendMessage(ChatColor.GREEN + "Virtual world " + virtualWorldName + " created");
                 }
             }else if (command.equals("list")) {
-                EnderChest.INSTANCE.getVirtualWorldManager().getVirtualWorlds().forEach(virtualWorld -> {
-                    minecraftSession.sendMessage(ChatColor.GREEN + virtualWorld.getName());
+                enderChest.getVirtualWorldManager().getVirtualWorlds().forEach(virtualWorld -> {
+                    player.getMinecraftSession().sendMessage(ChatColor.GREEN + virtualWorld.getName());
                 });
             }else if (command.equals("join")){
                 if (args.length == 3){
                     String virtualWorldName = args[2];
-                    VirtualWorld virtualWorld = EnderChest.INSTANCE.getVirtualWorldManager().getVirtualWorld(virtualWorldName);
+                    VirtualWorld virtualWorld = enderChest.getVirtualWorldManager().getVirtualWorld(virtualWorldName);
                     if (virtualWorld == null){
-                        minecraftSession.sendMessage(ChatColor.RED + "Virtual world not found");
+                        player.getMinecraftSession().sendMessage(ChatColor.RED + "Virtual world not found");
                         return;
                     }
                     CompletableFuture.runAsync(() -> {
                             player.joinWorld(virtualWorld);
-                        minecraftSession.sendMessage(ChatColor.GREEN + "Joined virtual world " + virtualWorldName);
+                        player.getMinecraftSession().sendMessage(ChatColor.GREEN + "Joined virtual world " + virtualWorldName);
                     });
 
                 }
             }else if (command.equals("leave")){
                 CompletableFuture.runAsync(() -> {
-                    minecraftSession.sendMessage(ChatColor.GREEN + "Left virtual world "+ player.getLocation().getWorld().getName());
+                    player.getMinecraftSession().sendMessage(ChatColor.GREEN + "Left virtual world "+ player.getLocation().getWorld().getName());
                     player.joinWorld(WorldRepository.INSTANCE.getWorld("world"));
                 });
             }
             return;
         }
 
-        EnderChest.INSTANCE.getMinecraftServer().getOnlinePlayers().forEach(each -> each.getMinecraftSession().sendMessage(player.getDisplayName() + " : " + ChatColor.translateAlternateColorCodes('&', event.getMessage())));
+        enderChest.getPlayers().forEach(each -> each.getMinecraftSession().sendMessage(player.getDisplayName() + " : " + ChatColor.translateAlternateColorCodes('&', event.getMessage())));
         System.out.println(player.getDisplayName() + " : " + event.getMessage());
     }
 }

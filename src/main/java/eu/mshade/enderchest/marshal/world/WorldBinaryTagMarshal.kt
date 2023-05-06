@@ -17,7 +17,7 @@ object WorldBinaryTagMarshal {
         world: World,
         metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry
     ): CompoundBinaryTag {
-        return metadataKeyValueBufferRegistry.serialize(world.metadatas)
+        return metadataKeyValueBufferRegistry.serialize(world.metadataKeyValueBucket)
     }
 
     fun deserialize(
@@ -37,7 +37,7 @@ object WorldBinaryTagMarshal {
         world: World,
         metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry
     ) {
-        if (world.metadatas.consumeUpdatedMetadataKeyValue().isEmpty()) return
+        if (world.metadataKeyValueBucket.consumeUpdatedMetadataKeyValue().isEmpty()) return
         try {
             val fileOutputStream = FileOutputStream(File(world.worldFolder, "level.dat"))
             binaryTagDriver.writeCompoundBinaryTag(

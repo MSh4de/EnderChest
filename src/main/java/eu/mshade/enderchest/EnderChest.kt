@@ -20,7 +20,7 @@ import eu.mshade.enderchest.world.SchematicLoader
 import eu.mshade.enderchest.world.WorldManager
 import eu.mshade.enderchest.world.virtual.VirtualWorldManager
 import eu.mshade.enderframe.EnderFrame
-import eu.mshade.enderframe.entity.EntityTracker
+import eu.mshade.enderframe.entity.Player
 import eu.mshade.enderframe.event.*
 import eu.mshade.enderframe.inventory.InventoryTracker
 import eu.mshade.enderframe.item.ItemStackMetadataKey
@@ -30,6 +30,7 @@ import eu.mshade.enderframe.metadata.MetadataKeyValueBufferRegistry
 import eu.mshade.enderframe.mojang.chat.*
 import eu.mshade.enderframe.packetevent.*
 import eu.mshade.enderframe.protocol.MinecraftEncryption
+import eu.mshade.enderframe.protocol.MinecraftProtocolRepository
 import eu.mshade.enderframe.tick.TickBus
 import eu.mshade.enderframe.world.*
 import eu.mshade.enderframe.world.block.BlockMetadataType
@@ -44,7 +45,9 @@ import io.netty.channel.EventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import org.slf4j.LoggerFactory
+import java.util.*
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.function.Consumer
 
 fun main() {
@@ -58,8 +61,9 @@ object EnderChest {
     val parentGroup: EventLoopGroup
 
     private val childGroup: EventLoopGroup
-    val minecraftServer = DefaultMinecraftServer()
+    val players: Queue<Player> = ConcurrentLinkedQueue()
     val minecraftEncryption = MinecraftEncryption()
+    val minecraftProtocolRepository = MinecraftProtocolRepository()
     val worldManager: WorldManager
     val virtualWorldManager: VirtualWorldManager
     val metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry
@@ -70,15 +74,13 @@ object EnderChest {
 
     init {
         val start = System.currentTimeMillis()
-        println(
-            "\n" +
-                    "███████╗███╗░░██╗██████╗░███████╗██████╗░░█████╗░██╗░░██╗███████╗░██████╗████████╗\n" +
-                    "██╔════╝████╗░██║██╔══██╗██╔════╝██╔══██╗██╔══██╗██║░░██║██╔════╝██╔════╝╚══██╔══╝\n" +
-                    "█████╗░░██╔██╗██║██║░░██║█████╗░░██████╔╝██║░░╚═╝███████║█████╗░░╚█████╗░░░░██║░░░\n" +
-                    "██╔══╝░░██║╚████║██║░░██║██╔══╝░░██╔══██╗██║░░██╗██╔══██║██╔══╝░░░╚═══██╗░░░██║░░░\n" +
-                    "███████╗██║░╚███║██████╔╝███████╗██║░░██║╚█████╔╝██║░░██║███████╗██████╔╝░░░██║░░░\n" +
-                    "╚══════╝╚═╝░░╚══╝╚═════╝░╚══════╝╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝╚══════╝╚═════╝░░░░╚═╝░░░"
-        )
+        println("\n" +
+                "███████╗███╗░░██╗██████╗░███████╗██████╗░░█████╗░██╗░░██╗███████╗░██████╗████████╗\n" +
+                "██╔════╝████╗░██║██╔══██╗██╔════╝██╔══██╗██╔══██╗██║░░██║██╔════╝██╔════╝╚══██╔══╝\n" +
+                "█████╗░░██╔██╗██║██║░░██║█████╗░░██████╔╝██║░░╚═╝███████║█████╗░░╚█████╗░░░░██║░░░\n" +
+                "██╔══╝░░██║╚████║██║░░██║██╔══╝░░██╔══██╗██║░░██╗██╔══██║██╔══╝░░░╚═══██╗░░░██║░░░\n" +
+                "███████╗██║░╚███║██████╔╝███████╗██║░░██║╚█████╔╝██║░░██║███████╗██████╔╝░░░██║░░░\n" +
+                "╚══════╝╚═╝░░╚══╝╚═════╝░╚══════╝╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝╚══════╝╚═════╝░░░░╚═╝░░░")
         LOGGER.info("Starting EnderChest")
         childGroup = NioEventLoopGroup(Runtime.getRuntime().availableProcessors())
         parentGroup = NioEventLoopGroup(Runtime.getRuntime().availableProcessors())
@@ -99,7 +101,7 @@ object EnderChest {
         LOGGER.info("Loaded ids from materials.json")
 
         //register minecraft protocol 1.8 to 1.19
-        minecraftServer.getMinecraftProtocols().register(EndermanMinecraftProtocol())
+        minecraftProtocolRepository.register(EndermanMinecraftProtocol())
 
         val textComponentSerializer = TextComponentSerializer()
         val objectMapper = MWork.getObjectMapper()
@@ -111,45 +113,96 @@ object EnderChest {
         objectMapper.registerModule(simpleModule)
         val enderFrame = EnderFrame.get()
 
-        val packetEvents = enderFrame.packetEvents
+        val packetEventBus = enderFrame.packetEventBus
         val binaryTagDriver = enderFrame.binaryTagDriver
 
-        packetEvents.subscribe(MinecraftPacketHandshakeEvent::class.java, MinecraftPacketHandshakeListener())
-        packetEvents.subscribe(MinecraftPacketServerPingEvent::class.java, MinecraftPacketServerPingListener())
-        packetEvents.subscribe(MinecraftPacketServerStatusEvent::class.java, MinecraftPacketServerStatusListener())
-        packetEvents.subscribe(MinecraftPacketLoginEvent::class.java, MinecraftPacketLoginListener())
-        packetEvents.subscribe(MinecraftPacketEncryptionEvent::class.java, MinecraftPacketEncryptionListener())
-        packetEvents.subscribe(MinecraftPacketKeepAliveEvent::class.java, MinecraftPacketKeepAliveListener())
-        packetEvents.subscribe(MinecraftPacketClientSettingsEvent::class.java, MinecraftPacketClientSettingsListener())
-        packetEvents.subscribe(MinecraftPacketChatMessageEvent::class.java, MinecraftPacketChatMessageListener())
-        packetEvents.subscribe(MinecraftPacketEntityActionEvent::class.java, MinecraftPacketEntityActionListener())
-        packetEvents.subscribe(MinecraftPacketMoveEvent::class.java, MinecraftPacketMoveListener())
-        packetEvents.subscribe(MinecraftPacketLookEvent::class.java, MinecraftPacketLookListener())
-        packetEvents.subscribe(MinecraftPacketMoveAndLookEvent::class.java, MinecraftPacketMoveAndLookListener())
-        packetEvents.subscribe(MinecraftPacketToggleFlyingEvent::class.java, MinecraftPacketToggleFlyingListener())
-        packetEvents.subscribe(MinecraftPacketBlockPlaceEvent::class.java, MinecraftPacketBlockPlaceListener())
-        packetEvents.subscribe(MinecraftPacketPlayerDiggingEvent::class.java, MinecraftPacketPlayerDiggingListener())
-        packetEvents.subscribe(MinecraftPacketCloseInventoryEvent::class.java, MinecraftPacketCloseInventoryListener())
-        packetEvents.subscribe(MinecraftPacketClickInventoryEvent::class.java, MinecraftPacketClickInventoryListener())
-        packetEvents.subscribe(MinecraftPacketClientStatusEvent::class.java, MinecraftPacketClientStatusListener())
-        packetEvents.subscribe(MinecraftPacketHeldItemChangeEvent::class.java, MinecraftPacketHeldItemChangeListener())
+        packetEventBus.subscribe(MinecraftPacketHandshakeEvent::class.java, MinecraftPacketHandshakeListener(this))
+        packetEventBus.subscribe(MinecraftPacketServerPingEvent::class.java,
+            MinecraftPacketServerPingListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketServerStatusEvent::class.java,
+            MinecraftPacketServerStatusListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketLoginEvent::class.java, MinecraftPacketLoginListener(this))
+        packetEventBus.subscribe(MinecraftPacketEncryptionEvent::class.java,
+            MinecraftPacketEncryptionListener(this)
+        )
+        packetEventBus.subscribe(MinecraftPacketKeepAliveEvent::class.java,
+            MinecraftPacketKeepAliveListener(this)
+        )
+        packetEventBus.subscribe(MinecraftPacketClientSettingsEvent::class.java,
+            MinecraftPacketClientSettingsListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketChatMessageEvent::class.java, MinecraftPacketChatMessageListener(this))
+        packetEventBus.subscribe(MinecraftPacketEntityActionEvent::class.java,
+            MinecraftPacketEntityActionListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketMoveEvent::class.java,
+            MinecraftPacketMoveListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketLookEvent::class.java,
+            MinecraftPacketLookListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketMoveAndLookEvent::class.java,
+            MinecraftPacketMoveAndLookListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketToggleFlyingEvent::class.java, MinecraftPacketToggleFlyingListener())
+        packetEventBus.subscribe(MinecraftPacketBlockPlaceEvent::class.java,
+            MinecraftPacketBlockPlaceListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketPlayerDiggingEvent::class.java,
+            MinecraftPacketPlayerDiggingListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketCloseInventoryEvent::class.java,
+            MinecraftPacketCloseInventoryListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketClickInventoryEvent::class.java,
+            MinecraftPacketClickInventoryListener()
+        )
+        packetEventBus.subscribe(MinecraftPacketClientStatusEvent::class.java, MinecraftPacketClientStatusListener())
 
-        val minecraftEvents = enderFrame.minecraftEvents
-        minecraftEvents.subscribe(EntityUnseeEvent::class.java, EntityUnseeListener())
-        minecraftEvents.subscribe(EntitySeeEvent::class.java, EntitySeeListener())
-        minecraftEvents.subscribe(ChunkSeeEvent::class.java, ChunkSeeListener())
-        minecraftEvents.subscribe(ChunkUnseeEvent::class.java, ChunkUnseeListener())
-        minecraftEvents.subscribe(EntityMoveEvent::class.java, EntityMoveListener())
-        minecraftEvents.subscribe(EntityTeleportEvent::class.java, EntityTeleportListener())
-        minecraftEvents.subscribe(EntityChunkChangeEvent::class.java, EntityChunkChangeListener())
-        minecraftEvents.subscribe(ChunkUnloadEvent::class.java, ChunkUnloadListener())
-        minecraftEvents.subscribe(ChunkLoadEvent::class.java, ChunkLoadListener())
-        minecraftEvents.subscribe(WatchdogSeeEvent::class.java, WatchdogSeeListener())
-        minecraftEvents.subscribe(ChunkCreateEvent::class.java, ChunkCreateListener())
-        minecraftEvents.subscribe(WatchdogUnseeEvent::class.java, WatchdogUnseeListener())
-        minecraftEvents.subscribe(PlayerDisconnectEvent::class.java, PlayerDisconnectListener())
-        minecraftEvents.subscribe(PrePlayerJoinEvent::class.java, PrePlayerJoinListener())
-        minecraftEvents.subscribe(PlayerJoinEvent::class.java, PlayerJoinListener())
+        val enderFrameEventBus = enderFrame.enderFrameEventBus
+        enderFrameEventBus.subscribe(EntityUnseeEvent::class.java,
+            EntityUnseeListener()
+        )
+        enderFrameEventBus.subscribe(EntitySeeEvent::class.java,
+            EntitySeeListener()
+        )
+        enderFrameEventBus.subscribe(ChunkSeeEvent::class.java,
+            ChunkSeeListener()
+        )
+        enderFrameEventBus.subscribe(ChunkUnseeEvent::class.java,
+            ChunkUnseeListener()
+        )
+        enderFrameEventBus.subscribe(EntityMoveEvent::class.java,
+            EntityMoveListener()
+        )
+        enderFrameEventBus.subscribe(EntityTeleportEvent::class.java,
+            EntityTeleportListener()
+        )
+        enderFrameEventBus.subscribe(EntityChunkChangeEvent::class.java,
+            EntityChunkChangeListener()
+        )
+        enderFrameEventBus.subscribe(ChunkUnloadEvent::class.java,
+            ChunkUnloadListener()
+        )
+        enderFrameEventBus.subscribe(ChunkLoadEvent::class.java,
+            ChunkLoadListener()
+        )
+        enderFrameEventBus.subscribe(WatchdogSeeEvent::class.java,
+            WatchdogSeeListener()
+        )
+        enderFrameEventBus.subscribe(ChunkCreateEvent::class.java, ChunkCreateListener())
+        enderFrameEventBus.subscribe(WatchdogUnseeEvent::class.java,
+            WatchdogUnseeListener()
+        )
+        enderFrameEventBus.subscribe(
+            PlayerDisconnectEvent::class.java,
+            PlayerDisconnectListener(this)
+        )
+        enderFrameEventBus.subscribe(PrePlayerJoinEvent::class.java,
+            PrePlayerJoinListener(this)
+        )
 
         metadataKeyValueBufferRegistry = MetadataKeyValueBufferRegistry()
         metadataKeyValueBufferRegistry.register(WorldMetadataType.NAME, NameWorldMetadataBuffer())
@@ -158,6 +211,7 @@ object EnderChest {
         metadataKeyValueBufferRegistry.register(WorldMetadataType.LEVEL_TYPE, LevelTypeWorldMetadataBuffer(binaryTagDriver))
         metadataKeyValueBufferRegistry.register(WorldMetadataType.DIFFICULTY, DifficultyWorldMetadataBuffer(binaryTagDriver))
         metadataKeyValueBufferRegistry.register(WorldMetadataType.PARENT, ParentWorldMetadataBuffer())
+
         metadataKeyValueBufferRegistry.register(BlockMetadataType.EXTRA, ExtraBlockMetadataBuffer())
         metadataKeyValueBufferRegistry.register(BlockMetadataType.FACE, FaceBlockMetadataBuffer())
         metadataKeyValueBufferRegistry.register(BlockMetadataType.HALF, HalfBlockMetadataBuffer())
@@ -170,6 +224,7 @@ object EnderChest {
         metadataKeyValueBufferRegistry.register(BlockMetadataType.SEAMLESS, SeamlessBlockMetadataBuffer())
         metadataKeyValueBufferRegistry.register(BlockMetadataType.MULTIPLE_FACE, MultipleFaceBlockMetadataBuffer())
         metadataKeyValueBufferRegistry.register(BlockMetadataType.SLAB_TYPE, SlabTypeBlockMetadataBuffer())
+
         metadataKeyValueBufferRegistry.register(ItemStackMetadataKey.NAME, NameItemStackMetadataBuffer())
         metadataKeyValueBufferRegistry.register(ItemStackMetadataKey.LORE, LoreItemStackMetadataBuffer())
 
@@ -196,9 +251,6 @@ object EnderChest {
         InventoryTracker.joinTickBus(tickBus)
         LOGGER.info("InventoryTracker joined TickBus")
 
-        EntityTracker.joinTickBus(tickBus)
-        LOGGER.info("EntityTracker joined TickBus")
-
         LOGGER.info("Starting $threadTickBus")
 
         /**
@@ -220,13 +272,9 @@ object EnderChest {
                 w.regions.forEach(Consumer { segmentBinaryTag: SegmentBinaryTag -> if (segmentBinaryTag.compoundSectionIndex.consume()) segmentBinaryTag.writeCompoundSectionIndex() })
             })
 
-            virtualWorldManager.getVirtualWorlds().forEach {
+            virtualWorldManager.getVirtualWorlds().forEach{
                 it.saveWorld()
-                it.chunks.forEach { chunkCompletableFuture: CompletableFuture<Chunk?> ->
-                    it.saveChunk(
-                        chunkCompletableFuture.join()
-                    )
-                }
+                it.chunks.forEach { chunkCompletableFuture: CompletableFuture<Chunk?> -> it.saveChunk(chunkCompletableFuture.join()) }
                 LOGGER.info("Saved " + it.chunks.size + " chunks in virtual world " + it.name)
                 it.regions.forEach { segmentBinaryTag: SegmentBinaryTag -> if (segmentBinaryTag.compoundSectionIndex.consume()) segmentBinaryTag.writeCompoundSectionIndex() }
             }
@@ -236,6 +284,7 @@ object EnderChest {
             childGroup.shutdownGracefully()
         })
 
+        //this.emerald = new Emerald(parentGroup);
         val channelFuture = ServerBootstrap()
             .group(parentGroup, childGroup)
             .channel(NioServerSocketChannel::class.java)
@@ -253,6 +302,11 @@ object EnderChest {
         val axolotlPacketInEventBus = Axolotl.eventBus
         axolotlPacketInEventBus.subscribe(HandshakeAxolotlEvent::class.java, HandshakeAxolotlListener())
         axolotlPacketInEventBus.subscribe(ChatMessageAxolotlEvent::class.java, MessageAxolotlListener())
+/*        axolotlPacketInEventBus.subscribe(AxolotlEvent::class.java, object : EventListener<AxolotlEvent> {
+            override fun onEvent(event: AxolotlEvent) {
+                LOGGER.info("Received event $event")
+            }
+        }, eventFilter = EventFilter.DERIVE)*/
 
         val axolotlProtocolRepository = AxolotlProtocolRepository
         axolotlProtocolRepository.register(StoneAxolotlProtocol())
@@ -276,6 +330,77 @@ object EnderChest {
 
         LOGGER.info("Done in {} ms !", System.currentTimeMillis() - start)
 
+
+        /*
+        try {
+            Chunk chunk = world.getChunk(0, 0).get();
+            Agent agentTest = Agent.from("AGENT_TEST");
+            agentTest.joinWatch(chunk);
+
+            Block block = Material.OAK_BUTTON.toBlock();
+            MetadataKeyValueBucket metadataKeyValueBucket = block.getMetadataKeyValueBucket();
+            BlockFace[] blockFaces = BlockFace.values();
+
+
+            parentGroup.scheduleAtFixedRate(()-> {
+                metadataKeyValueBucket.setMetadataKeyValue(new FaceBlockMetadata(blockFaces[ThreadLocalRandom.current().nextInt(blockFaces.length)]));
+                metadataKeyValueBucket.setMetadataKeyValue(new PoweredBlockMetadata(ThreadLocalRandom.current().nextBoolean()));
+
+                chunk.getWatching().forEach(agent -> {
+                    if (agent instanceof Player player) {
+                        player.getSessionWrapper().sendBlockChange(new Vector(7, 53, 7), block);
+                    }
+                });
+
+            },0, 600, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+*/
+
+
+//        SchematicLoader.placeSchematic(world, this.getClass().getClassLoader().getResourceAsStream("./spawn-e1930.schematic"), new Vector(0, 0, 0));
+///*        SchematicLoader.placeSchematic(world, this.getClass().getClassLoader().getResourceAsStream("./spawn-e1930.schematic"), new Vector(130, 0, 0));
+//        SchematicLoader.placeSchematic(world, this.getClass().getClassLoader().getResourceAsStream("./WaitingLobby1.schematic"), new Vector(-1577, 1, -95));
+
+        /*        parentGroup.scheduleAtFixedRate(()->{
+            System.out.println(String.valueOf(tickBus.getTPS()).replace(".", ","));
+        }, 0, 1, TimeUnit.SECONDS);*/
+
+
+        /*        parentGroup.execute(()->{
+            long startGenMap = System.currentTimeMillis();
+            List<CompletableFuture<Chunk>> ask = new ArrayList<>();
+            for (int x = 0; x < 250; x++) {
+                for (int z = 0; z < 250; z++) {
+                    ask.add(world.getChunk(x, z));
+
+                }
+            }
+            try {
+                Void unused = CompletableFuture.allOf(ask.toArray(new CompletableFuture[0])).get();
+                LOGGER.info("Done GenMap in {} ms", (System.currentTimeMillis()-startGenMap));
+            } catch (InterruptedException | ExecutionException e) {
+                LOGGER.error("", e);
+            }
+
+        });*/
+
+        //print length of chunk of the worlds
+/*        parentGroup.scheduleAtFixedRate({
+
+            worldManager.worlds.forEach(Consumer { w: World ->
+                LOGGER.info("World " + w.name + " has " + w.chunks.size + " chunks")
+            })
+        }, 0, 1, TimeUnit.SECONDS)*/
+
     }
 
+
+    fun addPlayer(player: Player) {
+        players.add(player)
+    }
+    fun removePlayer(player: Player) {
+        players.remove(player)
+    }
 }
