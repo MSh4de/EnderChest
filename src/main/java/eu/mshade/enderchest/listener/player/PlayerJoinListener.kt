@@ -1,15 +1,11 @@
-package eu.mshade.enderchest.listener
+package eu.mshade.enderchest.listener.player
 
 import eu.mshade.enderframe.event.PlayerJoinEvent
-import eu.mshade.enderframe.item.Enchantment
-import eu.mshade.enderframe.item.EnchantmentType
 import eu.mshade.enderframe.item.ItemStack
 import eu.mshade.enderframe.item.Material
-import eu.mshade.enderframe.item.metadata.EnchantmentsItemStackMetadata
 import eu.mshade.enderframe.item.metadata.NameItemStackMetadata
 import eu.mshade.enderframe.mojang.chat.TextComponent
 import eu.mshade.enderframe.scoreboard.ScoreboardSidebar
-import eu.mshade.enderman.packet.play.world.MinecraftPacketOutTimeUpdate
 import eu.mshade.mwork.event.EventListener
 import org.slf4j.LoggerFactory
 

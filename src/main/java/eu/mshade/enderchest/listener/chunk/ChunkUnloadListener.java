@@ -1,4 +1,4 @@
-package eu.mshade.enderchest.listener;
+package eu.mshade.enderchest.listener.chunk;
 
 import eu.mshade.enderchest.axolotl.AxololtConnection;
 import eu.mshade.enderframe.event.ChunkUnloadEvent;
