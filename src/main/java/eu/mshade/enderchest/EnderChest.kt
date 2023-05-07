@@ -20,6 +20,7 @@ import eu.mshade.enderchest.world.SchematicLoader
 import eu.mshade.enderchest.world.WorldManager
 import eu.mshade.enderchest.world.virtual.VirtualWorldManager
 import eu.mshade.enderframe.EnderFrame
+import eu.mshade.enderframe.MinecraftServer
 import eu.mshade.enderframe.entity.EntityTracker
 import eu.mshade.enderframe.event.*
 import eu.mshade.enderframe.inventory.InventoryTracker
@@ -58,7 +59,7 @@ object EnderChest {
     val parentGroup: EventLoopGroup
 
     private val childGroup: EventLoopGroup
-    val minecraftServer = DefaultMinecraftServer()
+    lateinit var minecraftServer : MinecraftServer
     val minecraftEncryption = MinecraftEncryption()
     val worldManager: WorldManager
     val virtualWorldManager: VirtualWorldManager
@@ -98,6 +99,7 @@ object EnderChest {
         }
         LOGGER.info("Loaded ids from materials.json")
 
+        this.minecraftServer = DefaultMinecraftServer()
         //register minecraft protocol 1.8 to 1.19
         minecraftServer.getMinecraftProtocols().register(EndermanMinecraftProtocol())
 
@@ -205,6 +207,7 @@ object EnderChest {
          * @TODO later delete this
          */
         SchematicLoader.SCHEMATIC_FOLDER.mkdir()
+
 
         Runtime.getRuntime().addShutdownHook(Thread {
             LOGGER.warn("Beginning save of server don't close the console !")

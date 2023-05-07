@@ -1,9 +1,14 @@
 package eu.mshade.enderchest
 
+import eu.mshade.enderchest.itemrule.ArmorItemRule
+import eu.mshade.enderchest.world.blockrule.*
 import eu.mshade.enderframe.MinecraftServer
 import eu.mshade.enderframe.entity.Entity
 import eu.mshade.enderframe.entity.Player
 import eu.mshade.enderframe.gamerule.GameRuleRepository
+import eu.mshade.enderframe.item.ItemRuleRepository
+import eu.mshade.enderframe.item.MaterialCategory
+import eu.mshade.enderframe.item.MaterialCategoryKey
 import eu.mshade.enderframe.protocol.MinecraftProtocolRepository
 import eu.mshade.enderframe.world.World
 import eu.mshade.enderframe.world.block.BlockRuleRepository
@@ -17,7 +22,18 @@ class DefaultMinecraftServer: MinecraftServer {
     private val minecraftProtocolRepository = MinecraftProtocolRepository()
     private val blockRuleRepository = BlockRuleRepository()
     private val gameRuleRepository = GameRuleRepository()
+    private val itemRuleRepository = ItemRuleRepository()
 
+    init {
+        blockRuleRepository.register(MaterialCategory.BUTTON, ButtonBlockRule())
+        blockRuleRepository.register(MaterialCategory.LEVER, LeverBlockRule())
+        blockRuleRepository.register(MaterialCategory.LOG, LogBlockRule())
+        blockRuleRepository.register(MaterialCategory.SLAB, SlabBlockRule())
+        blockRuleRepository.register(MaterialCategory.STAIRS, StairsBlockRule())
+        blockRuleRepository.register(MaterialCategory.VINE, VineBlockRule())
+
+        itemRuleRepository.register(MaterialCategory.ARMOR, ArmorItemRule())
+    }
 
     override fun addPlayer(player: Player) {
         players.add(player)
@@ -65,5 +81,9 @@ class DefaultMinecraftServer: MinecraftServer {
 
     override fun getGameRules(): GameRuleRepository {
         return gameRuleRepository
+    }
+
+    override fun getItemRules(): ItemRuleRepository {
+        return itemRuleRepository
     }
 }

@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 class PlayerDisconnectListener : EventListener<PlayerDisconnectEvent> {
 
     override fun onEvent(event: PlayerDisconnectEvent) {
-        val player = event.sessionWrapper.player
+        val player = event.minecraftSession.player
 
         player.leaveTickBus()
 
