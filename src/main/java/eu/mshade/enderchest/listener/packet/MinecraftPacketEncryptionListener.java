@@ -42,6 +42,7 @@ public class MinecraftPacketEncryptionListener implements EventListener<Minecraf
                     .GET()
                     .uri(new URI("https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" + minecraftSession.gameProfile.getName() + "&serverId=" + hashServerId))
                     .build();
+
             String body = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString()).body();
             if (body.isEmpty() || body.isBlank()) {
                 minecraftSession.sendDisconnect("You are not logged into Minecraft account. If you logged into you Minecraft account, try restarting you Minecraft client.");
@@ -63,8 +64,7 @@ public class MinecraftPacketEncryptionListener implements EventListener<Minecraf
                 properties.add(new Property(name, value, signature));
             });
 
-            GameProfile gameProfile = new GameProfile(uuid, jsonNode.get("name").asText(), properties);
-            minecraftSession.gameProfile = gameProfile;
+            minecraftSession.gameProfile = new GameProfile(uuid, jsonNode.get("name").asText(), properties);
 
             EnderFrame.get().getMinecraftEvents().publish(new PrePlayerJoinEvent(minecraftSession));
         }catch (Exception e){
