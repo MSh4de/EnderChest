@@ -10,6 +10,7 @@ import eu.mshade.enderchest.axolotl.AxolotlChannelInitializer
 import eu.mshade.enderchest.axolotl.listener.HandshakeAxolotlListener
 import eu.mshade.enderchest.axolotl.listener.MessageAxolotlListener
 import eu.mshade.enderchest.listener.*
+import eu.mshade.enderchest.listener.animation.SwingArmListener
 import eu.mshade.enderchest.listener.chunk.*
 import eu.mshade.enderchest.listener.entity.*
 import eu.mshade.enderchest.listener.packet.*
@@ -28,6 +29,7 @@ import eu.mshade.enderframe.EnderFrame
 import eu.mshade.enderframe.MinecraftServer
 import eu.mshade.enderframe.entity.EntityTracker
 import eu.mshade.enderframe.event.*
+import eu.mshade.enderframe.event.animation.SwingArmEvent
 import eu.mshade.enderframe.inventory.InventoryTracker
 import eu.mshade.enderframe.item.ItemStackMetadataKey
 import eu.mshade.enderframe.item.Material
@@ -140,41 +142,26 @@ object EnderChest {
         packetEvents.subscribe(MinecraftPacketClickInventoryEvent::class.java, MinecraftPacketClickInventoryListener())
         packetEvents.subscribe(MinecraftPacketClientStatusEvent::class.java, MinecraftPacketClientStatusListener())
         packetEvents.subscribe(MinecraftPacketHeldItemChangeEvent::class.java, MinecraftPacketHeldItemChangeListener())
+        packetEvents.subscribe(MinecraftPacketAnimationEvent::class.java, MinecraftPacketAnimationListener())
+
 
         val minecraftEvents = enderFrame.minecraftEvents
-        minecraftEvents.subscribe(EntityUnseeEvent::class.java,
-            EntityUnseeListener()
-        )
-        minecraftEvents.subscribe(EntitySeeEvent::class.java,
-            EntitySeeListener()
-        )
-        minecraftEvents.subscribe(ChunkSeeEvent::class.java,
-            ChunkSeeListener()
-        )
-        minecraftEvents.subscribe(ChunkUnseeEvent::class.java,
-            ChunkUnseeListener()
-        )
-        minecraftEvents.subscribe(EntityMoveEvent::class.java,
-            EntityMoveListener()
-        )
-        minecraftEvents.subscribe(EntityTeleportEvent::class.java,
-            EntityTeleportListener()
-        )
-        minecraftEvents.subscribe(EntityChunkChangeEvent::class.java,
-            EntityChunkChangeListener()
-        )
-        minecraftEvents.subscribe(ChunkUnloadEvent::class.java,
-            ChunkUnloadListener()
-        )
-        minecraftEvents.subscribe(ChunkLoadEvent::class.java,
-            ChunkLoadListener()
-        )
+        minecraftEvents.subscribe(EntityUnseeEvent::class.java, EntityUnseeListener())
+        minecraftEvents.subscribe(EntitySeeEvent::class.java, EntitySeeListener())
+        minecraftEvents.subscribe(ChunkSeeEvent::class.java, ChunkSeeListener())
+        minecraftEvents.subscribe(ChunkUnseeEvent::class.java, ChunkUnseeListener())
+        minecraftEvents.subscribe(EntityMoveEvent::class.java, EntityMoveListener())
+        minecraftEvents.subscribe(EntityTeleportEvent::class.java, EntityTeleportListener())
+        minecraftEvents.subscribe(EntityChunkChangeEvent::class.java, EntityChunkChangeListener())
+        minecraftEvents.subscribe(ChunkUnloadEvent::class.java, ChunkUnloadListener())
+        minecraftEvents.subscribe(ChunkLoadEvent::class.java, ChunkLoadListener())
         minecraftEvents.subscribe(WatchdogSeeEvent::class.java, WatchdogSeeListener())
         minecraftEvents.subscribe(ChunkCreateEvent::class.java, ChunkCreateListener())
         minecraftEvents.subscribe(WatchdogUnseeEvent::class.java, WatchdogUnseeListener())
         minecraftEvents.subscribe(PlayerDisconnectEvent::class.java, PlayerDisconnectListener())
         minecraftEvents.subscribe(PrePlayerJoinEvent::class.java, PrePlayerJoinListener())
         minecraftEvents.subscribe(PlayerJoinEvent::class.java, PlayerJoinListener())
+        minecraftEvents.subscribe(SwingArmEvent::class.java, SwingArmListener())
 
         metadataKeyValueBufferRegistry = MetadataKeyValueBufferRegistry()
         metadataKeyValueBufferRegistry.register(WorldMetadataType.NAME, NameWorldMetadataBuffer())
