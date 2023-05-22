@@ -5,13 +5,10 @@ import eu.mshade.enderchest.world.virtual.VirtualChunk
 import eu.mshade.enderchest.world.virtual.VirtualSection
 import eu.mshade.enderframe.virtualserver.VirtualWorld
 import eu.mshade.enderframe.world.chunk.Chunk
-import eu.mshade.mwork.binarytag.BinaryTag
-import eu.mshade.mwork.binarytag.BinaryTagType
-import eu.mshade.mwork.binarytag.ByteArrayBinaryTag
-import eu.mshade.mwork.binarytag.ZstdCompoundBinaryTag
-import eu.mshade.mwork.binarytag.segment.SegmentBinaryTag
+import eu.mshade.mwork.binarytag.*
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag
 import eu.mshade.mwork.binarytag.entity.ListBinaryTag
+import eu.mshade.mwork.binarytag.segment.SegmentBinaryTag
 import java.io.IOException
 import java.util.concurrent.ExecutionException
 
@@ -20,12 +17,14 @@ object VirtualChunkBinaryTagMarshal {
 
     fun write(
         segmentBinaryTag: SegmentBinaryTag,
+        binaryTagDriver: BinaryTagDriver,
         virtualChunk: VirtualChunk,
         metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry
     ) {
         try {
-            segmentBinaryTag.writeCompoundBinaryTag(
+            segmentBinaryTag.writeCompound(
                 chunkId(virtualChunk.x, virtualChunk.z),
+                binaryTagDriver,
                 serialize(virtualChunk, metadataKeyValueBufferRegistry)
             )
         } catch (e: ExecutionException) {
@@ -94,14 +93,15 @@ object VirtualChunkBinaryTagMarshal {
 
     fun read(
         segmentBinaryTag: SegmentBinaryTag,
+        binaryTagDriver: BinaryTagDriver,
         virtualWorld: VirtualWorld,
         chunkX: Int,
         chunkZ: Int,
         metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry
     ): Chunk {
         val chunkId = chunkId(chunkX, chunkZ)
-        val compoundBinaryTag = segmentBinaryTag.readCompoundBinaryTag(chunkId)
-        return deserialize(compoundBinaryTag!!, virtualWorld, metadataKeyValueBufferRegistry)
+        val compoundBinaryTag = segmentBinaryTag.readCompound(chunkId, binaryTagDriver)
+        return deserialize(compoundBinaryTag, virtualWorld, metadataKeyValueBufferRegistry)
     }
 
     private fun chunkId(chunkX: Int, chunkZ: Int): String {

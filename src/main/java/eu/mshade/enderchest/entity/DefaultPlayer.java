@@ -136,7 +136,6 @@ public class DefaultPlayer extends Player {
             int radius = 10;
 
 
-            long start = System.currentTimeMillis();
             Queue<CompletableFuture<Chunk>> askChunks = new ConcurrentLinkedQueue<>();
 
             int rSquared = radius * radius;
@@ -157,6 +156,7 @@ public class DefaultPlayer extends Player {
 
             try {
                 Void waitingAskChunk = CompletableFuture.allOf(askChunks.toArray(new CompletableFuture[0])).get();
+                long start = System.currentTimeMillis();
 
                 Queue<Chunk> result = askChunks.stream().map(CompletableFuture::join).distinct().collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
 
@@ -176,8 +176,9 @@ public class DefaultPlayer extends Player {
 
                 newChunks.forEach(chunk -> {
                     this.getMinecraftSession().sendChunk(chunk);
-
                 });
+
+//                LOGGER.info("Chunk loaded in " + (System.currentTimeMillis() - start) + "ms, there are " + world.getChunks().size() + " chunks in all, new chunk " + newChunks.size());
 
 //                this.getMinecraftSession().sendMessage(ChatColor.GREEN + "Chunk loaded in " + (System.currentTimeMillis() - start) + "ms, there are " + world.getChunks().size() + " chunks in all, new chunk " + newChunks.size(), TextPosition.HOT_BAR);
             } catch (InterruptedException | ExecutionException e) {

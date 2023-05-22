@@ -8,7 +8,6 @@ import eu.mshade.enderchest.world.EmptyChunk
 import eu.mshade.enderframe.EnderFrame
 import eu.mshade.enderframe.entity.Entity
 import eu.mshade.enderframe.entity.EntityKey
-import eu.mshade.enderframe.entity.EntityType
 import eu.mshade.enderframe.item.MaterialKey
 import eu.mshade.enderframe.metadata.MetadataKeyValueBucket
 import eu.mshade.enderframe.virtualserver.VirtualWorld
@@ -18,7 +17,6 @@ import eu.mshade.enderframe.world.Location
 import eu.mshade.enderframe.world.World
 import eu.mshade.enderframe.world.block.Block
 import eu.mshade.enderframe.world.chunk.Chunk
-import eu.mshade.mwork.binarytag.BinaryTagDriver
 import eu.mshade.mwork.binarytag.segment.SegmentBinaryTag
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -41,10 +39,6 @@ class DefaultVirtualWorld(
     private val regionByBinaryTagPoet = ConcurrentHashMap<SegmentBinaryTag, String>()
     private val binaryTagDriver = EnderFrame.get().binaryTagDriver
 
-    init {
-        regionFolder.mkdirs()
-        indicesFolder.mkdirs()
-    }
 
     companion object {
         val LOGGER: Logger = LoggerFactory.getLogger(DefaultVirtualWorld::class.java)
@@ -54,7 +48,7 @@ class DefaultVirtualWorld(
         val chunkStateStore = chunk.chunkStateStore
 
         chunkStateStore.setFinishWrite {
-            val segmentBinaryTag: SegmentBinaryTag = getCarbonBinaryTag(binaryTagDriver, this, chunk)
+            val segmentBinaryTag = getSegment(this, chunk)
             chunksByRegion[segmentBinaryTag]!!.remove(chunk)
             chunkById.remove(chunk.id)
         }
@@ -70,9 +64,10 @@ class DefaultVirtualWorld(
     }
 
     override fun saveChunk(chunk: Chunk) {
-        val carbonBinaryTag = getCarbonBinaryTag(binaryTagDriver, this, chunk)
+        val carbonBinaryTag = getSegment(this, chunk)
         VirtualChunkBinaryTagMarshal.write(
             carbonBinaryTag,
+            binaryTagDriver,
             chunk as VirtualChunk,
             EnderChest.metadataKeyValueBufferRegistry
         )
@@ -93,7 +88,7 @@ class DefaultVirtualWorld(
             return chunkCompletableFuture
         }
 
-        val carbonBinaryTag = getCarbonBinaryTag(binaryTagDriver, this, chunkX, chunkZ)
+        val carbonBinaryTag = getSegment(this, chunkX, chunkZ)
         if (isChunkExists(chunkX, chunkZ)) {
             chunkCompletableFuture = CompletableFuture()
             chunkCompletableFuture.completeAsync {
@@ -101,6 +96,7 @@ class DefaultVirtualWorld(
                 try {
                     chunk = VirtualChunkBinaryTagMarshal.read(
                         carbonBinaryTag,
+                        binaryTagDriver,
                         this,
                         chunkX,
                         chunkZ,
@@ -145,8 +141,8 @@ class DefaultVirtualWorld(
     }
 
     override fun isChunkExists(chunkX: Int, chunkZ: Int): Boolean {
-        val carbonBinaryTag = getCarbonBinaryTag(binaryTagDriver, this, chunkX, chunkZ)
-        return carbonBinaryTag.compoundSectionIndex.containsKey(chunkId(chunkX, chunkZ))
+        val carbonBinaryTag = getSegment(this, chunkX, chunkZ)
+        return carbonBinaryTag.hasKey(chunkId(chunkX, chunkZ))
     }
 
     override fun addEntity(entity: Entity?) {
@@ -241,9 +237,9 @@ class DefaultVirtualWorld(
                     lastUsageRegion.remove(carbonBinaryTag)
                     chunksByRegion.remove(carbonBinaryTag)
                     binaryTagPoetByRegion.remove(regionByBinaryTagPoet.remove(carbonBinaryTag))
-                    if (carbonBinaryTag.compoundSectionIndex.consume()) {
+/*                    if (carbonBinaryTag.compoundSectionIndex.consume()) {
                         carbonBinaryTag.writeCompoundSectionIndex()
-                    }
+                    }*/
                 }
             }
             saveWorld()
@@ -272,13 +268,11 @@ class DefaultVirtualWorld(
     }
 
 
-    private fun getCarbonBinaryTag(binaryTagDriver: BinaryTagDriver, world: World, x: Int, z: Int): SegmentBinaryTag {
+    private fun getSegment(world: World, x: Int, z: Int): SegmentBinaryTag {
         val regionId = regionId(x, z)
         return binaryTagPoetByRegion.computeIfAbsent(regionId) { s: String ->
             val segmentBinaryTag = SegmentBinaryTag(
-                File(world.indicesFolder, "$regionId.dat"),
-                File(world.regionFolder, "$regionId.dat"),
-                binaryTagDriver
+                File(world.regionFolder, "$regionId.msr"),
             )
             chunksByRegion[segmentBinaryTag] = ConcurrentLinkedQueue()
             regionByBinaryTagPoet[segmentBinaryTag] = s
@@ -287,8 +281,8 @@ class DefaultVirtualWorld(
         }
     }
 
-    private fun getCarbonBinaryTag(binaryTagDriver: BinaryTagDriver, world: World, chunk: Chunk): SegmentBinaryTag {
-        return getCarbonBinaryTag(binaryTagDriver, world, chunk.x, chunk.z)
+    private fun getSegment(world: World, chunk: Chunk): SegmentBinaryTag {
+        return getSegment(world, chunk.x, chunk.z)
     }
 
     fun toVirtualChunk(chunk: Chunk): VirtualChunk {

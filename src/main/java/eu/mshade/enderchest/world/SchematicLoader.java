@@ -24,12 +24,12 @@ import java.util.zip.GZIPInputStream;
 
 public class SchematicLoader {
 
+    private static final Block AIR = Material.AIR.toBlock();
+    public static File SCHEMATIC_FOLDER = new File(System.getProperty("user.dir"), "schematics");
     private static EndermanMinecraftProtocol endermanProtocol = new EndermanMinecraftProtocol();
     private static Logger LOGGER = LoggerFactory.getLogger(SchematicLoader.class);
-    private static final Block AIR = Material.AIR.toBlock();
-    public static File SCHEMATIC_FOLDER = new File(System.getProperty("user.dir") , "schematics");
 
-    public static void placeSchematic(World world, String schematic, Vector start){
+    public static void placeSchematic(World world, String schematic, Vector start) {
         try {
             placeSchematic(world, new FileInputStream(new File(SCHEMATIC_FOLDER, schematic)), start);
         } catch (FileNotFoundException e) {
@@ -39,7 +39,7 @@ public class SchematicLoader {
 
     public static void placeSchematic(World world, InputStream inputStream, Vector start) {
         BlockTransformerController blockTransformerController = endermanProtocol.getBlockTransformerController();
-        Block STONE = Material.STONE.toBlock();
+        Block STONE = Material.RED_STAINED_GLASS.toBlock();
         CompletableFuture.runAsync(() -> {
 
             BinaryTagDriver binaryTagDriver = MWork.INSTANCE.getBinaryTagDriver();
@@ -58,8 +58,11 @@ public class SchematicLoader {
                 System.out.println("Schematic size: " + width + "x" + length + "x" + height);
 
                 int unknown = 0;
+
+                Set<MaterialKey> unknownTypes = new HashSet<>();
+
                 Set<Chunk> updatedChunks = new HashSet<>();
-                
+
                 for (int x = 0; x < width; x++) {
                     for (int y = 0; y < height; y++) {
                         for (int z = 0; z < length; z++) {
@@ -78,15 +81,16 @@ public class SchematicLoader {
                             if (materialKey != Material.AIR) {
                                 reverse = blockTransformerController.reverse(materialKey);
 
-                            if (reverse == null) {
-                                unknown++;
-                                reverse = STONE;
-                            }
+                                if (reverse == null) {
+                                    reverse = blockTransformerController.reverse(MaterialKey.from(block));
+                                    if (reverse == null) {
+                                        unknown++;
+                                        unknownTypes.add(materialKey);
+                                        reverse = STONE;
+                                    }
+                                }
 
-/*                                if (reverse == null) {
-
-                                }*/
-                            }else {
+                            } else {
                                 reverse = AIR;
                             }
 
@@ -105,18 +109,13 @@ public class SchematicLoader {
                     }
                 }
 
-                System.out.println(unknown + " unknown blocks out of " + blocks.length+ " blocks (" + (unknown / (double) blocks.length * 100) + "%)");
+                unknownTypes.forEach(materialKey -> {
+                    System.out.println("Unknown block: " + materialKey);
+                });
+                System.out.println(unknown + " unknown blocks out of " + blocks.length + " blocks (" + (unknown / (double) blocks.length * 100) + "%)");
                 LOGGER.info("Loaded schematic in " + (System.currentTimeMillis() - startTime) + "ms");
 
                 updatedChunks.forEach(chunk -> {
-                    // set middle block into chunk
-/*                    int maxY = chunk.getHighest(chunk.getX(), chunk.getZ());
-                    // get middle of chunk
-                    int middleX = chunk.getX() << 4;
-                    int middleZ = chunk.getZ() << 4;
-
-                    chunk.setBlock(chunk.getX() + middleX, maxY, chunk.getZ() + middleZ, Material.RED_WOOL);*/
-
                     chunk.notify(Player.class, player -> {
                         player.getMinecraftSession().sendUnloadChunk(chunk);
                     });
@@ -136,4 +135,6 @@ public class SchematicLoader {
 
         });
     }
+
+
 }

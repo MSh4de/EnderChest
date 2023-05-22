@@ -6,9 +6,9 @@ import eu.mshade.enderframe.inventory.Inventory
 import eu.mshade.enderframe.world.World
 import eu.mshade.enderframe.world.chunk.Chunk
 import eu.mshade.mwork.binarytag.*
-import eu.mshade.mwork.binarytag.segment.SegmentBinaryTag
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag
 import eu.mshade.mwork.binarytag.entity.ListBinaryTag
+import eu.mshade.mwork.binarytag.segment.SegmentBinaryTag
 import java.io.IOException
 import java.util.concurrent.ExecutionException
 
@@ -100,13 +100,15 @@ object ChunkBinaryTagMarshal {
     }
 
     fun write(
-        segmentBinaryTag: SegmentBinaryTag,
+        segment: SegmentBinaryTag,
+        binaryTagDriver: BinaryTagDriver,
         chunk: Chunk,
         metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry
     ) {
         try {
-            segmentBinaryTag.writeCompoundBinaryTag(
+            segment.writeCompound(
                 chunkId(chunk),
+                binaryTagDriver,
                 this.serialize(chunk, metadataKeyValueBufferRegistry)
             )
         } catch (e: ExecutionException) {
@@ -119,15 +121,16 @@ object ChunkBinaryTagMarshal {
     }
 
     fun read(
-        segmentBinaryTag: SegmentBinaryTag,
+        segment: SegmentBinaryTag,
+        binaryTagDriver: BinaryTagDriver,
         world: World,
         chunkX: Int,
         chunkZ: Int,
         metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry
     ): Chunk {
         val chunkId = chunkId(chunkX, chunkZ)
-        val compoundBinaryTag = segmentBinaryTag.readCompoundBinaryTag(chunkId)
-        return deserialize(compoundBinaryTag!!, world, metadataKeyValueBufferRegistry)
+        val compoundBinaryTag = segment.readCompound(chunkId, binaryTagDriver)
+        return deserialize(compoundBinaryTag, world, metadataKeyValueBufferRegistry)
     }
 
 }

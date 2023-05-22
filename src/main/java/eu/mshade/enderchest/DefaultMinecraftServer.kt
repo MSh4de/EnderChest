@@ -7,15 +7,14 @@ import eu.mshade.enderframe.entity.Entity
 import eu.mshade.enderframe.entity.Player
 import eu.mshade.enderframe.gamerule.GameRuleRepository
 import eu.mshade.enderframe.item.ItemRuleRepository
-import eu.mshade.enderframe.item.MaterialCategory
-import eu.mshade.enderframe.item.MaterialCategoryKey
 import eu.mshade.enderframe.protocol.MinecraftProtocolRepository
 import eu.mshade.enderframe.world.World
+import eu.mshade.enderframe.world.WorldRepository
 import eu.mshade.enderframe.world.block.BlockRuleRepository
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 
-class DefaultMinecraftServer: MinecraftServer {
+class DefaultMinecraftServer : MinecraftServer {
 
     private val players = ConcurrentLinkedQueue<Player>()
     private val entities = ConcurrentLinkedQueue<Entity>()
@@ -25,14 +24,15 @@ class DefaultMinecraftServer: MinecraftServer {
     private val itemRuleRepository = ItemRuleRepository()
 
     init {
-        blockRuleRepository.register(MaterialCategory.BUTTON, ButtonBlockRule())
-        blockRuleRepository.register(MaterialCategory.LEVER, LeverBlockRule())
-        blockRuleRepository.register(MaterialCategory.LOG, LogBlockRule())
-        blockRuleRepository.register(MaterialCategory.SLAB, SlabBlockRule())
-        blockRuleRepository.register(MaterialCategory.STAIRS, StairsBlockRule())
-        blockRuleRepository.register(MaterialCategory.VINE, VineBlockRule())
+        blockRuleRepository.register(ButtonBlockRule())
+        blockRuleRepository.register(LeverBlockRule())
+        blockRuleRepository.register(WoodBlockRule())
+        blockRuleRepository.register(SlabBlockRule())
+        blockRuleRepository.register(StairsBlockRule())
+        blockRuleRepository.register(VineBlockRule())
 
-        itemRuleRepository.register(MaterialCategory.ARMOR, ArmorItemRule())
+        itemRuleRepository.register(ArmorItemRule())
+
     }
 
     override fun addPlayer(player: Player) {
@@ -56,7 +56,7 @@ class DefaultMinecraftServer: MinecraftServer {
     }
 
     override fun getWorlds(): Collection<World> {
-        TODO("Not yet implemented")
+        return WorldRepository.getWorlds()
     }
 
     override fun getWorld(worldName: String): World? {

@@ -31,6 +31,7 @@ import eu.mshade.enderframe.metadata.MetadataKeyValueBufferRegistry
 import eu.mshade.enderframe.mojang.chat.*
 import eu.mshade.enderframe.packetevent.*
 import eu.mshade.enderframe.protocol.MinecraftEncryption
+import eu.mshade.enderframe.scoreboard.ScoreboardSidebar
 import eu.mshade.enderframe.tick.TickBus
 import eu.mshade.enderframe.world.*
 import eu.mshade.enderframe.world.block.BlockMetadataType
@@ -46,6 +47,7 @@ import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
 fun main() {
@@ -65,6 +67,8 @@ object EnderChest {
     val virtualWorldManager: VirtualWorldManager
     val metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry
     val chunkSafeguard = ChunkSafeguard()
+
+    val metrics = ScoreboardSidebar("EnderChest - Metrics")
 
 
     val tickBus = TickBus(20)
@@ -93,7 +97,7 @@ object EnderChest {
                 LOGGER.warn("Material $key not found")
                 return@forEach
             }
-            val material = Material.fromNamespacedKey(key)
+            val material = Material.fromName(key)
             (material as DefaultMaterialKey).id = id.asInt()
             Material.registerMaterialKey(material)
         }
@@ -208,6 +212,9 @@ object EnderChest {
          */
         SchematicLoader.SCHEMATIC_FOLDER.mkdir()
 
+        Metrics().joinTickBus(tickBus)
+
+
 
         Runtime.getRuntime().addShutdownHook(Thread {
             LOGGER.warn("Beginning save of server don't close the console !")
@@ -220,7 +227,7 @@ object EnderChest {
                 })
                 // log number of chunks saved in the world
                 LOGGER.info("Saved " + w.chunks.size + " chunks in world " + w.name)
-                w.regions.forEach(Consumer { segmentBinaryTag: SegmentBinaryTag -> if (segmentBinaryTag.compoundSectionIndex.consume()) segmentBinaryTag.writeCompoundSectionIndex() })
+//                w.regions.forEach(Consumer { segmentBinaryTag: SegmentBinaryTag -> if (segmentBinaryTag.compoundSectionIndex.consume()) segmentBinaryTag.writeCompoundSectionIndex() })
             })
 
             virtualWorldManager.getVirtualWorlds().forEach {
@@ -231,7 +238,7 @@ object EnderChest {
                     )
                 }
                 LOGGER.info("Saved " + it.chunks.size + " chunks in virtual world " + it.name)
-                it.regions.forEach { segmentBinaryTag: SegmentBinaryTag -> if (segmentBinaryTag.compoundSectionIndex.consume()) segmentBinaryTag.writeCompoundSectionIndex() }
+//                it.regions.forEach { segmentBinaryTag: SegmentBinaryTag -> if (segmentBinaryTag.compoundSectionIndex.consume()) segmentBinaryTag.writeCompoundSectionIndex() }
             }
 
             LOGGER.info("Worlds saved")

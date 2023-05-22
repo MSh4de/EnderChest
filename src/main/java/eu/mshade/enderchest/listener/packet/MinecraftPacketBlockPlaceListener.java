@@ -25,13 +25,14 @@ public class MinecraftPacketBlockPlaceListener implements EventListener<Minecraf
         BlockFace blockFace = event.getBlockFace();
         Vector blockPosition;
         ItemStack itemStack = player.getInventory().getItemInHand();
+        if (itemStack == null) return;
         MaterialKey material = itemStack.getMaterial();
         boolean isSneaking = player.isSneaking();
 
         if (material == null) return;
 
-        if (material.getMaterialCategories().contains(MaterialCategory.ITEM) && !material.getMaterialCategories().contains(MaterialCategory.BLOCK)) {
-            ItemRule itemRule = EnderChest.INSTANCE.getMinecraftServer().getItemRules().getItemRule(material.getTag());
+        if (material.getMaterialCategories().contains(MaterialTag.ITEM) && !material.getMaterialCategories().contains(MaterialTag.BLOCK)) {
+            ItemRule itemRule = EnderChest.INSTANCE.getMinecraftServer().getItemRules().getItemRule(material);
 
             if (itemRule != null) {
                 itemRule.apply(player, itemStack);
@@ -54,7 +55,7 @@ public class MinecraftPacketBlockPlaceListener implements EventListener<Minecraf
 
             Block block = material.toBlock();
 
-            BlockRule blockRule = EnderChest.INSTANCE.getMinecraftServer().getBlockRules().getBlockRule(block.getMaterialKey().getTag());
+            BlockRule blockRule = EnderChest.INSTANCE.getMinecraftServer().getBlockRules().getBlockRule(block.getMaterialKey());
             if (blockRule != null) {
                 block = blockRule.apply(player.getLocation(), blockPosition, blockFace, event.getCursorPosition(), block);
             }

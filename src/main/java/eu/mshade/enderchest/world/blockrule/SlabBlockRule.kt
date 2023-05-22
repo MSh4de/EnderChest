@@ -1,11 +1,12 @@
 package eu.mshade.enderchest.world.blockrule
 
 import eu.mshade.enderframe.item.Material
+import eu.mshade.enderframe.item.MaterialKey
 import eu.mshade.enderframe.world.Location
 import eu.mshade.enderframe.world.Vector
 import eu.mshade.enderframe.world.block.*
 
-class SlabBlockRule : BlockRule() {
+class SlabBlockRule : BlockRule {
 
     override fun apply(
         pov: Location,
@@ -44,6 +45,10 @@ class SlabBlockRule : BlockRule() {
         if (previousBlock.getMaterialKey() == Material.AIR) return block
 
         return block
+    }
+
+    override fun canApply(material: MaterialKey): Boolean {
+        return material.namespacedKey.key.endsWith("_slab")
     }
 
 }

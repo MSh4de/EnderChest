@@ -14,8 +14,8 @@ public class ChunkSafeguard extends Thread {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChunkSafeguard.class);
     protected BlockingQueue<Chunk> chunkBlockingQueue = new LinkedBlockingQueue<>();
-    protected boolean running = true;
     protected CompletableFuture<Boolean> waitingFinishLastChunk = new CompletableFuture<>();
+    protected boolean running = true;
 
     public ChunkSafeguard() {
         super("ChunkSafeguard");

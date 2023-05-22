@@ -38,7 +38,7 @@ public class DefaultWorld extends World {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultWorld.class);
     private final ChunkSafeguard chunkSafeguard;
 
-    private final Map<String, SegmentBinaryTag> binaryTagPoetByRegion = new ConcurrentHashMap<>();
+    private final Map<String, SegmentBinaryTag> segmentByRegion = new ConcurrentHashMap<>();
     private final Map<SegmentBinaryTag, Queue<Chunk>> chunksByRegion = new ConcurrentHashMap<>();
     private final Map<SegmentBinaryTag, Long> lastUsageRegion = new ConcurrentHashMap<>();
     private final Map<SegmentBinaryTag, String> regionByBinaryTagPoet = new ConcurrentHashMap<>();
@@ -47,9 +47,6 @@ public class DefaultWorld extends World {
     public DefaultWorld(ChunkSafeguard chunkSafeguard,  File worldFolder, MetadataKeyValueBucket metadataKeyValueBucket) {
         super(worldFolder, metadataKeyValueBucket);
         this.chunkSafeguard = chunkSafeguard;
-        this.regionFolder.mkdirs();
-        this.indicesFolder.mkdirs();
-
     }
 
     public DefaultWorld(ChunkSafeguard chunkSafeguard, File worldFolder) {
@@ -62,7 +59,7 @@ public class DefaultWorld extends World {
         ChunkStateStore chunkStateStore = chunk.getChunkStateStore();
 
         chunkStateStore.setFinishWrite(() -> {
-            SegmentBinaryTag segmentBinaryTag = getCarbonBinaryTag(binaryTagDriver, this, chunk);
+            SegmentBinaryTag segmentBinaryTag = getSegment(this, chunk);
             this.chunksByRegion.get(segmentBinaryTag).remove(chunk);
             this.chunkById.remove(chunk.getId());
             EnderFrame.get().getMinecraftEvents().publish(new ChunkUnloadEvent(chunk));
@@ -90,8 +87,8 @@ public class DefaultWorld extends World {
 
     @Override
     public void saveChunk(Chunk chunk) {
-        SegmentBinaryTag segmentBinaryTag = getCarbonBinaryTag(binaryTagDriver, this, chunk);
-        ChunkBinaryTagMarshal.INSTANCE.write(segmentBinaryTag, chunk, EnderChest.INSTANCE.getMetadataKeyValueBufferRegistry());
+        SegmentBinaryTag segmentBinaryTag = getSegment(this, chunk);
+        ChunkBinaryTagMarshal.INSTANCE.write(segmentBinaryTag, binaryTagDriver, chunk, EnderChest.INSTANCE.getMetadataKeyValueBufferRegistry());
         this.lastUsageRegion.put(segmentBinaryTag, System.currentTimeMillis());
 
     }
@@ -129,13 +126,13 @@ public class DefaultWorld extends World {
 
             return completableFuture;
         } else {
-            SegmentBinaryTag segmentBinaryTag = getCarbonBinaryTag(binaryTagDriver, this, x, z);
+            SegmentBinaryTag segmentBinaryTag = getSegment(this, x, z);
             CompletableFuture<Chunk> completableFuture = new CompletableFuture<>();
             completableFuture.completeAsync(() -> {
 
                 Chunk chunk;
                 try {
-                    chunk = ChunkBinaryTagMarshal.INSTANCE.read(segmentBinaryTag, this, x, z, EnderChest.INSTANCE.getMetadataKeyValueBufferRegistry());
+                    chunk = ChunkBinaryTagMarshal.INSTANCE.read(segmentBinaryTag, binaryTagDriver,this, x, z, EnderChest.INSTANCE.getMetadataKeyValueBufferRegistry());
                     ChunkLoadEvent chunkLoadEvent = new ChunkLoadEvent(completableFuture);
                     EnderFrame.get().getMinecraftEvents().publish(chunkLoadEvent);
 
@@ -172,8 +169,8 @@ public class DefaultWorld extends World {
 
     @Override
     public boolean isChunkExists(int chunkX, int chunkZ) {
-        SegmentBinaryTag segmentBinaryTag = getCarbonBinaryTag(binaryTagDriver, this, chunkX, chunkZ);
-        return segmentBinaryTag.getCompoundSectionIndex().containsKey(chunkId(chunkX, chunkZ));
+        SegmentBinaryTag segmentBinaryTag = getSegment(this, chunkX, chunkZ);
+        return segmentBinaryTag.hasKey(chunkId(chunkX, chunkZ));
     }
 
 
@@ -235,7 +232,7 @@ public class DefaultWorld extends World {
 
     @Override
     public Collection<SegmentBinaryTag> getRegions() {
-        return this.binaryTagPoetByRegion.values();
+        return this.segmentByRegion.values();
     }
 
     @Override
@@ -267,16 +264,13 @@ public class DefaultWorld extends World {
                 }
             }
 
-            for (SegmentBinaryTag segmentBinaryTag : this.binaryTagPoetByRegion.values()) {
+            for (SegmentBinaryTag segmentBinaryTag : this.segmentByRegion.values()) {
 
                 long delay = System.currentTimeMillis() - this.lastUsageRegion.get(segmentBinaryTag);
                 if (delay > 5000 && this.chunksByRegion.get(segmentBinaryTag).isEmpty()) {
                     this.lastUsageRegion.remove(segmentBinaryTag);
                     this.chunksByRegion.remove(segmentBinaryTag);
-                    this.binaryTagPoetByRegion.remove(regionByBinaryTagPoet.remove(segmentBinaryTag));
-                    if (segmentBinaryTag.getCompoundSectionIndex().consume()) {
-                        segmentBinaryTag.writeCompoundSectionIndex();
-                    }
+                    this.segmentByRegion.remove(regionByBinaryTagPoet.remove(segmentBinaryTag));
                 }
             }
 
@@ -314,10 +308,11 @@ public class DefaultWorld extends World {
     }
 
 
-    private SegmentBinaryTag getCarbonBinaryTag(BinaryTagDriver binaryTagDriver, World world, int x, int z) {
+    private SegmentBinaryTag getSegment(World world, int x, int z) {
         String regionId = regionId(x, z);
-        return binaryTagPoetByRegion.computeIfAbsent(regionId, s -> {
-            SegmentBinaryTag segmentBinaryTag = new SegmentBinaryTag(new File(world.getIndicesFolder(), regionId + ".dat"), new File(world.getRegionFolder(), regionId + ".dat"), binaryTagDriver);
+        return segmentByRegion.computeIfAbsent(regionId, s -> {
+            //mshade region
+            SegmentBinaryTag segmentBinaryTag = new SegmentBinaryTag(new File(world.getRegionFolder(), regionId + ".msr"));
             this.chunksByRegion.put(segmentBinaryTag, new ConcurrentLinkedQueue<>());
             this.regionByBinaryTagPoet.put(segmentBinaryTag, s);
             this.lastUsageRegion.put(segmentBinaryTag, System.currentTimeMillis());
@@ -325,8 +320,8 @@ public class DefaultWorld extends World {
         });
     }
 
-    private SegmentBinaryTag getCarbonBinaryTag(BinaryTagDriver binaryTagDriver, World world, Chunk chunk) {
-        return getCarbonBinaryTag(binaryTagDriver, world, chunk.getX(), chunk.getZ());
+    private SegmentBinaryTag getSegment(World world, Chunk chunk) {
+        return getSegment(world, chunk.getX(), chunk.getZ());
     }
 
     @Override

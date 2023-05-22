@@ -80,7 +80,7 @@ class PrePlayerJoinListener : EventListener<PrePlayerJoinEvent> {
                 )
             )
         )
-        minecraftSession.sendAbilities(false, false, true, false, 0.1f, 0.1f)
+        minecraftSession.sendAbilities(false, false, true, false, 0.5f, 0.1f)
         minecraftSession.sendPacket(MinecraftPacketOutChangeGameState(3, player.gameMode.id.toFloat()))
         minecraftSession.teleport(location)
         EnderChest.minecraftServer.addPlayer(player)

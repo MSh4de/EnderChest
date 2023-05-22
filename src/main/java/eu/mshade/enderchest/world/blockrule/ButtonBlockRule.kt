@@ -1,10 +1,12 @@
 package eu.mshade.enderchest.world.blockrule
 
+import eu.mshade.enderframe.item.MaterialKey
 import eu.mshade.enderframe.world.Location
 import eu.mshade.enderframe.world.Vector
 import eu.mshade.enderframe.world.block.*
+import java.util.concurrent.atomic.AtomicInteger
 
-class ButtonBlockRule : BlockRule() {
+class ButtonBlockRule : BlockRule {
 
     override fun apply(
         pov: Location,
@@ -17,6 +19,10 @@ class ButtonBlockRule : BlockRule() {
         metadataKeyValueBucket.setMetadataKeyValue(FaceBlockMetadata(blockFace))
         metadataKeyValueBucket.setMetadataKeyValue(PoweredBlockMetadata(false))
         return block
+    }
+
+    override fun canApply(material: MaterialKey): Boolean {
+        return material.namespacedKey.key.endsWith("_button")
     }
 
 }

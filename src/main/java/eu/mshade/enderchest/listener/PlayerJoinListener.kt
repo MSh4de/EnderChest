@@ -1,5 +1,6 @@
 package eu.mshade.enderchest.listener
 
+import eu.mshade.enderchest.EnderChest
 import eu.mshade.enderframe.event.PlayerJoinEvent
 import eu.mshade.enderframe.item.Enchantment
 import eu.mshade.enderframe.item.EnchantmentType
@@ -8,9 +9,13 @@ import eu.mshade.enderframe.item.Material
 import eu.mshade.enderframe.item.metadata.EnchantmentsItemStackMetadata
 import eu.mshade.enderframe.item.metadata.NameItemStackMetadata
 import eu.mshade.enderframe.mojang.chat.TextComponent
+import eu.mshade.enderframe.particle.ParticleBlockCrack
 import eu.mshade.enderframe.scoreboard.ScoreboardSidebar
+import eu.mshade.enderframe.world.Vector
 import eu.mshade.enderman.packet.play.world.MinecraftPacketOutTimeUpdate
 import eu.mshade.mwork.event.EventListener
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import org.slf4j.LoggerFactory
 
 class PlayerJoinListener : EventListener<PlayerJoinEvent> {
@@ -23,32 +28,10 @@ class PlayerJoinListener : EventListener<PlayerJoinEvent> {
         val player = event.player
         val minecraftSession = player.minecraftSession
 
-        val scoreboardSidebar = ScoreboardSidebar(TextComponent.of("EnderChest"))
-        scoreboardSidebar.modifyLine("test") {
-            it.setValue("test")
-        }
-        scoreboardSidebar.modifyLine("test2") {
-            it.setValue("test_")
-        }
+        EnderChest.metrics.addWatcher(player)
 
-        /*        val buildTeam = Team.builder()
-                    .setTeamName("a")
-                    .setTeamMode(TeamMode.CREATE_TEAM)
-                    .setTeamDisplayName("hi")
-                    .setPlayersName(listOf(player.name))
-                    .buildTeam()
-
-                minecraftSession.sendTeams(buildTeam)*/
-
-        scoreboardSidebar.addWatcher(player)
-
-
-        val itemStack = ItemStack(Material.RED_WOOL, 64)
-        val metadataKeyValueBucket = itemStack.metadataKeyValueBucket
-        metadataKeyValueBucket.setMetadataKeyValue(NameItemStackMetadata("Test"))
-
-
-        player.inventory?.setItemStack(0, itemStack)
+        val itemStack = ItemStack(Material.VILLAGER_SPAWN_EGG)
+        player.inventory?.addItemStack(itemStack)
 
     }
 

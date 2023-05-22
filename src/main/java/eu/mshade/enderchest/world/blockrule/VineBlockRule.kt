@@ -1,11 +1,12 @@
 package eu.mshade.enderchest.world.blockrule
 
 import eu.mshade.enderframe.item.Material
+import eu.mshade.enderframe.item.MaterialKey
 import eu.mshade.enderframe.world.Location
 import eu.mshade.enderframe.world.Vector
 import eu.mshade.enderframe.world.block.*
 
-class VineBlockRule : BlockRule() {
+class VineBlockRule : BlockRule {
 
     override fun apply(
         pov: Location,
@@ -33,6 +34,10 @@ class VineBlockRule : BlockRule() {
         metadataKeyValue.metadataValue.add(blockFace)
 
         return vineBlock
+    }
+
+    override fun canApply(material: MaterialKey): Boolean {
+        return material == Material.VINE
     }
 
 }
