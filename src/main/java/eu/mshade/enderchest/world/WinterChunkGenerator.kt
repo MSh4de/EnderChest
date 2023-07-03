@@ -14,7 +14,7 @@ class WinterChunkGenerator(val world: World) : ChunkGenerator {
         val chunkX = chunk.x
         val chunkZ = chunk.z
 
-        try {
+/*        try {
             val heightMap = biomeBucket.getHeightMap(chunkX, chunkZ)
             for (x in 0..15) {
                 for (z in 0..15) {
@@ -28,7 +28,7 @@ class WinterChunkGenerator(val world: World) : ChunkGenerator {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-        }
+        }*/
 
     }
 

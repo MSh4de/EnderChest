@@ -2,8 +2,9 @@ package eu.mshade.enderchest
 
 import eu.mshade.enderframe.mojang.chat.ChatColor
 import eu.mshade.enderframe.tick.Tickable
+import eu.mshade.enderframe.world.block.TickableBlockRepository
 
-class Metrics: Tickable() {
+class Metrics : Tickable() {
 
     val scoreboard = EnderChest.metrics
     val tickBus = EnderChest.tickBus
@@ -62,5 +63,17 @@ class Metrics: Tickable() {
         scoreboard.modifyLine("regions") {
             it.setValue("Regions: $regions")
         }
+
+        scoreboard.modifyLine("space5") {
+            it.setValue(ChatColor.DARK_PURPLE.toString())
+        }
+
+        val tickableBlockSize = tickBus.tickables.find { it is TickableBlockRepository }?.let {
+            (it as TickableBlockRepository).tickableBlockEntries.size
+        } ?: 0
+        scoreboard.modifyLine("tickBus") {
+            it.setValue("Tickable count: $tickableBlockSize")
+        }
+
     }
 }

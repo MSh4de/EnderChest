@@ -1,7 +1,7 @@
 package eu.mshade.enderchest
 
 import eu.mshade.enderchest.itemrule.ArmorItemRule
-import eu.mshade.enderchest.world.blockrule.*
+import eu.mshade.enderchest.world.block.*
 import eu.mshade.enderframe.MinecraftServer
 import eu.mshade.enderframe.entity.Entity
 import eu.mshade.enderframe.entity.Player
@@ -10,7 +10,8 @@ import eu.mshade.enderframe.item.ItemRuleRepository
 import eu.mshade.enderframe.protocol.MinecraftProtocolRepository
 import eu.mshade.enderframe.world.World
 import eu.mshade.enderframe.world.WorldRepository
-import eu.mshade.enderframe.world.block.BlockRuleRepository
+import eu.mshade.enderframe.world.block.BlockBehaviorRepository
+import eu.mshade.enderframe.world.block.TickableBlockRepository
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -19,17 +20,23 @@ class DefaultMinecraftServer : MinecraftServer {
     private val players = ConcurrentLinkedQueue<Player>()
     private val entities = ConcurrentLinkedQueue<Entity>()
     private val minecraftProtocolRepository = MinecraftProtocolRepository()
-    private val blockRuleRepository = BlockRuleRepository()
+    private val blockBehaviorRepository = BlockBehaviorRepository()
     private val gameRuleRepository = GameRuleRepository()
     private val itemRuleRepository = ItemRuleRepository()
+    private val tickableBlockRepository = TickableBlockRepository(blockBehaviorRepository)
 
     init {
-        blockRuleRepository.register(ButtonBlockRule())
-        blockRuleRepository.register(LeverBlockRule())
-        blockRuleRepository.register(WoodBlockRule())
-        blockRuleRepository.register(SlabBlockRule())
-        blockRuleRepository.register(StairsBlockRule())
-        blockRuleRepository.register(VineBlockRule())
+        blockBehaviorRepository.register(ButtonBlockBehavior())
+        blockBehaviorRepository.register(LeverBlockBehavior())
+        blockBehaviorRepository.register(WoodBlockBehavior())
+        blockBehaviorRepository.register(SlabBlockBehavior())
+        blockBehaviorRepository.register(StairsBlockBehavior())
+        blockBehaviorRepository.register(VineBlockBehavior())
+        blockBehaviorRepository.register(BedBlockBehavior())
+        blockBehaviorRepository.register(ChestBlockBehavior())
+        blockBehaviorRepository.register(RedstoneLampBlockBehavior())
+        blockBehaviorRepository.register(RedstoneWireBlockBehavior())
+        blockBehaviorRepository.register(RepeaterBlockBehavior())
 
         itemRuleRepository.register(ArmorItemRule())
 
@@ -75,8 +82,8 @@ class DefaultMinecraftServer : MinecraftServer {
         return minecraftProtocolRepository
     }
 
-    override fun getBlockRules(): BlockRuleRepository {
-        return blockRuleRepository
+    override fun getBlockBehaviors(): BlockBehaviorRepository {
+        return blockBehaviorRepository
     }
 
     override fun getGameRules(): GameRuleRepository {
@@ -85,5 +92,9 @@ class DefaultMinecraftServer : MinecraftServer {
 
     override fun getItemRules(): ItemRuleRepository {
         return itemRuleRepository
+    }
+
+    override fun getTickableBlocks(): TickableBlockRepository {
+        return tickableBlockRepository
     }
 }

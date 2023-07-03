@@ -1,21 +1,25 @@
 package eu.mshade.enderchest.listener
 
 import eu.mshade.enderchest.EnderChest
+import eu.mshade.enderframe.attribute.Attribute
+import eu.mshade.enderframe.attribute.AttributeModifier
+import eu.mshade.enderframe.attribute.AttributeOperation
+import eu.mshade.enderframe.effect.Effect
+import eu.mshade.enderframe.effect.EffectType
 import eu.mshade.enderframe.event.PlayerJoinEvent
-import eu.mshade.enderframe.item.Enchantment
-import eu.mshade.enderframe.item.EnchantmentType
+import eu.mshade.enderframe.inventory.EquipmentSlot
 import eu.mshade.enderframe.item.ItemStack
+import eu.mshade.enderframe.item.ItemStackAttributeModifier
 import eu.mshade.enderframe.item.Material
-import eu.mshade.enderframe.item.metadata.EnchantmentsItemStackMetadata
-import eu.mshade.enderframe.item.metadata.NameItemStackMetadata
-import eu.mshade.enderframe.mojang.chat.TextComponent
-import eu.mshade.enderframe.particle.ParticleBlockCrack
-import eu.mshade.enderframe.scoreboard.ScoreboardSidebar
-import eu.mshade.enderframe.world.Vector
-import eu.mshade.enderman.packet.play.world.MinecraftPacketOutTimeUpdate
+import eu.mshade.enderframe.item.metadata.AttributeModifiersItemStackMetadata
+import eu.mshade.enderframe.item.metadata.MapDecorationsItemStackMetadata
+import eu.mshade.enderframe.item.metadata.MapIsScalingItemStackMetadata
+import eu.mshade.enderframe.map.MapCursorType
+import eu.mshade.enderframe.map.MapDecoration
 import eu.mshade.mwork.event.EventListener
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import org.slf4j.LoggerFactory
 
 class PlayerJoinListener : EventListener<PlayerJoinEvent> {
@@ -30,8 +34,15 @@ class PlayerJoinListener : EventListener<PlayerJoinEvent> {
 
         EnderChest.metrics.addWatcher(player)
 
-        val itemStack = ItemStack(Material.VILLAGER_SPAWN_EGG)
-        player.inventory?.addItemStack(itemStack)
+        val itemStack = ItemStack(Material.MAP)
+        val metadatas = itemStack.metadatas
+        val mapDecoration = MapDecoration("test", MapCursorType.WHITE_POINTER, 32.0, 32.0, 1.0)
+
+//        metadatas.setMetadataKeyValue(MapIsScalingItemStackMetadata(false))
+//        metadatas.setMetadataKeyValue(MapDecorationsItemStackMetadata(mutableListOf(mapDecoration)))
+
+        player.inventory?.setItemStack(0, itemStack)
+
 
     }
 

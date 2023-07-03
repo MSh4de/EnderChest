@@ -1,4 +1,3 @@
-import eu.mshade.enderchest.world.SchematicLoader
 import eu.mshade.enderframe.item.Material
 import eu.mshade.enderframe.item.MaterialKey
 import eu.mshade.enderframe.world.block.Block
@@ -23,7 +22,7 @@ class MaterialTest {
         val materialKey = MaterialKey.from(1, 0)
         val reverse = blockTransformerController.reverse(materialKey)
         assert(reverse != null)
-        println(reverse!!.getMaterialKey() == Material.STONE)
+        println(reverse!!.getMaterial() == Material.STONE)
     }
 
     @Test

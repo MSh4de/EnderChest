@@ -1,9 +1,13 @@
 package eu.mshade.enderchest.marshal.world
 
+import eu.mshade.enderchest.EnderChest
 import eu.mshade.enderframe.metadata.MetadataKeyValueBufferRegistry
 import eu.mshade.enderchest.world.DefaultChunk
+import eu.mshade.enderframe.MinecraftServer
 import eu.mshade.enderframe.inventory.Inventory
+import eu.mshade.enderframe.world.Vector
 import eu.mshade.enderframe.world.World
+import eu.mshade.enderframe.world.block.BlockMetadataType
 import eu.mshade.enderframe.world.chunk.Chunk
 import eu.mshade.mwork.binarytag.*
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag
@@ -13,6 +17,8 @@ import java.io.IOException
 import java.util.concurrent.ExecutionException
 
 object ChunkBinaryTagMarshal {
+
+    val tickableBlocks = EnderChest.minecraftServer.getTickableBlocks()
 
     fun serialize(
         chunk: Chunk,
@@ -25,7 +31,7 @@ object ChunkBinaryTagMarshal {
         val listBinaryTagSections = ListBinaryTag(BinaryTagType.COMPOUND)
         val listBinaryTagEntities = ListBinaryTag(BinaryTagType.COMPOUND)
 
-        for (i in chunk.sections.indices){
+        for (i in chunk.sections.indices) {
             val section = chunk.sections[i]
             if (section != null) {
                 listBinaryTagSections.add(SectionBinaryTagMarshal.serialize(section, metadataKeyValueBufferRegistry))
@@ -63,11 +69,19 @@ object ChunkBinaryTagMarshal {
             sections[section.y] = section
         }
 
-        chunk.blocks.forEach { block ->
-            block.getMetadataKeyValueBucket().metadataKeyValues.forEach { metadataKeyValue ->
-                val inventory = metadataKeyValue.metadataValue
-                if (inventory is Inventory) {
-                    chunk.agent.joinWatch(inventory)
+        for (section in sections) {
+            if (section == null) continue
+            for (i in 0 until section.blocks.size) {
+                val block = section.getBlock(i)
+
+                if (block.isTickable() && block.getPower() == 15) {
+                    val vectorFromIndex = chunk.getVectorFromIndex(i)
+                    val position = Vector(
+                        vectorFromIndex.x + x * 16,
+                        vectorFromIndex.y + section.y * 16,
+                        vectorFromIndex.z + z * 16
+                    )
+                    tickableBlocks.join(world, position)
                 }
             }
         }

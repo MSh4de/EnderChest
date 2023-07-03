@@ -16,7 +16,7 @@ public class ChainedTick {
         System.out.println(PlayerInventory.indexFromAccurateSlot(36));
 
 
-        System.out.println(Chunk.key(100, 100));
+        System.out.println(Chunk.Companion.key(100, 100));
 
     }
 

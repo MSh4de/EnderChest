@@ -21,5 +21,9 @@ class ArmorItemRule: ItemRule {
 
     }
 
+    override fun canApply(material: MaterialKey): Boolean {
+        return material.equipmentSlot == EquipmentSlot.HELMET || material.equipmentSlot == EquipmentSlot.CHEST_PLATE || material.equipmentSlot == EquipmentSlot.LEGGINGS || material.equipmentSlot == EquipmentSlot.BOOTS
+    }
+
 
 }

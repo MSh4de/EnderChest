@@ -8,12 +8,14 @@ import eu.mshade.enderframe.Agent;
 import eu.mshade.enderframe.item.Material;
 import eu.mshade.enderframe.virtualserver.VirtualWorld;
 import eu.mshade.enderframe.world.ChunkStatus;
-import eu.mshade.enderframe.world.block.Block;
-import eu.mshade.enderframe.world.chunk.Chunk;
-import eu.mshade.enderframe.world.chunk.EmptySection;
-import eu.mshade.enderframe.world.chunk.Palette;
-import eu.mshade.enderframe.world.chunk.Section;
+import eu.mshade.enderframe.world.Vector;
 import eu.mshade.enderframe.world.World;
+import eu.mshade.enderframe.world.block.Block;
+import eu.mshade.enderframe.world.block.TickableBlockRepository;
+import eu.mshade.enderframe.world.chunk.Chunk;
+import eu.mshade.enderframe.world.chunk.Palette;
+import eu.mshade.enderframe.world.chunk.PaletteEntry;
+import eu.mshade.enderframe.world.chunk.Section;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +32,7 @@ public class DefaultChunk extends Chunk {
     private static final Block AIR = Material.AIR.toBlock();
 
     private final Queue<Agent> agents = new ConcurrentLinkedQueue<>();
+    private final TickableBlockRepository tickableBlocks = EnderChest.INSTANCE.getMinecraftServer().getTickableBlocks();
     private byte[] biomes = new byte[256];
 
     public DefaultChunk(int x, int z, World world) {
@@ -45,11 +48,16 @@ public class DefaultChunk extends Chunk {
         if (section != null) {
             int blockIndex = getBlockIndex(x, y, z);
             block = section.getBlock(blockIndex);
-        }else {
+
+            if (block == null) {
+                throw new IllegalStateException("Block at " + x + ", " + y + ", " + z + " is null");
+            }
+
+        } else {
             block = AIR;
         }
 
-        return block;
+        return block.clone();
     }
 
     @Override
@@ -60,11 +68,11 @@ public class DefaultChunk extends Chunk {
         Section section = getSectionOrCreate(sectionIndex);
         if (this.getChunkStateStore().getChunkStatus() != ChunkStatus.PREPARE_TO_LOAD) {
             try {
-                Collection<VirtualWorld> virtualWorldsFrom = EnderChest.INSTANCE.getVirtualWorldManager().getVirtualWorldsFrom(getWorld());
+                Collection<VirtualWorld> virtualWorldsFrom = EnderChest.INSTANCE.getVirtualWorldManager().getVirtualWorldsFrom(this.getWorld());
                 for (VirtualWorld virtualWorld : virtualWorldsFrom) {
-                    VirtualChunk virtualChunk = (VirtualChunk) virtualWorld.getChunk(getX(), getZ()).get();
+                    VirtualChunk virtualChunk = (VirtualChunk) virtualWorld.getChunk(x, z).get();
                     Section virtualSection = virtualChunk.getSection(sectionIndex);
-                    if(virtualSection == null){
+                    if (virtualSection == null) {
                         virtualChunk.getSections()[sectionIndex] = virtualChunk.copySection(section);
                         virtualSection = virtualChunk.getSection(sectionIndex);
                     }
@@ -81,29 +89,46 @@ public class DefaultChunk extends Chunk {
         int index = getBlockIndex(x, y, z);
         Block targetBlock = section.getBlock(index);
 
-        if (block.equals(targetBlock)) return;
-
-
-        if (targetBlock != null) {
-            Integer blockId = palette.getId(targetBlock);
-            if (blockId != null) {
-                palette.removeCount(blockId);
-                int blockCount = palette.getCount(blockId);
-                if (blockCount <= 0) palette.deleteBlock(blockId);
-            }
+        if (targetBlock == null){
+            throw new IllegalStateException("Block at " + x + ", " + y + ", " + z + " is null");
         }
 
-        Integer blockId = palette.getId(block);
-        if (blockId == null) {
+        if (targetBlock.equals(block)) {
+            return;
+        }
+
+
+        PaletteEntry targetPalette = palette.getBlockEntry(targetBlock);
+
+        if (targetPalette == null){
+            throw new IllegalStateException("PaletteEntry at " + x + ", " + y + ", " + z + " is null for block " + targetBlock.getMaterial().getNamespacedKey());
+        }
+
+        if (targetBlock.isTickable()){
+            tickableBlocks.leave(getWorld(), new Vector(x, y, z));
+        }
+
+        targetPalette.setCount(targetPalette.getCount() - 1);
+        if (targetPalette.getCount() <= 0) {
+            palette.deleteBlock(targetBlock);
+            section.getUniqueId().flushId(targetPalette.getId());
+        }
+
+        PaletteEntry blockPalette = palette.getBlockEntry(block);
+        Integer blockId;
+        if (blockPalette == null) {
             blockId = section.getUniqueId().getFreeId();
-            palette.setBlock(blockId, block);
+            palette.setBlock(blockId, block, 1);
+        } else {
+            blockId = blockPalette.getId();
+            blockPalette.setCount(blockPalette.getCount() + 1);
         }
-        palette.addCount(blockId);
+
         section.getBlocks()[index] = blockId;
 
-
-        this.getChunkStateStore().interact();
+//        this.getChunkStateStore().interact();
     }
+
 
     @Override
     public byte getBlockLight(int x, int y, int z) {
@@ -161,26 +186,26 @@ public class DefaultChunk extends Chunk {
 
     @Override
     public Section getSectionOrCreate(int y) {
-        if (sections[y] == null) {
-            sections[y] = new DefaultSection(this, y);
+        if (getSections()[y] == null) {
+            getSections()[y] = new DefaultSection(this, y);
         }
-        return sections[y];
+        return getSections()[y];
     }
 
     @Override
     public Section createSection(int y) {
-        if (sections[y] != null) {
+        if (getSections()[y] != null) {
             throw new IllegalStateException("Section already exists");
         }
-        return sections[y] = new DefaultSection(this, y);
+        return getSections()[y] = new DefaultSection(this, y);
     }
 
 
     @Override
     public void addWatcher(Agent agent) {
         agents.add(agent);
-        if (chunkStateStore.getChunkStatus() != ChunkStatus.LOADED) {
-            chunkStateStore.setChunkStatus(ChunkStatus.LOADED);
+        if (getChunkStateStore().getChunkStatus() != ChunkStatus.LOADED) {
+            getChunkStateStore().setChunkStatus(ChunkStatus.LOADED);
         }
     }
 
@@ -208,7 +233,7 @@ public class DefaultChunk extends Chunk {
 
     @Override
     public String toString() {
-        return "DefaultChunk{" + "x=" + x + ", z=" + z + ", players=" + agents + ", world=" + world + '}';
+        return "DefaultChunk{" + "x=" + getX() + ", z=" + getZ() + ", players=" + agents + ", world=" + getAgent() + '}';
     }
 
     @Override
@@ -216,12 +241,12 @@ public class DefaultChunk extends Chunk {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DefaultChunk that = (DefaultChunk) o;
-        return id == that.id && world.equals(that.world);
+        return getId() == that.getId() && getWorld().equals(that.getWorld());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, world);
+        return Objects.hash(getId(), getWorld());
     }
 }
 

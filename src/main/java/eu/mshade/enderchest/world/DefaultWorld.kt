@@ -1,24 +1,24 @@
-package eu.mshade.enderchest.world.virtual
+package eu.mshade.enderchest.world
+
 
 import eu.mshade.enderchest.EnderChest
-import eu.mshade.enderchest.marshal.world.virtual.VirtualChunkBinaryTagMarshal
-import eu.mshade.enderchest.marshal.world.WorldBinaryTagMarshal.write
-import eu.mshade.enderchest.world.ChunkSafeguard
-import eu.mshade.enderchest.world.EmptyChunk
+import eu.mshade.enderchest.marshal.world.ChunkBinaryTagMarshal
+import eu.mshade.enderchest.marshal.world.WorldBinaryTagMarshal
 import eu.mshade.enderframe.EnderFrame
 import eu.mshade.enderframe.entity.Entity
 import eu.mshade.enderframe.entity.EntityKey
+import eu.mshade.enderframe.event.ChunkCreateEvent
+import eu.mshade.enderframe.event.ChunkLoadEvent
+import eu.mshade.enderframe.event.ChunkUnloadEvent
 import eu.mshade.enderframe.item.MaterialKey
 import eu.mshade.enderframe.metadata.MetadataKeyValueBucket
-import eu.mshade.enderframe.virtualserver.VirtualWorld
 import eu.mshade.enderframe.world.ChunkStatus
-import eu.mshade.enderframe.world.Dimension
 import eu.mshade.enderframe.world.Location
 import eu.mshade.enderframe.world.World
 import eu.mshade.enderframe.world.block.Block
 import eu.mshade.enderframe.world.chunk.Chunk
+import eu.mshade.enderman.packet.play.world.MinecraftPacketOutTimeUpdate
 import eu.mshade.mwork.binarytag.segment.SegmentBinaryTag
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.*
@@ -27,25 +27,28 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ExecutionException
 
-class DefaultVirtualWorld(
+
+class DefaultWorld(
     private val chunkSafeguard: ChunkSafeguard,
-    worldDirectory: File,
-    metadataKeyValueBucket: MetadataKeyValueBucket,
-) : VirtualWorld(worldDirectory, metadataKeyValueBucket) {
+    worldFolder: File,
+    metadataKeyValueBucket: MetadataKeyValueBucket = MetadataKeyValueBucket(
+        true
+    ),
+) : World(worldFolder, metadataKeyValueBucket) {
 
-    private val regionById = ConcurrentHashMap<String, SegmentBinaryTag>()
-    private val chunksByRegion = ConcurrentHashMap<SegmentBinaryTag, Queue<Chunk>>()
-    private val lastUsageRegion = ConcurrentHashMap<SegmentBinaryTag, Long>()
-    private val regionByBinaryTagPoet = ConcurrentHashMap<SegmentBinaryTag, String>()
+    private val segmentByRegion: MutableMap<String?, SegmentBinaryTag> = ConcurrentHashMap()
+    private val chunksByRegion: MutableMap<SegmentBinaryTag, Queue<Chunk>> = ConcurrentHashMap()
+    private val lastUsageRegion: MutableMap<SegmentBinaryTag, Long> = ConcurrentHashMap()
+    private val regionByBinaryTagPoet: MutableMap<SegmentBinaryTag, String?> = ConcurrentHashMap()
     private val binaryTagDriver = EnderFrame.get().binaryTagDriver
-
+    private val metadataKeyValueBufferRegistry = EnderChest.metadataKeyValueBufferRegistry
     private val minecraftServer = EnderChest.minecraftServer
     private val blockBehaviorRepository = minecraftServer.getBlockBehaviors()
+    private val ticableBlocks = minecraftServer.getTickableBlocks()
 
 
-    companion object {
-        val LOGGER: Logger = LoggerFactory.getLogger(DefaultVirtualWorld::class.java)
-    }
+
+
 
     override fun flushChunk(chunk: Chunk, save: Boolean) {
         val chunkStateStore = chunk.chunkStateStore
@@ -54,117 +57,124 @@ class DefaultVirtualWorld(
             val segmentBinaryTag = getSegment(this, chunk)
             chunksByRegion[segmentBinaryTag]!!.remove(chunk)
             chunkById.remove(chunk.id)
+            ticableBlocks.flush(chunk)
+            EnderFrame.get().minecraftEvents.publish(ChunkUnloadEvent(chunk))
         }
 
         if (save && !chunkStateStore.isInChunkSafeguard) {
             chunkSafeguard.addChunk(chunk)
             return
         }
-
         if (!save) {
             chunkStateStore.finishWrite()
         }
     }
 
     override fun saveChunk(chunk: Chunk) {
-        val carbonBinaryTag = getSegment(this, chunk)
-        VirtualChunkBinaryTagMarshal.write(
-            carbonBinaryTag,
-            binaryTagDriver,
-            chunk as VirtualChunk,
-            EnderChest.metadataKeyValueBufferRegistry
-        )
-        lastUsageRegion[carbonBinaryTag] = System.currentTimeMillis()
+        val segmentBinaryTag = getSegment(this, chunk)
+        ChunkBinaryTagMarshal.write(segmentBinaryTag, binaryTagDriver, chunk, EnderChest.metadataKeyValueBufferRegistry)
+        lastUsageRegion[segmentBinaryTag] = System.currentTimeMillis()
     }
 
     override fun getChunk(chunkX: Int, chunkZ: Int): CompletableFuture<Chunk> {
         val id = Chunk.key(chunkX, chunkZ)
-
-        var chunkCompletableFuture = chunkById[id]
+        val chunkCompletableFuture = chunkById[id]
 
         if (chunkCompletableFuture != null) {
             val chunk = chunkCompletableFuture.join()
-            if (chunk != null) {
+
+
+/*            if (chunk != null) {
                 val chunkStateStore = chunk.chunkStateStore
                 if (chunkStateStore.chunkStatus != ChunkStatus.LOADED) chunkStateStore.chunkStatus = ChunkStatus.LOADED
-            }
-            return chunkCompletableFuture
-        }
+            }*/
 
-        val carbonBinaryTag = getSegment(this, chunkX, chunkZ)
-        if (isChunkExists(chunkX, chunkZ)) {
-            chunkCompletableFuture = CompletableFuture()
-            chunkCompletableFuture.completeAsync {
+            return chunkCompletableFuture
+
+        }
+        val completableFuture = CompletableFuture<Chunk>()
+        val segmentBinaryTag = getSegment(this, chunkX, chunkZ)
+        chunkById[id] = completableFuture
+        //TODO: clear chunk into @chunkById when chunk is not loaded
+        if (!isChunkExists(chunkX, chunkZ)) {
+            completableFuture.completeAsync {
+                val chunk = DefaultChunk(chunkX, chunkZ, this)
+
+                val chunkCreateEvent = ChunkCreateEvent(chunk)
+                EnderFrame.get().minecraftEvents.publish(chunkCreateEvent)
+
+                if (!chunkCreateEvent.isCancelled) {
+
+                    if (chunkGenerator != null) chunkGenerator!!.generate(chunk)
+                    chunk.chunkStateStore.chunkStatus = ChunkStatus.LOADED
+                    chunksByRegion.computeIfAbsent(segmentBinaryTag) { _ -> ConcurrentLinkedQueue() }
+                        .add(chunk)
+
+                    lastUsageRegion[segmentBinaryTag] = System.currentTimeMillis()
+                    return@completeAsync chunk
+
+                }
+                EmptyChunk(chunkX, chunkZ, this)
+            }
+        } else {
+            completableFuture.completeAsync {
                 val chunk: Chunk
                 try {
-                    chunk = VirtualChunkBinaryTagMarshal.read(
-                        carbonBinaryTag,
+                    chunk = ChunkBinaryTagMarshal.read(
+                        segmentBinaryTag,
                         binaryTagDriver,
                         this,
                         chunkX,
                         chunkZ,
-                        EnderChest.metadataKeyValueBufferRegistry
+                        metadataKeyValueBufferRegistry
                     )
-
-                    chunk.chunkStateStore.chunkStatus = ChunkStatus.LOADED
-                    chunkById[id] = chunkCompletableFuture!!
-                    chunksByRegion.computeIfAbsent(carbonBinaryTag) { ConcurrentLinkedQueue() }.add(chunk)
-                    lastUsageRegion[carbonBinaryTag] = System.currentTimeMillis()
-                    return@completeAsync chunk
-                } catch (e: Throwable ) {
-                    LOGGER.error("Can't read chunk x=$chunkX, z=$chunkZ from region=" + regionId(chunkX, chunkZ), e)
+                    val chunkLoadEvent = ChunkLoadEvent(completableFuture)
+                    EnderFrame.get().minecraftEvents.publish(chunkLoadEvent)
+                    if (!chunkLoadEvent.isCancelled) {
+                        chunk.chunkStateStore.chunkStatus = ChunkStatus.LOADED
+                        chunksByRegion.computeIfAbsent(segmentBinaryTag) { _ -> ConcurrentLinkedQueue() }
+                            .add(chunk)
+                        lastUsageRegion[segmentBinaryTag] = System.currentTimeMillis()
+                        return@completeAsync chunk
+                    }
+                } catch (e: Exception) {
+                    LOGGER.error("Can't read chunk x=" + chunkX + ", z=" + chunkZ + " from region=" + regionId(chunkX, chunkZ), e)
                 }
-                return@completeAsync EmptyChunk(chunkX, chunkZ, this)
+                EmptyChunk(chunkX, chunkZ, this)
             }
-            return chunkCompletableFuture
         }
-            try {
-                val parentChunk = getParentWorld().getChunk(chunkX, chunkZ)!!.get()
-                val chunk = toVirtualChunk(parentChunk)
-                chunkCompletableFuture = CompletableFuture.completedFuture(chunk)
-                chunk.chunkStateStore.chunkStatus = ChunkStatus.LOADED
-                chunkById[id] = chunkCompletableFuture
-                chunksByRegion.computeIfAbsent(carbonBinaryTag) { ConcurrentLinkedQueue() }.add(chunk)
-                lastUsageRegion[carbonBinaryTag] = System.currentTimeMillis()
-                return chunkCompletableFuture
-            } catch (e: Throwable ) {
-                LOGGER.error("Can't get parent chunk x=$chunkX, z=$chunkZ", e)
-            }
-
-        return CompletableFuture.completedFuture(EmptyChunk(chunkX, chunkZ, this))
-
+        return completableFuture
     }
 
-    override fun getChunk(id: Long): CompletableFuture<Chunk> {
+    override fun getChunk(id: Long): CompletableFuture<Chunk>? {
         return chunkById[id]!!
     }
 
-    override fun hasChunkLoaded(x: Int, z: Int): Boolean {
-        return chunkById.containsKey(Chunk.key(x, z))
+    override fun hasChunkLoaded(chunkX: Int, chunkZ: Int): Boolean {
+        return chunkById.containsKey(Chunk.key(chunkX, chunkZ))
     }
 
     override fun isChunkExists(chunkX: Int, chunkZ: Int): Boolean {
-        val carbonBinaryTag = getSegment(this, chunkX, chunkZ)
-        return carbonBinaryTag.hasKey(chunkId(chunkX, chunkZ))
+        val segmentBinaryTag = getSegment(this, chunkX, chunkZ)
+        return segmentBinaryTag.hasKey(chunkId(chunkX, chunkZ))
     }
 
     override fun addEntity(entity: Entity) {
-        TODO("Not yet implemented")
+        if (entities.contains(entity)) return
+        entities.add(entity)
     }
 
     override fun removeEntity(entity: Entity) {
-        TODO("Not yet implemented")
+        entities.remove(entity)
     }
 
     override fun spawnEntity(entityType: EntityKey, location: Location): Entity {
         TODO("Not yet implemented")
     }
 
-
     override fun setBlock(x: Int, y: Int, z: Int, materialKey: MaterialKey) {
         val chunkX = x shr 4
         val chunkZ = z shr 4
-
         try {
             val chunk = getChunk(chunkX, chunkZ).get()
             chunk.setBlock(x, y, z, materialKey.toBlock())
@@ -178,7 +188,6 @@ class DefaultVirtualWorld(
     override fun setBlock(x: Int, y: Int, z: Int, block: Block) {
         val chunkX = x shr 4
         val chunkZ = z shr 4
-
         try {
             val chunk = getChunk(chunkX, chunkZ).get()
             chunk.setBlock(x, y, z, block)
@@ -192,7 +201,6 @@ class DefaultVirtualWorld(
     override fun getBlock(x: Int, y: Int, z: Int): Block {
         val chunkX = x shr 4
         val chunkZ = z shr 4
-
         return try {
             val chunk = getChunk(chunkX, chunkZ).get()
             chunk.getBlock(x, y, z)
@@ -203,9 +211,13 @@ class DefaultVirtualWorld(
         }
     }
 
+
     override fun saveLevel() {
-        write(binaryTagDriver, this, EnderChest.metadataKeyValueBufferRegistry)
+        WorldBinaryTagMarshal.write(binaryTagDriver, this, metadataKeyValueBufferRegistry)
     }
+
+    override val regions: Collection<SegmentBinaryTag>
+        get() = chunksByRegion.keys
 
     override fun tick() {
         if (isPeriod(20)) {
@@ -217,9 +229,10 @@ class DefaultVirtualWorld(
                         chunkSafeguard.addChunk(chunk)
                         chunkStateStore.resetAge()
                     }
-                    if (chunk.watchers.isEmpty() && chunkStateStore.outdatedInteract(500)) {
+                    if (chunk.watchers.isEmpty() && chunkStateStore.outdatedInteract(1000)) {
                         chunkStateStore.chunkStatus = ChunkStatus.PREPARE_TO_UNLOAD
                     }
+
                 }
                 if (chunkStateStore.chunkStatus == ChunkStatus.PREPARE_TO_UNLOAD && chunkStateStore.outdatedChunkStatus(
                         2000
@@ -231,29 +244,34 @@ class DefaultVirtualWorld(
                     this.flushChunk(chunk)
                 }
             }
-            for (carbonBinaryTag in regionById.values) {
-                val delay = System.currentTimeMillis() - lastUsageRegion[carbonBinaryTag]!!
-                if (delay > 5000 && chunksByRegion[carbonBinaryTag]!!.isEmpty()) {
-                    lastUsageRegion.remove(carbonBinaryTag)
-                    chunksByRegion.remove(carbonBinaryTag)
-                    regionById.remove(regionByBinaryTagPoet.remove(carbonBinaryTag))
+
+            for (segmentBinaryTag in segmentByRegion.values) {
+                val delay = System.currentTimeMillis() - lastUsageRegion[segmentBinaryTag]!!
+                if (delay > 5000 && chunksByRegion[segmentBinaryTag]!!.isEmpty()) {
+                    LOGGER.info("Unload region $segmentBinaryTag, delay=$delay, chunks=${chunksByRegion[segmentBinaryTag]!!.size}")
+                    lastUsageRegion.remove(segmentBinaryTag)
+                    chunksByRegion.remove(segmentBinaryTag)
+                    segmentByRegion.remove(regionByBinaryTagPoet.remove(segmentBinaryTag))
                 }
             }
-            saveLevel()
+
+            this.saveLevel()
+
+            for (onlinePlayer in minecraftServer.getOnlinePlayers()) {
+                onlinePlayer.minecraftSession.sendPacket(MinecraftPacketOutTimeUpdate(tick))
+            }
+        }
+
+        this.chunks.forEach {
+            val chunk = it.join() ?: return@forEach
+            if (chunk.chunkStateStore.chunkStatus == ChunkStatus.LOADED) {
+                chunk.entities.forEach { entity ->
+                    entity.tick()
+                }
+            }
         }
     }
 
-
-    override val dimension: Dimension?
-        get() = getParentWorld().dimension
-
-    override val regions: Collection<SegmentBinaryTag>
-        get() = regionById.values
-
-    /*override fun getDimension(): Dimension {
-        return this.getParentWorld().dimension
-    }
-*/
     private fun regionId(chunk: Chunk): String {
         return regionId(chunk.x, chunk.z)
     }
@@ -270,17 +288,14 @@ class DefaultVirtualWorld(
         return "$chunkX,$chunkZ"
     }
 
-
     private fun getSegment(world: World, x: Int, z: Int): SegmentBinaryTag {
         val regionId = regionId(x, z)
-        return regionById.computeIfAbsent(regionId) { s: String ->
-            val segmentBinaryTag = SegmentBinaryTag(
-                File(world.regionFolder, "$regionId.msr"),
-            )
+        return segmentByRegion.computeIfAbsent(regionId) { _ ->
+            val segmentBinaryTag = SegmentBinaryTag(File(world.regionFolder, "$regionId.msr"))
             chunksByRegion[segmentBinaryTag] = ConcurrentLinkedQueue()
-            regionByBinaryTagPoet[segmentBinaryTag] = s
+            regionByBinaryTagPoet[segmentBinaryTag] = regionId
             lastUsageRegion[segmentBinaryTag] = System.currentTimeMillis()
-            return@computeIfAbsent segmentBinaryTag
+            segmentBinaryTag
         }
     }
 
@@ -288,17 +303,13 @@ class DefaultVirtualWorld(
         return getSegment(world, chunk.x, chunk.z)
     }
 
-    fun toVirtualChunk(chunk: Chunk): VirtualChunk {
-        val virtualChunk = VirtualChunk(chunk.x, chunk.z, this)
-        for(i in 0 .. 15){
-            val section = chunk.sections[i]
-            if(section != null){
-                virtualChunk.sections[i] = virtualChunk.copySection(section)
-            }
-        }
-        return virtualChunk
-
+    override fun toString(): String {
+        return "DefaultWorld{" +
+                "name=" + name +
+                '}'
     }
 
-
+    companion object {
+        private val LOGGER = LoggerFactory.getLogger(DefaultWorld::class.java)
+    }
 }

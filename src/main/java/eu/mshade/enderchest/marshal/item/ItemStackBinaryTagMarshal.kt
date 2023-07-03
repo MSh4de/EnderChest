@@ -15,11 +15,15 @@ object ItemStackBinaryTagMarshal {
         compoundBinaryTag.putInt("type", itemStack.material.id)
         compoundBinaryTag.putInt("amount", itemStack.amount)
         compoundBinaryTag.putInt("durability", itemStack.durability)
-        compoundBinaryTag.putBinaryTag("metadata", metadataKeyValueBufferRegistry.serialize(itemStack.metadataKeyValueBucket))
+        compoundBinaryTag.putBinaryTag("metadata", metadataKeyValueBufferRegistry.serialize(itemStack.metadatas))
         return compoundBinaryTag
     }
 
-    fun deserialize(compoundBinaryTag: CompoundBinaryTag, metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry): ItemStack {
+    fun deserialize(compoundBinaryTag: CompoundBinaryTag, metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry): ItemStack? {
+        if (compoundBinaryTag.isEmpty()) {
+            return null
+        }
+        
         val type = compoundBinaryTag.getInt("type")
         val amount = compoundBinaryTag.getInt("amount")
         val durability = compoundBinaryTag.getInt("durability")

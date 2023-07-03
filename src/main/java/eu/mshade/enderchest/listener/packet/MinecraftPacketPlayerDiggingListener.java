@@ -24,15 +24,7 @@ public class MinecraftPacketPlayerDiggingListener implements EventListener<Minec
 
 
         if (gameMode == GameMode.CREATIVE) {
-            Block block = world.getBlock(blockPosition);
-            if (block == null || block.getMaterialKey().equals(Material.AIR)) return;
-            world.setBlock(blockPosition, Material.AIR);
-
-            player.getLocation().getChunk().join().notify(agent -> {
-                if (agent instanceof Player target) {
-                    target.getMinecraftSession().sendBlockChange(blockPosition, Material.AIR);
-                }
-            });
+            breakBlock(player, world, blockPosition);
         }
 
 
@@ -40,16 +32,21 @@ public class MinecraftPacketPlayerDiggingListener implements EventListener<Minec
             System.out.println(event.getDiggingStatus());
 
             if (event.getDiggingStatus() == DiggingStatus.FINISHED) {
-                Block block = world.getBlock(blockPosition);
-                if (block == null || block.getMaterialKey().equals(Material.AIR)) return;
-                world.setBlock(blockPosition, Material.AIR);
-
-                player.getLocation().getChunk().join().notify(agent -> {
-                    if (agent instanceof Player target) {
-                        target.getMinecraftSession().sendBlockChange(blockPosition, Material.AIR);
-                    }
-                });
+                breakBlock(player, world, blockPosition);
             }
         }
     }
+
+    private void breakBlock(Player player, World world, Vector blockPosition) {
+        Block block = world.getBlock(blockPosition);
+        if (block.getMaterial().equals(Material.AIR)) return;
+        world.setBlock(blockPosition, Material.AIR);
+
+        player.getLocation().getChunk().join().notify(agent -> {
+            if (agent instanceof Player target) {
+                target.getMinecraftSession().sendBlockChange(blockPosition, Material.AIR);
+            }
+        });
+    }
+
 }

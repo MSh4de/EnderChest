@@ -18,7 +18,7 @@ class VirtualSection: Section {
         }
 
         blockLight.fill(15.toByte())
-        palette.setBlock(0, 4096, Material.AIR.toBlock())
+        palette.setBlock(0, Material.AIR.toBlock(), 4096)
     }
 
     constructor(virtualChunk: VirtualChunk, y: Int, virtualSectionStatus: VirtualSectionStatus, palette: Palette, blocks: IntArray, uniqueId: UniqueId, blockLight: NibbleArray, skyLight: NibbleArray): super(virtualChunk, y, palette, blocks, uniqueId, blockLight, skyLight){

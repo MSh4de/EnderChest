@@ -14,14 +14,14 @@ object PaletteBinaryTagMarshal {
     fun serialize(palette: Palette, metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry): BinaryTag<*> {
         val paletteCompound = CompoundBinaryTag()
         val blockList = ListBinaryTag(BinaryTagType.COMPOUND)
-        palette.blockById.forEach { (id, block) ->
+        for (paletteEntry in palette.getBlocks()) {
             val blockCompound = CompoundBinaryTag()
-            blockCompound.putInt("blockId", id);
-            blockCompound.putInt("materialId", block.getMaterialKey().id);
-            blockCompound.putInt("count", palette.getCount(id));
+            blockCompound.putInt("blockId", paletteEntry.id);
+            blockCompound.putInt("materialId", paletteEntry.block.getMaterial().id);
+            blockCompound.putInt("count", paletteEntry.count);
             blockCompound.putBinaryTag(
                 "metadataKeyValueBucket",
-                metadataKeyValueBufferRegistry.serialize(block.getMetadataKeyValueBucket())
+                metadataKeyValueBufferRegistry.serialize(paletteEntry.block.getMetadatas())
             )
             blockList.add(blockCompound)
         }
@@ -40,7 +40,7 @@ object PaletteBinaryTagMarshal {
             val count = blockCompound.getInt("count")
             val metadata = blockCompound.getBinaryTag("metadataKeyValueBucket") as CompoundBinaryTag
             val block = Block(Material.fromId(materialId), metadataKeyValueBufferRegistry.deserialize(metadata))
-            palette.setBlock(blockId, count, block)
+            palette.setBlock(blockId, block, count)
         }
         return palette
     }

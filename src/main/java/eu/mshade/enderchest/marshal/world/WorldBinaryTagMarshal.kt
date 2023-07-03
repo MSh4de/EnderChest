@@ -1,14 +1,13 @@
 package eu.mshade.enderchest.marshal.world
 
-import eu.mshade.enderframe.metadata.MetadataKeyValueBufferRegistry
 import eu.mshade.enderchest.world.ChunkSafeguard
 import eu.mshade.enderchest.world.DefaultWorld
+import eu.mshade.enderframe.metadata.MetadataKeyValueBufferRegistry
 import eu.mshade.enderframe.world.World
 import eu.mshade.mwork.binarytag.BinaryTag
 import eu.mshade.mwork.binarytag.BinaryTagDriver
 import eu.mshade.mwork.binarytag.entity.CompoundBinaryTag
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 
 object WorldBinaryTagMarshal {
@@ -37,14 +36,10 @@ object WorldBinaryTagMarshal {
         world: World,
         metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry
     ) {
-        if (world.metadatas.consumeUpdatedMetadataKeyValue().isEmpty()) return
+        if (!world.metadatas.visitModified()) return
+
         try {
-            val fileOutputStream = FileOutputStream(File(world.worldFolder, "level.dat"))
-            binaryTagDriver.writeCompoundBinaryTag(
-                serialize(world, metadataKeyValueBufferRegistry),
-                fileOutputStream
-            )
-            fileOutputStream.close()
+            binaryTagDriver.writeCompoundBinaryTag(serialize(world, metadataKeyValueBufferRegistry), world.levelFile)
         } catch (e: IOException) {
             e.printStackTrace()
         }

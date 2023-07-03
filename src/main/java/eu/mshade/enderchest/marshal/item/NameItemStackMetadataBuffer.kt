@@ -15,7 +15,7 @@ class NameItemStackMetadataBuffer : MetadataKeyValueBuffer {
     }
 
     override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {
-        return TextComponentBinaryTagMarshal.serialize((metadataKeyValue as NameItemStackMetadata).metadataValue)
+        return TextComponentBinaryTagMarshal.serialize((metadataKeyValue as NameItemStackMetadata).metadataValue!!)
     }
 
 }

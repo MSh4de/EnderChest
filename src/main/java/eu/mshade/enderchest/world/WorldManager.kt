@@ -52,7 +52,7 @@ class WorldManager(
         }
 
         world = DefaultWorld(chunkSafeguard, file)
-        val metadataKeyValueBucket = world.getMetadatas()
+        val metadataKeyValueBucket = world.metadatas
         metadataKeyValueBucket.setMetadataKeyValue(NameWorldMetadata(name))
         bucketConsumer.accept(metadataKeyValueBucket)
         world.joinTickBus(tickBus)

@@ -3,6 +3,7 @@ package eu.mshade.enderchest.world.virtual
 import eu.mshade.enderframe.Agent
 import eu.mshade.enderframe.virtualserver.VirtualWorld
 import eu.mshade.enderframe.world.ChunkStatus
+import eu.mshade.enderframe.world.Vector
 import eu.mshade.enderframe.world.block.Block
 import eu.mshade.enderframe.world.chunk.Chunk
 import eu.mshade.enderframe.world.chunk.Section
@@ -41,25 +42,28 @@ class VirtualChunk(x: Int, z: Int, private val virtualWorld: VirtualWorld) : Chu
         (section as VirtualSection).virtualSectionStatus = VirtualSectionStatus.DIFFERENT
 
 
-        if (targetBlock != null) {
-            val blockId = palette.getId(targetBlock)
-            if (blockId != null) {
-                palette.removeCount(blockId)
-                val blockCount = palette.getCount(blockId)
-                if (blockCount <= 0) palette.deleteBlock(blockId)
-            }
+        checkNotNull(targetBlock) { "Block at $x, $y, $z is null" }
+
+        val targetPalette = palette.getBlockEntry(targetBlock)
+            ?: throw IllegalStateException("PaletteEntry at " + x + ", " + y + ", " + z + " is null for block " + targetBlock.getMaterial().namespacedKey)
+
+
+
+        targetPalette.count = targetPalette.count - 1
+        if (targetPalette.count == 0) {
+            palette.deleteBlock(targetBlock)
+            section.getUniqueId().flushId(targetPalette.id)
         }
 
-        var blockId = palette.getId(block)
-        if (blockId == null) {
-            blockId = section.uniqueId.freeId
-            palette.setBlock(blockId, block)
+        val blockPalette = palette.getBlockEntry(block)
+        if (blockPalette == null) {
+            palette.setBlock(section.getUniqueId().freeId, block, 1)
+        } else {
+            blockPalette.count = blockPalette.count + 1
         }
-        palette.addCount(blockId!!)
-        section.blocks[index] = blockId
 
 
-        getChunkStateStore().interact()
+        chunkStateStore.interact()
 
     }
 
@@ -87,11 +91,17 @@ class VirtualChunk(x: Int, z: Int, private val virtualWorld: VirtualWorld) : Chu
         TODO("Not yet implemented")
     }
 
+    override var biomes: ByteArray
+        get() = ByteArray(0)
+        set(value) {
+            throw UnsupportedOperationException()
+        }
+
     override fun getSectionOrCreate(y: Int): Section {
         if (sections[y] == null) {
             sections[y] = createSection(y)
         }
-        return sections[y]
+        return sections[y]!!
     }
 
     override fun createSection(y: Int): Section {
@@ -101,16 +111,9 @@ class VirtualChunk(x: Int, z: Int, private val virtualWorld: VirtualWorld) : Chu
         }
 
         sections[y] = VirtualSection(this, y, VirtualSectionStatus.DIFFERENT)
-        return sections[y]
+        return sections[y]!!
     }
 
-    override fun getBiomes(): ByteArray {
-        return ByteArray(256)
-    }
-
-    override fun setBiomes(biomes: ByteArray?) {
-
-    }
 
     override fun addWatcher(agent: Agent) {
         agents.add(agent)

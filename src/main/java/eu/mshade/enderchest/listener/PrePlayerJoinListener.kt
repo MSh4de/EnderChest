@@ -16,6 +16,7 @@ import eu.mshade.enderframe.event.PlayerJoinEvent
 import eu.mshade.enderframe.event.PrePlayerJoinEvent
 import eu.mshade.enderframe.inventory.Inventory
 import eu.mshade.enderframe.inventory.InventoryTracker
+import eu.mshade.enderframe.item.Material
 import eu.mshade.enderframe.mojang.SkinPart
 import eu.mshade.enderframe.protocol.MinecraftByteBuf
 import eu.mshade.enderframe.protocol.MinecraftProtocolPipeline
@@ -70,7 +71,6 @@ class PrePlayerJoinListener : EventListener<PrePlayerJoinEvent> {
             )
         }
         minecraftSession.sendServerDifficulty(world.difficulty)
-        //default value of flying speed as 0.05
         minecraftSession.sendPacket(
             MinecraftPacketOutSpawnPosition(
                 Vector(
@@ -80,7 +80,8 @@ class PrePlayerJoinListener : EventListener<PrePlayerJoinEvent> {
                 )
             )
         )
-        minecraftSession.sendAbilities(false, false, true, false, 0.5f, 0.1f)
+        //default value of flying speed as 0.05
+        minecraftSession.sendAbilities(false, false, true, false, 0.05f, 0.1f)
         minecraftSession.sendPacket(MinecraftPacketOutChangeGameState(3, player.gameMode.id.toFloat()))
         minecraftSession.teleport(location)
         EnderChest.minecraftServer.addPlayer(player)

@@ -41,7 +41,7 @@ public class DefaultPlayer extends Player {
         /**
          * At future set player inventory from read data
          */
-        this.setPlayerInventory(new PlayerInventory(getUniqueId()));
+        this.setPlayerInventory(new PlayerInventory());
         this.getInventory().addWatcher(this);
 
         this.setGameProfile(minecraftSession.gameProfile);
@@ -121,11 +121,6 @@ public class DefaultPlayer extends Player {
         setTickLocation(getLocation());
 
 
-/*        getLookAtEntity().forEach(entity -> {
-            getMinecraftSession().sendUpdateLocation(entity, entity.getTickBeforeLocation(), entity.getTickLocation());
-        });*/
-
-
         boolean hasChangeChunk = lastServerChunkLocation == null || (this.lastServerChunkLocation.getChunkX() != this.getLocation().getChunkX() || this.lastServerChunkLocation.getChunkZ() != this.getLocation().getChunkZ());
 
         if (hasChangeChunk) {
@@ -156,8 +151,6 @@ public class DefaultPlayer extends Player {
 
             try {
                 Void waitingAskChunk = CompletableFuture.allOf(askChunks.toArray(new CompletableFuture[0])).get();
-                long start = System.currentTimeMillis();
-
                 Queue<Chunk> result = askChunks.stream().map(CompletableFuture::join).distinct().collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
 
                 for (Chunk chunk : this.getLookAtChunks()) {
@@ -167,6 +160,7 @@ public class DefaultPlayer extends Player {
                         chunk.removeWatcher(this);
                     }
                 }
+
                 Queue<Chunk> newChunks = new ConcurrentLinkedQueue<>();
                 result.stream().filter(chunk -> !hasLookAtChunk(chunk)).forEach(chunk -> {
                     this.getLookAtChunks().add(chunk);
@@ -178,35 +172,12 @@ public class DefaultPlayer extends Player {
                     this.getMinecraftSession().sendChunk(chunk);
                 });
 
-//                LOGGER.info("Chunk loaded in " + (System.currentTimeMillis() - start) + "ms, there are " + world.getChunks().size() + " chunks in all, new chunk " + newChunks.size());
 
-//                this.getMinecraftSession().sendMessage(ChatColor.GREEN + "Chunk loaded in " + (System.currentTimeMillis() - start) + "ms, there are " + world.getChunks().size() + " chunks in all, new chunk " + newChunks.size(), TextPosition.HOT_BAR);
+
             } catch (InterruptedException | ExecutionException e) {
                 LOGGER.error("", e);
             }
 
-
-/*            Set<Entity> entities = new HashSet<>();
-
-            for (int x = chunkX - 5; x <= chunkX + 5; x++) {
-                for (int z = chunkZ - 5; z <= chunkZ + 5; z++) {
-                    if ((chunkX - x) * (chunkX - x) + (chunkZ - z) * (chunkZ - z) <= 5 * 5) {
-                        Chunk chunk = world.getChunk(x, z).join();
-                        entities.addAll(chunk.getEntities());
-                        chunk.getWatchers().stream().filter(target -> !target.equals(this) && target instanceof Entity).forEach(entity -> entities.add((Entity) entity));
-                    }
-                }
-            }
-
-            Set<Entity> collect = entities.stream().filter(entity -> entity.getLocation().distanceXZ(this.getLocation()) <= 80).collect(Collectors.toSet());
-
-            for (Entity entity : collect) {
-                entity.addWatcher(this);
-            }
-
-            getLookAtEntity().stream().filter(entity -> !collect.contains(entity)).forEach(entity -> {
-                entity.removeWatcher(this);
-            });*/
         }
 
 

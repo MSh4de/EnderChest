@@ -18,6 +18,7 @@ import eu.mshade.enderchest.world.ChunkSafeguard
 import eu.mshade.enderchest.world.DefaultChunkGenerator
 import eu.mshade.enderchest.world.SchematicLoader
 import eu.mshade.enderchest.world.WorldManager
+import eu.mshade.enderchest.world.generation.TestWorldGeneration
 import eu.mshade.enderchest.world.virtual.VirtualWorldManager
 import eu.mshade.enderframe.EnderFrame
 import eu.mshade.enderframe.MinecraftServer
@@ -35,10 +36,8 @@ import eu.mshade.enderframe.scoreboard.ScoreboardSidebar
 import eu.mshade.enderframe.tick.TickBus
 import eu.mshade.enderframe.world.*
 import eu.mshade.enderframe.world.block.BlockMetadataType
-import eu.mshade.enderframe.world.chunk.Chunk
 import eu.mshade.enderman.EndermanMinecraftProtocol
 import eu.mshade.mwork.MWork
-import eu.mshade.mwork.binarytag.segment.SegmentBinaryTag
 import eu.mshade.stone.StoneAxolotlProtocol
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelOption
@@ -46,8 +45,6 @@ import io.netty.channel.EventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import org.slf4j.LoggerFactory
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
 fun main() {
@@ -61,7 +58,7 @@ object EnderChest {
     val parentGroup: EventLoopGroup
 
     private val childGroup: EventLoopGroup
-    lateinit var minecraftServer : MinecraftServer
+    var minecraftServer : MinecraftServer
     val minecraftEncryption = MinecraftEncryption()
     val worldManager: WorldManager
     val virtualWorldManager: VirtualWorldManager
@@ -164,18 +161,27 @@ object EnderChest {
         metadataKeyValueBufferRegistry.register(WorldMetadataType.LEVEL_TYPE, LevelTypeWorldMetadataBuffer(binaryTagDriver))
         metadataKeyValueBufferRegistry.register(WorldMetadataType.DIFFICULTY, DifficultyWorldMetadataBuffer(binaryTagDriver))
         metadataKeyValueBufferRegistry.register(WorldMetadataType.PARENT, ParentWorldMetadataBuffer())
+
         metadataKeyValueBufferRegistry.register(BlockMetadataType.EXTRA, ExtraBlockMetadataBuffer())
         metadataKeyValueBufferRegistry.register(BlockMetadataType.FACE, FaceBlockMetadataBuffer())
         metadataKeyValueBufferRegistry.register(BlockMetadataType.HALF, HalfBlockMetadataBuffer())
         metadataKeyValueBufferRegistry.register(BlockMetadataType.SHAPE, ShapeBlockMetadataBuffer())
         metadataKeyValueBufferRegistry.register(BlockMetadataType.AXIS, AxisBlockMetadataBuffer())
-        metadataKeyValueBufferRegistry.register(BlockMetadataType.POWERED, PoweredBlockMetadataBuffer())
         metadataKeyValueBufferRegistry.register(BlockMetadataType.POWER, PowerBlockMetadataBuffer())
         metadataKeyValueBufferRegistry.register(BlockMetadataType.DECAYABLE, DecayableBlockMetadataBuffer())
         metadataKeyValueBufferRegistry.register(BlockMetadataType.CHECK_DECAY, CheckDecayBlockMetadataBuffer())
         metadataKeyValueBufferRegistry.register(BlockMetadataType.SEAMLESS, SeamlessBlockMetadataBuffer())
         metadataKeyValueBufferRegistry.register(BlockMetadataType.MULTIPLE_FACE, MultipleFaceBlockMetadataBuffer())
         metadataKeyValueBufferRegistry.register(BlockMetadataType.SLAB_TYPE, SlabTypeBlockMetadataBuffer())
+        metadataKeyValueBufferRegistry.register(BlockMetadataType.INVENTORY, InventoryBlockMetadataBuffer())
+        metadataKeyValueBufferRegistry.register(BlockMetadataType.TICKABLE, TickableBlockMetadataBuffer())
+        metadataKeyValueBufferRegistry.register(BlockMetadataType.TICK, TickBlockMetadataBuffer())
+        metadataKeyValueBufferRegistry.register(BlockMetadataType.DELAY, DelayBlockMetadataBuffer())
+        metadataKeyValueBufferRegistry.register(BlockMetadataType.REDSTONE_STATE, RedstoneStateBlockMetadataBuffer())
+        metadataKeyValueBufferRegistry.register(BlockMetadataType.LOCKED, LockedBlockMetadataBuffer())
+        metadataKeyValueBufferRegistry.register(BlockMetadataType.POWER_SOURCE, PowerSourceBlockMetadataBuffer())
+
+
         metadataKeyValueBufferRegistry.register(ItemStackMetadataKey.NAME, NameItemStackMetadataBuffer())
         metadataKeyValueBufferRegistry.register(ItemStackMetadataKey.LORE, LoreItemStackMetadataBuffer())
 
@@ -184,17 +190,6 @@ object EnderChest {
         chunkSafeguard.start()
         LOGGER.info("ChunkSafeGuard started")
 
-        worldManager = WorldManager(binaryTagDriver, chunkSafeguard, tickBus)
-        virtualWorldManager = VirtualWorldManager(chunkSafeguard, tickBus)
-
-
-        val world = worldManager.createWorld("world") { metadataKeyValueBucket ->
-            metadataKeyValueBucket.setMetadataKeyValue(SeedWorldMetadata(-4975988339999789512L))
-            metadataKeyValueBucket.setMetadataKeyValue(LevelTypeWorldMetadata(LevelType.DEFAULT))
-            metadataKeyValueBucket.setMetadataKeyValue(DimensionWorldMetadata(Dimension.OVERWORLD))
-            metadataKeyValueBucket.setMetadataKeyValue(DifficultyWorldMetadata(Difficulty.NORMAL))
-        }
-        world.chunkGenerator = DefaultChunkGenerator(world)
 
         val threadTickBus = Thread(tickBus, "TickBus")
         threadTickBus.start()
@@ -214,31 +209,42 @@ object EnderChest {
 
         Metrics().joinTickBus(tickBus)
 
+        minecraftServer.getTickableBlocks().joinTickBus(tickBus)
 
+        worldManager = WorldManager(binaryTagDriver, chunkSafeguard, tickBus)
+        virtualWorldManager = VirtualWorldManager(chunkSafeguard, tickBus)
+
+
+        val world = worldManager.createWorld("world") { metadataKeyValueBucket ->
+            metadataKeyValueBucket.setMetadataKeyValue(SeedWorldMetadata(-4975988339999789512L))
+            metadataKeyValueBucket.setMetadataKeyValue(LevelTypeWorldMetadata(LevelType.DEFAULT))
+            metadataKeyValueBucket.setMetadataKeyValue(DimensionWorldMetadata(Dimension.OVERWORLD))
+            metadataKeyValueBucket.setMetadataKeyValue(DifficultyWorldMetadata(Difficulty.NORMAL))
+        }
+//        world.chunkGenerator = DefaultChunkGenerator(world)
+        world.chunkGenerator = TestWorldGeneration()
 
         Runtime.getRuntime().addShutdownHook(Thread {
             LOGGER.warn("Beginning save of server don't close the console !")
             chunkSafeguard.stopSafeguard()
             WorldRepository.getWorlds().forEach(Consumer { w: World ->
                 LOGGER.info("Saving world " + w.name)
-                w.saveWorld()
-                w.chunks.forEach(Consumer { chunkCompletableFuture: CompletableFuture<Chunk?> ->
-                    w.saveChunk(chunkCompletableFuture.join())
-                })
+                w.saveLevel()
+                w.chunks.forEach{chunk ->
+                    minecraftServer.getTickableBlocks().flush(chunk.join())
+                    w.saveChunk(chunk.join())
+                }
                 // log number of chunks saved in the world
                 LOGGER.info("Saved " + w.chunks.size + " chunks in world " + w.name)
-//                w.regions.forEach(Consumer { segmentBinaryTag: SegmentBinaryTag -> if (segmentBinaryTag.compoundSectionIndex.consume()) segmentBinaryTag.writeCompoundSectionIndex() })
             })
 
             virtualWorldManager.getVirtualWorlds().forEach {
-                it.saveWorld()
-                it.chunks.forEach { chunkCompletableFuture: CompletableFuture<Chunk?> ->
-                    it.saveChunk(
-                        chunkCompletableFuture.join()
-                    )
+                it.saveLevel()
+                it.chunks.forEach { chunk ->
+                    minecraftServer.getTickableBlocks().flush(chunk.join())
+                    it.saveChunk(chunk.join())
                 }
                 LOGGER.info("Saved " + it.chunks.size + " chunks in virtual world " + it.name)
-//                it.regions.forEach { segmentBinaryTag: SegmentBinaryTag -> if (segmentBinaryTag.compoundSectionIndex.consume()) segmentBinaryTag.writeCompoundSectionIndex() }
             }
 
             LOGGER.info("Worlds saved")

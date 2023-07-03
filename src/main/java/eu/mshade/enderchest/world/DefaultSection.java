@@ -22,7 +22,7 @@ public class DefaultSection extends Section {
         }
 
 //        blockLight.fill((byte) 15);
-        palette.setBlock(0, 4096, Material.AIR.toBlock());
+        palette.setBlock(0, Material.AIR.toBlock(), 4096);
     }
 
     public DefaultSection(Chunk chunk, int y, Palette palette, int[] blocks, UniqueId uniqueId, NibbleArray blockLight, NibbleArray skyLight) {

@@ -1,32 +1,39 @@
 package eu.mshade.enderchest.world.generation
 
+import eu.mshade.enderchest.world.noise.PerlinNoiseGenerator
 import eu.mshade.enderchest.world.noise.SimplexOctaveGenerator
 import eu.mshade.enderframe.item.Material
 
 class BiomeBucket(seed: Long) {
 
     private val biomes = mutableListOf<Biome>()
-    private val simplexNoiseGenerator = SimplexOctaveGenerator(seed, 8)
+    private val perlinNoiseGenerator = PerlinNoiseGenerator(seed)
 
 
     init {
-        simplexNoiseGenerator.setScale(0.005)
-
-        biomes.add(BorderBiome(seed))
-        biomes.add(PlainsBiome(seed))
-//        biomes.add(SandBiome(seed))
-        biomes.add(SnowBiome(seed))
-        biomes.add(IslandBiome(seed))
+//        simplexNoiseGenerator.setScale(0.005)
     }
 
     fun addBiome(biome: Biome) {
         biomes.add(biome)
     }
 
+    /*    fun getBiome(x: Int, z: Int, chunkX: Int, chunkZ: Int): Biome {
+            val noise = simplexNoiseGenerator.noise((chunkX * 16 + x).toDouble(), (chunkZ * 16 + z).toDouble(), 0.5, 0.5) * 0.5 + 0.5
+            return biomes[((noise * (biomes.size - 1)).toInt())]
+        }*/
     fun getBiome(x: Int, z: Int, chunkX: Int, chunkZ: Int): Biome {
-        val noise = simplexNoiseGenerator.noise((chunkX * 16 + x).toDouble(), (chunkZ * 16 + z).toDouble(), 0.5, 0.5) * 0.5 + 0.5
-        return biomes[((noise * (biomes.size - 1)).toInt())]
+        val noiseScale = 0.1
+        val noiseX = (chunkX * 16 + x).toDouble() * noiseScale
+        val noiseZ = (chunkZ * 16 + z).toDouble() * noiseScale
+
+        val noiseValue = perlinNoiseGenerator.noise(noiseX, noiseZ)
+        val normalizedValue = (noiseValue + 1.0) / 2.0 // Normaliser la valeur du bruit entre 0 et 1
+
+        if (normalizedValue < 0.3) return biomes[0]
+        return biomes[1]
     }
+
 
     fun getHeight(x: Int, z: Int, chunkX: Int, chunkZ: Int): Double {
         return getBiome(x, z, chunkX, chunkZ).getHeight(x, z, chunkX, chunkZ)
@@ -71,75 +78,49 @@ class BiomeBucket(seed: Long) {
 
 }
 
-class SandBiome(seed: Long): Biome(seed, 1){
 
-    init {
+class ForestBiome(seed: Long) : Biome(seed) {
+    override val octaves = 8.0
+    override val amplitude = 20.0
+    override val smoothness = 100.0
+    override val heightOffset = 1.0
+    override val roughness = 1.0
 
-        temperatures.add(Material.SAND.toBlock())
-        temperatures.add(Material.RED_SAND.toBlock())
-        temperatures.add(Material.SANDSTONE.toBlock())
-    }
+    override val topBlock = Material.GRASS_BLOCK
+    override val secondBlock = Material.DIRT
+    override val thirdBlock = Material.STONE
+    override val miscBlock = Material.GRASS_BLOCK
 
-/*    override fun getHeight(x: Int, z: Int, chunkX: Int, chunkZ: Int): Double {
-        return perlinNoiseGenerator.noise((chunkX * 16 + x).toDouble(), (chunkZ * 16 + z).toDouble(), octave, 0.5, 0.5) * 10 + 30
-    }*/
-
+    override val secondLayerHeight = 3
 }
 
-class PlainsBiome(seed: Long): Biome(seed, 12){
+// Implémenter un autre exemple de biome spécifique (désert)
+class DesertBiome(seed: Long) : Biome(seed) {
+    override val octaves = 6.0
+    override val amplitude = 30.0
+    override val smoothness = 1.0
+    override val heightOffset = 10.0
+    override val roughness = 0.1
 
-    init {
+    override val topBlock = Material.SAND
+    override val secondBlock = Material.SAND
+    override val thirdBlock = Material.STONE
+    override val miscBlock = Material.STONE
 
-        heightOffset = 50
-        amplitude = 10.0
-        smoothness = 5.0
-        roughness = 1.0
-
-
-
-        temperatures.add(Material.DIRT.toBlock())
-        temperatures.add(Material.GRASS_BLOCK.toBlock())
-        temperatures.add(Material.STONE.toBlock())
-    }
-
+    override val secondLayerHeight = 3
 }
 
-class SnowBiome(seed: Long): Biome(seed, 6){
+class FrozenBiome(seed: Long) : Biome(seed) {
+    override val octaves = 8.0
+    override val amplitude = 20.0
+    override val smoothness = 100.0
+    override val heightOffset = 1.0
+    override val roughness = 1.0
 
-    init {
-        heightOffset = 90
-        amplitude = 30.0
-        smoothness = 2.0
-        roughness = 75.0
+    override val topBlock = Material.SNOW_BLOCK
+    override val secondBlock = Material.SNOW_BLOCK
+    override val thirdBlock = Material.STONE
+    override val miscBlock = Material.STONE
 
-
-        temperatures.add(Material.SNOW.toBlock())
-        temperatures.add(Material.WHITE_WOOL.toBlock())
-    }
-
-}
-
-class IslandBiome(seed: Long): Biome(seed, 8) {
-
-    init {
-        heightOffset = 50
-        amplitude = 8.0
-        smoothness = 128.0
-        roughness = 2.0
-
-        temperatures.add(Material.SAND.toBlock())
-        temperatures.add(Material.GRASS_BLOCK.toBlock())
-    }
-}
-
-class BorderBiome(seed: Long): Biome(seed, 8) {
-
-    init {
-        heightOffset = 30
-        amplitude = 8.0
-        smoothness = 128.0
-        roughness = 2.0
-
-        temperatures.add(Material.AIR.toBlock())
-    }
+    override val secondLayerHeight = 3
 }
