@@ -1,6 +1,7 @@
 package eu.mshade.enderchest.listener.packet;
 
 import eu.mshade.enderframe.GameMode;
+import eu.mshade.enderframe.world.effect.WorldEffectType;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.item.Material;
 import eu.mshade.enderframe.packetevent.MinecraftPacketPlayerDiggingEvent;
@@ -29,8 +30,9 @@ public class MinecraftPacketPlayerDiggingListener implements EventListener<Minec
             world.setBlock(blockPosition, Material.AIR);
 
             player.getLocation().getChunk().join().notify(agent -> {
-                if (agent instanceof Player target) {
+                if (agent instanceof Player target && target != player) {
                     target.getMinecraftSession().sendBlockChange(blockPosition, Material.AIR);
+                    target.getMinecraftSession().sendWorldEffect(WorldEffectType.STEP_SOUND, blockPosition, block.getMaterialKey(), false);
                 }
             });
         }
