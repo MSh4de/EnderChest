@@ -1,4 +1,4 @@
-package eu.mshade.enderchest.listener
+package eu.mshade.enderchest.listener.player
 
 import eu.mshade.axolotl.protocol.AxolotlSession
 import eu.mshade.enderchest.EnderChest

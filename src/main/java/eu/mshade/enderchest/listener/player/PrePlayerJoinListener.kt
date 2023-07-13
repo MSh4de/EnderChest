@@ -1,4 +1,4 @@
-package eu.mshade.enderchest.listener
+package eu.mshade.enderchest.listener.player
 
 import eu.mshade.axolotl.protocol.AxolotlSession
 import eu.mshade.enderchest.EnderChest
@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.ExecutionException
 
 class PrePlayerJoinListener : EventListener<PrePlayerJoinEvent> {
-    private val chunk: Chunk? = null
 
     override fun onEvent(event: PrePlayerJoinEvent) {
         val minecraftProtocolPipeline = MinecraftProtocolPipeline.get()

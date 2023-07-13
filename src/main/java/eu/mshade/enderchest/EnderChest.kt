@@ -10,7 +10,13 @@ import eu.mshade.enderchest.axolotl.AxolotlChannelInitializer
 import eu.mshade.enderchest.axolotl.listener.HandshakeAxolotlListener
 import eu.mshade.enderchest.axolotl.listener.MessageAxolotlListener
 import eu.mshade.enderchest.listener.*
+import eu.mshade.enderchest.listener.animation.SwingArmListener
+import eu.mshade.enderchest.listener.chunk.*
+import eu.mshade.enderchest.listener.entity.*
 import eu.mshade.enderchest.listener.packet.*
+import eu.mshade.enderchest.listener.player.PlayerDisconnectListener
+import eu.mshade.enderchest.listener.player.PlayerJoinListener
+import eu.mshade.enderchest.listener.player.PrePlayerJoinListener
 import eu.mshade.enderchest.marshal.item.LoreItemStackMetadataBuffer
 import eu.mshade.enderchest.marshal.item.NameItemStackMetadataBuffer
 import eu.mshade.enderchest.marshal.metadata.*
@@ -24,6 +30,7 @@ import eu.mshade.enderframe.EnderFrame
 import eu.mshade.enderframe.MinecraftServer
 import eu.mshade.enderframe.entity.EntityTracker
 import eu.mshade.enderframe.event.*
+import eu.mshade.enderframe.event.animation.SwingArmEvent
 import eu.mshade.enderframe.inventory.InventoryTracker
 import eu.mshade.enderframe.item.ItemStackMetadataKey
 import eu.mshade.enderframe.item.Material
@@ -136,6 +143,8 @@ object EnderChest {
         packetEvents.subscribe(MinecraftPacketClickInventoryEvent::class.java, MinecraftPacketClickInventoryListener())
         packetEvents.subscribe(MinecraftPacketClientStatusEvent::class.java, MinecraftPacketClientStatusListener())
         packetEvents.subscribe(MinecraftPacketHeldItemChangeEvent::class.java, MinecraftPacketHeldItemChangeListener())
+        packetEvents.subscribe(MinecraftPacketAnimationEvent::class.java, MinecraftPacketAnimationListener())
+
 
         val minecraftEvents = enderFrame.minecraftEvents
         minecraftEvents.subscribe(EntityUnseeEvent::class.java, EntityUnseeListener())
@@ -153,6 +162,7 @@ object EnderChest {
         minecraftEvents.subscribe(PlayerDisconnectEvent::class.java, PlayerDisconnectListener())
         minecraftEvents.subscribe(PrePlayerJoinEvent::class.java, PrePlayerJoinListener())
         minecraftEvents.subscribe(PlayerJoinEvent::class.java, PlayerJoinListener())
+        minecraftEvents.subscribe(SwingArmEvent::class.java, SwingArmListener())
 
         metadataKeyValueBufferRegistry = MetadataKeyValueBufferRegistry()
         metadataKeyValueBufferRegistry.register(WorldMetadataType.NAME, NameWorldMetadataBuffer())

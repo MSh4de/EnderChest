@@ -1,4 +1,4 @@
-package eu.mshade.enderchest.listener;
+package eu.mshade.enderchest.listener.entity;
 
 import eu.mshade.enderframe.entity.Entity;
 import eu.mshade.enderframe.event.EntityChunkChangeEvent;
