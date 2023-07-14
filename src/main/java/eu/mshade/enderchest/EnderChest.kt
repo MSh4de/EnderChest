@@ -276,7 +276,7 @@ object EnderChest {
             LOGGER.error("", e)
         }
 
-        val axolotlPacketInEventBus = Axolotl.eventBus
+/*        val axolotlPacketInEventBus = Axolotl.eventBus
         axolotlPacketInEventBus.subscribe(HandshakeAxolotlEvent::class.java, HandshakeAxolotlListener())
         axolotlPacketInEventBus.subscribe(ChatMessageAxolotlEvent::class.java, MessageAxolotlListener())
 
@@ -297,7 +297,7 @@ object EnderChest {
             LOGGER.info(axolotlServer.sync().channel().toString())
         } catch (e: InterruptedException) {
             LOGGER.error("", e)
-        }
+        }*/
 
 
         LOGGER.info("Done in {} ms !", System.currentTimeMillis() - start)
