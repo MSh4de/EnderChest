@@ -201,7 +201,9 @@ object EnderChest {
         metadataKeyValueBufferRegistry.register(ItemStackMetadataKey.NAME, NameItemStackMetadataBuffer())
         metadataKeyValueBufferRegistry.register(ItemStackMetadataKey.LORE, LoreItemStackMetadataBuffer())
 
-
+        val pluginManager: PluginManager = DefaultPluginManager(mapper)
+        pluginManager.loadPlugins(File(System.getProperty("user.dir"), "plugins").toPath())
+        pluginManager.enablePlugins()
 
         chunkSafeguard.start()
         LOGGER.info("ChunkSafeGuard started")
@@ -241,9 +243,6 @@ object EnderChest {
         world.chunkGenerator = TestWorldGeneration()
 
 
-        val pluginManager: PluginManager = DefaultPluginManager(mapper)
-        pluginManager.loadPlugins(File(System.getProperty("user.dir"), "plugins").toPath())
-        pluginManager.enablePlugins()
 
         Runtime.getRuntime().addShutdownHook(Thread {
             LOGGER.warn("Beginning save of server don't close the console !")
