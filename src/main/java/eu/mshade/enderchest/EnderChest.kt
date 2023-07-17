@@ -20,6 +20,7 @@ import eu.mshade.enderchest.listener.player.PrePlayerJoinListener
 import eu.mshade.enderchest.marshal.item.LoreItemStackMetadataBuffer
 import eu.mshade.enderchest.marshal.item.NameItemStackMetadataBuffer
 import eu.mshade.enderchest.marshal.metadata.*
+import eu.mshade.enderchest.plugin.DefaultPluginManager
 import eu.mshade.enderchest.world.ChunkSafeguard
 import eu.mshade.enderchest.world.DefaultChunkGenerator
 import eu.mshade.enderchest.world.SchematicLoader
@@ -38,6 +39,7 @@ import eu.mshade.enderframe.item.MaterialKey.DefaultMaterialKey
 import eu.mshade.enderframe.metadata.MetadataKeyValueBufferRegistry
 import eu.mshade.enderframe.mojang.chat.*
 import eu.mshade.enderframe.packetevent.*
+import eu.mshade.enderframe.plugin.PluginManager
 import eu.mshade.enderframe.protocol.MinecraftEncryption
 import eu.mshade.enderframe.scoreboard.ScoreboardSidebar
 import eu.mshade.enderframe.tick.TickBus
@@ -53,6 +55,8 @@ import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import org.fusesource.jansi.AnsiConsole
 import org.slf4j.LoggerFactory
+import java.io.File
+import java.nio.file.Path
 import java.util.function.Consumer
 
 fun main() {
@@ -235,6 +239,11 @@ object EnderChest {
         }
 //        world.chunkGenerator = DefaultChunkGenerator(world)
         world.chunkGenerator = TestWorldGeneration()
+
+
+        val pluginManager: PluginManager = DefaultPluginManager(mapper)
+        pluginManager.loadPlugins(File(System.getProperty("user.dir"), "plugins").toPath())
+        pluginManager.enablePlugins()
 
         Runtime.getRuntime().addShutdownHook(Thread {
             LOGGER.warn("Beginning save of server don't close the console !")
