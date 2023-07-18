@@ -62,7 +62,6 @@ class DefaultPluginManager(val objectMapper: ObjectMapper): PluginManager {
     override fun enablePlugins() {
         var idx = 0
 
-        //copy pluginStates
         val cpyPluginStates = pluginStates.toMutableMap()
 
         for ((pluginName, state) in pluginStates) {
@@ -74,17 +73,14 @@ class DefaultPluginManager(val objectMapper: ObjectMapper): PluginManager {
                 continue
             }
 
-            for (denpendency in pluginManifest.depends) {
-                if (pluginStates[denpendency] == null) {
+            for (dependency in pluginManifest.depends) {
+                if (pluginStates[dependency] == null) {
                     cpyPluginStates.remove(pluginName)
-                    LOGGER.error("Plugin $pluginName depends on $denpendency but it is not found in plugins")
+                    LOGGER.error("Plugin $pluginName depends on $dependency but it is not found in plugins")
                     continue
                 }
             }
         }
-
-/*        println(cpyPluginStates)
-        exitProcess(0)*/
 
         var pluginName = poolPlugin(cpyPluginStates, idx)
         while (pluginName != null) {
