@@ -9,6 +9,7 @@ import java.io.InputStream
 import java.net.URLClassLoader
 import java.nio.file.Path
 import java.util.jar.JarFile
+import kotlin.system.exitProcess
 
 class DefaultPluginManager(val objectMapper: ObjectMapper): PluginManager {
 
@@ -60,20 +61,46 @@ class DefaultPluginManager(val objectMapper: ObjectMapper): PluginManager {
 
     override fun enablePlugins() {
         var idx = 0
-        var pluginName = peakRandomPlugin(idx)
+
+        //copy pluginStates
+        val cpyPluginStates = pluginStates.toMutableMap()
+
+        for ((pluginName, state) in pluginStates) {
+
+            val pluginManifest = pluginManifests[pluginName]
+            if (pluginManifest == null) {
+                cpyPluginStates.remove(pluginName)
+                LOGGER.error("Plugin $pluginName not found in pluginManifests")
+                continue
+            }
+
+            for (denpendency in pluginManifest.depends) {
+                if (pluginStates[denpendency] == null) {
+                    cpyPluginStates.remove(pluginName)
+                    LOGGER.error("Plugin $pluginName depends on $denpendency but it is not found in plugins")
+                    continue
+                }
+            }
+        }
+
+/*        println(cpyPluginStates)
+        exitProcess(0)*/
+
+        var pluginName = poolPlugin(cpyPluginStates, idx)
         while (pluginName != null) {
             val plugin = plugins[pluginName]!!
             if (checkDependencies(pluginManifests[pluginName]!!)) {
                 plugin.onEnable()
+                cpyPluginStates[pluginName] = true
                 pluginStates[pluginName] = true
             }
-            pluginName = peakRandomPlugin(idx)
+            pluginName = poolPlugin(cpyPluginStates, idx)
             idx++
         }
 
     }
 
-    fun peakRandomPlugin(idx: Int): String? {
+    fun poolPlugin(pluginStates: MutableMap<String, Boolean>, idx: Int): String? {
         val filter = pluginStates.filter { !it.value }
         if (filter.isEmpty()) {
             return null
