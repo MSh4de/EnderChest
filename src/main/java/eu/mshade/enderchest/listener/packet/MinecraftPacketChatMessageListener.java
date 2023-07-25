@@ -1,9 +1,10 @@
 package eu.mshade.enderchest.listener.packet;
 
 import eu.mshade.enderchest.EnderChest;
-import eu.mshade.enderchest.axolotl.AxololtConnection;
 import eu.mshade.enderchest.world.SchematicLoader;
+import eu.mshade.enderframe.EnderFrame;
 import eu.mshade.enderframe.entity.Player;
+import eu.mshade.enderframe.event.PlayerChatEvent;
 import eu.mshade.enderframe.item.MaterialKey;
 import eu.mshade.enderframe.mojang.chat.ChatColor;
 import eu.mshade.enderframe.mojang.chat.TextComponent;
@@ -27,7 +28,7 @@ public class MinecraftPacketChatMessageListener implements EventListener<Minecra
         MinecraftSession minecraftSession = player.getMinecraftSession();
         Location location = player.getLocation();
 
-        AxololtConnection.INSTANCE.send(axolotlSession -> axolotlSession.sendChatMessage(player, event.getMessage()));
+        EnderFrame.get().getMinecraftEvents().publishAsync(new PlayerChatEvent(player, event.getMessage()));
 
         if (event.getMessage().startsWith("schematic")) {
             String[] args = event.getMessage().split(" ");
