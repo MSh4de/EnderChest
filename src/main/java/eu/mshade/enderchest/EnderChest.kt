@@ -2,27 +2,21 @@ package eu.mshade.enderchest
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
-import eu.mshade.axolotl.Axolotl
-import eu.mshade.axolotl.event.ChatMessageAxolotlEvent
-import eu.mshade.axolotl.event.HandshakeAxolotlEvent
-import eu.mshade.axolotl.protocol.AxolotlProtocolRepository
-import eu.mshade.enderchest.axolotl.AxolotlChannelInitializer
-import eu.mshade.enderchest.axolotl.listener.HandshakeAxolotlListener
-import eu.mshade.enderchest.axolotl.listener.MessageAxolotlListener
-import eu.mshade.enderchest.listener.*
+import eu.mshade.enderchest.listener.WatchdogSeeListener
+import eu.mshade.enderchest.listener.WatchdogUnseeListener
 import eu.mshade.enderchest.listener.animation.SwingArmListener
 import eu.mshade.enderchest.listener.chunk.*
 import eu.mshade.enderchest.listener.entity.*
 import eu.mshade.enderchest.listener.packet.*
 import eu.mshade.enderchest.listener.player.PlayerDisconnectListener
 import eu.mshade.enderchest.listener.player.PlayerJoinListener
+import eu.mshade.enderchest.listener.player.PlayerTabCompleteListener
 import eu.mshade.enderchest.listener.player.PrePlayerJoinListener
 import eu.mshade.enderchest.marshal.item.LoreItemStackMetadataBuffer
 import eu.mshade.enderchest.marshal.item.NameItemStackMetadataBuffer
 import eu.mshade.enderchest.marshal.metadata.*
 import eu.mshade.enderchest.plugin.DefaultPluginManager
 import eu.mshade.enderchest.world.ChunkSafeguard
-import eu.mshade.enderchest.world.DefaultChunkGenerator
 import eu.mshade.enderchest.world.SchematicLoader
 import eu.mshade.enderchest.world.WorldManager
 import eu.mshade.enderchest.world.generation.TestWorldGeneration
@@ -47,7 +41,6 @@ import eu.mshade.enderframe.world.*
 import eu.mshade.enderframe.world.block.BlockMetadataType
 import eu.mshade.enderman.EndermanMinecraftProtocol
 import eu.mshade.mwork.MWork
-import eu.mshade.stone.StoneAxolotlProtocol
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelOption
 import io.netty.channel.EventLoopGroup
@@ -56,7 +49,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
 import org.fusesource.jansi.AnsiConsole
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.nio.file.Path
 import java.util.function.Consumer
 
 fun main() {
@@ -150,7 +142,7 @@ object EnderChest {
         packetEvents.subscribe(MinecraftPacketClientStatusEvent::class.java, MinecraftPacketClientStatusListener())
         packetEvents.subscribe(MinecraftPacketHeldItemChangeEvent::class.java, MinecraftPacketHeldItemChangeListener())
         packetEvents.subscribe(MinecraftPacketAnimationEvent::class.java, MinecraftPacketAnimationListener())
-
+        packetEvents.subscribe(MinecraftPacketTabCompleteEvent::class.java, MinecraftPacketTabCompleteListener())
 
         val minecraftEvents = enderFrame.minecraftEvents
         minecraftEvents.subscribe(EntityUnseeEvent::class.java, EntityUnseeListener())
@@ -169,6 +161,7 @@ object EnderChest {
         minecraftEvents.subscribe(PrePlayerJoinEvent::class.java, PrePlayerJoinListener())
         minecraftEvents.subscribe(PlayerJoinEvent::class.java, PlayerJoinListener())
         minecraftEvents.subscribe(SwingArmEvent::class.java, SwingArmListener())
+        minecraftEvents.subscribe(PlayerTabCompleteEvent::class.java, PlayerTabCompleteListener())
 
         metadataKeyValueBufferRegistry = MetadataKeyValueBufferRegistry()
         metadataKeyValueBufferRegistry.register(WorldMetadataType.NAME, NameWorldMetadataBuffer())
