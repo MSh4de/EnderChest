@@ -40,7 +40,7 @@ public class MinecraftPacketEncryptionListener implements EventListener<Minecraf
 
             HttpRequest httpRequest = HttpRequest.newBuilder()
                     .GET()
-                    .uri(new URI("https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" + minecraftSession.gameProfile.getName() + "&serverId=" + hashServerId))
+                    .uri(new URI("https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" + minecraftSession.getGameProfile().getName() + "&serverId=" + hashServerId))
                     .build();
 
             String body = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString()).body();
@@ -64,7 +64,7 @@ public class MinecraftPacketEncryptionListener implements EventListener<Minecraf
                 properties.add(new Property(name, value, signature));
             });
 
-            minecraftSession.gameProfile = new GameProfile(uuid, jsonNode.get("name").asText(), properties);
+            minecraftSession.setGameProfile(new GameProfile(uuid, jsonNode.get("name").asText(), properties));
 
             EnderFrame.get().getMinecraftEvents().publish(new PrePlayerJoinEvent(minecraftSession));
         }catch (Exception e){

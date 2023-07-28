@@ -13,7 +13,7 @@ public class MinecraftPacketLoginListener implements EventListener<MinecraftPack
     @Override
     public void onEvent(MinecraftPacketLoginEvent event) {
         MinecraftSession minecraftSession = event.getMinecraftSession();
-        minecraftSession.gameProfile = new GameProfile(event.getName());
+        minecraftSession.setGameProfile(new GameProfile(event.getName()));
 //        minecraftSession.sendEncryption(EnderChest.INSTANCE.getMinecraftEncryption().getKeyPair().getPublic());
         EnderFrame.get().getMinecraftEvents().publish(new PrePlayerJoinEvent(minecraftSession));
     }

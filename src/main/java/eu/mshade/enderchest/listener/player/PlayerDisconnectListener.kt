@@ -1,8 +1,6 @@
 package eu.mshade.enderchest.listener.player
 
-import eu.mshade.axolotl.protocol.AxolotlSession
 import eu.mshade.enderchest.EnderChest
-import eu.mshade.enderchest.axolotl.AxololtConnection
 import eu.mshade.enderframe.PlayerInfoBuilder
 import eu.mshade.enderframe.PlayerInfoType
 import eu.mshade.enderframe.entity.Entity
@@ -45,7 +43,6 @@ class PlayerDisconnectListener : EventListener<PlayerDisconnectEvent> {
 
         EnderChest.minecraftServer.getOnlinePlayers().forEach { target -> target.minecraftSession.sendPlayerInfo(playerInfoBuilder) }
         InventoryTracker.remove(player.inventory!!)
-        AxololtConnection.send { axolotlSession: AxolotlSession -> axolotlSession.sendPlayerLeave(player) }
 
         Entity.ID.flushId(player.getEntityId())
         logger.info("{} leave server", player.name)

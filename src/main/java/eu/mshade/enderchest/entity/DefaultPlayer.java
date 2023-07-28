@@ -1,6 +1,5 @@
 package eu.mshade.enderchest.entity;
 
-import eu.mshade.enderchest.axolotl.AxololtConnection;
 import eu.mshade.enderchest.world.virtual.VirtualSection;
 import eu.mshade.enderchest.world.virtual.VirtualSectionStatus;
 import eu.mshade.enderframe.EnderFrame;
@@ -10,10 +9,10 @@ import eu.mshade.enderframe.event.PlayerMoveEvent;
 import eu.mshade.enderframe.inventory.PlayerInventory;
 import eu.mshade.enderframe.protocol.MinecraftSession;
 import eu.mshade.enderframe.virtualserver.VirtualWorld;
-import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Vector;
 import eu.mshade.enderframe.world.World;
+import eu.mshade.enderframe.world.chunk.Chunk;
 import eu.mshade.enderframe.world.chunk.EmptySection;
 import eu.mshade.enderframe.world.chunk.Section;
 import org.slf4j.Logger;
@@ -44,14 +43,14 @@ public class DefaultPlayer extends Player {
         this.setPlayerInventory(new PlayerInventory());
         this.getInventory().addWatcher(this);
 
-        this.setGameProfile(minecraftSession.gameProfile);
-        this.setDisplayName(minecraftSession.gameProfile.getName());
+        this.setGameProfile(minecraftSession.getGameProfile());
+        this.setDisplayName(minecraftSession.getGameProfile().getName());
         this.setMinecraftProtocolVersion(minecraftSession.getProtocol().getMinecraftProtocolVersion());
         this.minecraftSession = minecraftSession;
     }
 
     public DefaultPlayer(Location location, int entityId, MinecraftSession minecraftSession) {
-        this(location, new Vector(), entityId, minecraftSession.gameProfile.getId(), minecraftSession);
+        this(location, new Vector(), entityId, minecraftSession.getGameProfile().getId(), minecraftSession);
     }
 
     @Override
@@ -115,7 +114,6 @@ public class DefaultPlayer extends Player {
         if (!this.getTickBeforeLocation().equals(this.getTickLocation())) {
             EnderFrame.get().getMinecraftEvents().publish(new PlayerMoveEvent(this, this.getTickBeforeLocation(), this.getTickBeforeLocation()));
 
-            AxololtConnection.INSTANCE.send(axolotlSession -> axolotlSession.sendEntityLocation(this));
         }
 
         setTickLocation(getLocation());

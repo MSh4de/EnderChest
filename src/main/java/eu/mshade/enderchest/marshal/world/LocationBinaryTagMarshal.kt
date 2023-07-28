@@ -1,5 +1,6 @@
 package eu.mshade.enderchest.marshal.world
 
+import eu.mshade.enderchest.EnderChest
 import eu.mshade.enderchest.world.WorldManager
 import eu.mshade.enderframe.world.Location
 import eu.mshade.enderframe.world.WorldMetadataType
@@ -24,7 +25,7 @@ object LocationBinaryTagMarshal {
 
     fun deserialize(binaryTag: BinaryTag<*>): Location {
         val compoundBinaryTag = binaryTag as CompoundBinaryTag
-        val world = WorldRepository.getWorld(compoundBinaryTag.getString("world")!!)
+        val world = EnderChest.worldRepository.getWorld(compoundBinaryTag.getString("world")!!)
         val x = compoundBinaryTag.getDouble("x")
         val y = compoundBinaryTag.getDouble("y")
         val z = compoundBinaryTag.getDouble("z")

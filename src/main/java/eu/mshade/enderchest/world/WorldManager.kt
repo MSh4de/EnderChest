@@ -39,7 +39,7 @@ class WorldManager(
     }
 
     fun createWorld(name: String, bucketConsumer: Consumer<MetadataKeyValueBucket>): World {
-        var world = WorldRepository.getWorld(name)
+        var world = EnderChest.worldRepository.getWorld(name)
         if (world != null) {
             return world
         }
@@ -56,7 +56,7 @@ class WorldManager(
         metadataKeyValueBucket.setMetadataKeyValue(NameWorldMetadata(name))
         bucketConsumer.accept(metadataKeyValueBucket)
         world.joinTickBus(tickBus)
-        WorldRepository.addWorld(world)
+        EnderChest.worldRepository.addWorld(world)
 
         return world
     }
@@ -71,6 +71,6 @@ class WorldManager(
     private fun loadWorld(binaryTagDriver: BinaryTagDriver, worldFolder: File) {
         val world = WorldBinaryTagMarshal.read(binaryTagDriver, worldFolder, chunkSafeguard, EnderChest.metadataKeyValueBufferRegistry)
         world.joinTickBus(tickBus)
-        WorldRepository.addWorld(world)
+        EnderChest.worldRepository.addWorld(world)
     }
 }

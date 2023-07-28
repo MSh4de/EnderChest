@@ -1,7 +1,6 @@
 package eu.mshade.enderchest.listener.packet;
 
 import eu.mshade.enderchest.EnderChest;
-import eu.mshade.enderchest.axolotl.AxololtConnection;
 import eu.mshade.enderchest.world.SchematicLoader;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.item.MaterialKey;
@@ -12,7 +11,6 @@ import eu.mshade.enderframe.protocol.MinecraftSession;
 import eu.mshade.enderframe.virtualserver.VirtualWorld;
 import eu.mshade.enderframe.world.Location;
 import eu.mshade.enderframe.world.Vector;
-import eu.mshade.enderframe.world.WorldRepository;
 import eu.mshade.mwork.event.EventListener;
 
 import java.util.concurrent.CompletableFuture;
@@ -27,7 +25,6 @@ public class MinecraftPacketChatMessageListener implements EventListener<Minecra
         MinecraftSession minecraftSession = player.getMinecraftSession();
         Location location = player.getLocation();
 
-        AxololtConnection.INSTANCE.send(axolotlSession -> axolotlSession.sendChatMessage(player, event.getMessage()));
 
         if (event.getMessage().startsWith("schematic")) {
             String[] args = event.getMessage().split(" ");
@@ -116,7 +113,7 @@ public class MinecraftPacketChatMessageListener implements EventListener<Minecra
             }else if (command.equals("leave")){
                 CompletableFuture.runAsync(() -> {
                     minecraftSession.sendMessage(ChatColor.GREEN + "Left virtual world "+ player.getLocation().getWorld().getName());
-                    player.joinWorld(WorldRepository.INSTANCE.getWorld("world"));
+                    player.joinWorld(EnderChest.INSTANCE.getWorldRepository().getWorld("world"));
                 });
             }
             return;

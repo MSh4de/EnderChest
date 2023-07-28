@@ -15,7 +15,7 @@ public class MinecraftPacketHandshakeListener implements EventListener<Minecraft
     public void onEvent(MinecraftPacketHandshakeEvent event) {
         MinecraftProtocolPipeline minecraftProtocolPipeline = MinecraftProtocolPipeline.get();
         MinecraftSession minecraftSession = event.getMinecraftSession();
-        Channel channel = minecraftSession.channel;
+        Channel channel = minecraftSession.getChannel();
         MinecraftHandshake minecraftHandshake = event.getHandshake();
         MinecraftHandshakeStatus minecraftHandshakeStatus = minecraftHandshake.getHandshakeStatus();
         MinecraftProtocolVersion minecraftProtocolVersion = minecraftHandshake.getVersion();

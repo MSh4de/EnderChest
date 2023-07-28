@@ -78,10 +78,10 @@ class DifficultyWorldMetadataBuffer(val binaryTagDriver: BinaryTagDriver): Metad
 
 }
 
-class ParentWorldMetadataBuffer: MetadataKeyValueBuffer {
+class ParentWorldMetadataBuffer(private val worldRepository: WorldRepository): MetadataKeyValueBuffer {
 
     override fun read(binaryTag: BinaryTag<*>): MetadataKeyValue<*> {
-        return ParentWorldMetadata(WorldRepository.getWorld(binaryTag.value as String))
+        return ParentWorldMetadata(worldRepository.getWorld(binaryTag.value as String))
     }
 
     override fun write(metadataKeyValue: MetadataKeyValue<*>): BinaryTag<*> {

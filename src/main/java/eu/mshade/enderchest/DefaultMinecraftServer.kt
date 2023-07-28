@@ -63,7 +63,7 @@ class DefaultMinecraftServer : MinecraftServer {
     }
 
     override fun getWorlds(): Collection<World> {
-        return WorldRepository.getWorlds()
+        return EnderChest.worldRepository.getWorlds()
     }
 
     override fun getWorld(worldName: String): World? {
