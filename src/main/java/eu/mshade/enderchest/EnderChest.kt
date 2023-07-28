@@ -2,16 +2,16 @@ package eu.mshade.enderchest
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
+import eu.mshade.enderchest.commands.CommandDblock
+import eu.mshade.enderchest.commands.CommandTp
+import eu.mshade.enderchest.commands.CommandVirtualWorld
 import eu.mshade.enderchest.listener.WatchdogSeeListener
 import eu.mshade.enderchest.listener.WatchdogUnseeListener
 import eu.mshade.enderchest.listener.animation.SwingArmListener
 import eu.mshade.enderchest.listener.chunk.*
 import eu.mshade.enderchest.listener.entity.*
 import eu.mshade.enderchest.listener.packet.*
-import eu.mshade.enderchest.listener.player.PlayerDisconnectListener
-import eu.mshade.enderchest.listener.player.PlayerJoinListener
-import eu.mshade.enderchest.listener.player.PlayerTabCompleteListener
-import eu.mshade.enderchest.listener.player.PrePlayerJoinListener
+import eu.mshade.enderchest.listener.player.*
 import eu.mshade.enderchest.marshal.item.LoreItemStackMetadataBuffer
 import eu.mshade.enderchest.marshal.item.NameItemStackMetadataBuffer
 import eu.mshade.enderchest.marshal.metadata.*
@@ -23,12 +23,15 @@ import eu.mshade.enderchest.world.generation.TestWorldGeneration
 import eu.mshade.enderchest.world.virtual.VirtualWorldManager
 import eu.mshade.enderframe.EnderFrame
 import eu.mshade.enderframe.MinecraftServer
+import eu.mshade.enderframe.commands.Command
 import eu.mshade.enderframe.entity.EntityTracker
+import eu.mshade.enderframe.entity.Player
 import eu.mshade.enderframe.event.*
 import eu.mshade.enderframe.event.animation.SwingArmEvent
 import eu.mshade.enderframe.inventory.InventoryTracker
 import eu.mshade.enderframe.item.ItemStackMetadataKey
 import eu.mshade.enderframe.item.Material
+import eu.mshade.enderframe.item.MaterialKey
 import eu.mshade.enderframe.item.MaterialKey.DefaultMaterialKey
 import eu.mshade.enderframe.metadata.MetadataKeyValueBufferRegistry
 import eu.mshade.enderframe.mojang.chat.*
@@ -49,6 +52,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
 import org.fusesource.jansi.AnsiConsole
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.util.concurrent.ForkJoinPool
 import java.util.function.Consumer
 
 fun main() {
@@ -62,7 +66,7 @@ object EnderChest {
     val parentGroup: EventLoopGroup
 
     private val childGroup: EventLoopGroup
-    var minecraftServer : MinecraftServer
+    var minecraftServer: MinecraftServer
     val minecraftEncryption = MinecraftEncryption()
     val worldManager: WorldManager
     val virtualWorldManager: VirtualWorldManager
@@ -162,13 +166,23 @@ object EnderChest {
         minecraftEvents.subscribe(PlayerJoinEvent::class.java, PlayerJoinListener())
         minecraftEvents.subscribe(SwingArmEvent::class.java, SwingArmListener())
         minecraftEvents.subscribe(PlayerTabCompleteEvent::class.java, PlayerTabCompleteListener())
+        minecraftEvents.subscribe(PlayerChatEvent::class.java, PlayerChatListener())
 
         metadataKeyValueBufferRegistry = MetadataKeyValueBufferRegistry()
         metadataKeyValueBufferRegistry.register(WorldMetadataType.NAME, NameWorldMetadataBuffer())
         metadataKeyValueBufferRegistry.register(WorldMetadataType.SEED, SeedWorldMetadataBuffer())
-        metadataKeyValueBufferRegistry.register(WorldMetadataType.DIMENSION, DimensionWorldMetadataBuffer(binaryTagDriver))
-        metadataKeyValueBufferRegistry.register(WorldMetadataType.LEVEL_TYPE, LevelTypeWorldMetadataBuffer(binaryTagDriver))
-        metadataKeyValueBufferRegistry.register(WorldMetadataType.DIFFICULTY, DifficultyWorldMetadataBuffer(binaryTagDriver))
+        metadataKeyValueBufferRegistry.register(
+            WorldMetadataType.DIMENSION,
+            DimensionWorldMetadataBuffer(binaryTagDriver)
+        )
+        metadataKeyValueBufferRegistry.register(
+            WorldMetadataType.LEVEL_TYPE,
+            LevelTypeWorldMetadataBuffer(binaryTagDriver)
+        )
+        metadataKeyValueBufferRegistry.register(
+            WorldMetadataType.DIFFICULTY,
+            DifficultyWorldMetadataBuffer(binaryTagDriver)
+        )
         metadataKeyValueBufferRegistry.register(WorldMetadataType.PARENT, ParentWorldMetadataBuffer())
 
         metadataKeyValueBufferRegistry.register(BlockMetadataType.EXTRA, ExtraBlockMetadataBuffer())
@@ -193,6 +207,47 @@ object EnderChest {
 
         metadataKeyValueBufferRegistry.register(ItemStackMetadataKey.NAME, NameItemStackMetadataBuffer())
         metadataKeyValueBufferRegistry.register(ItemStackMetadataKey.LORE, LoreItemStackMetadataBuffer())
+
+        //DEFAULT COMMANDS
+        val commandManager = enderFrame.commandManager
+        commandManager.registerDefaultCommand(
+            Command("schematic") { ctx ->
+                if (ctx.sender is Player && ctx.args.size == 1) {
+                    val player = ctx.sender as Player
+                    val location = player.getLocation()
+                    val schematicPath: String = ctx.args[0]
+                    player.minecraftSession.sendMessage(ChatColor.GREEN.toString() + "Loading schematic " + schematicPath)
+                    ForkJoinPool.commonPool().execute {
+                        SchematicLoader.placeSchematic(
+                            location.world,
+                            schematicPath,
+                            Vector(location.blockX, location.blockY, location.blockZ)
+                        )
+                    }
+                }
+            }
+        )
+
+        commandManager.registerDefaultCommand(
+            Command("tp", executor = CommandTp())
+        )
+
+        commandManager.registerDefaultCommand(
+            Command("dblock", executor = CommandDblock())
+        )
+
+        commandManager.registerDefaultCommand(
+            Command("bdblock") { ctx ->
+                if (ctx.sender !is Player)
+                    return@Command
+                val player = ctx.sender as Player
+                val location = player.getLocation()
+                val id: Int = ctx.args[1].toInt()
+                val data: Int = ctx.args[2].toInt()
+                val materialKey = MaterialKey.from(id, data)
+                player.minecraftSession.sendUnsafeBlockChange(location.toVector().add(0, -1, 0), materialKey)
+            }
+        )
 
         val pluginManager: PluginManager = DefaultPluginManager(mapper)
         pluginManager.loadPlugins(File(System.getProperty("user.dir"), "plugins").toPath())
@@ -235,7 +290,11 @@ object EnderChest {
 //        world.chunkGenerator = DefaultChunkGenerator(world)
         world.chunkGenerator = TestWorldGeneration()
 
+        commandManager.registerDefaultCommand(
+            Command("virtualworld", executor = CommandVirtualWorld())
+        )
 
+        LOGGER.debug("Registered commands: ${commandManager.getCommands().values.toTypedArray().contentToString()}")
 
         Runtime.getRuntime().addShutdownHook(Thread {
             LOGGER.warn("Beginning save of server don't close the console !")
@@ -243,7 +302,7 @@ object EnderChest {
             WorldRepository.getWorlds().forEach(Consumer { w: World ->
                 LOGGER.info("Saving world " + w.name)
                 w.saveLevel()
-                w.chunks.forEach{chunk ->
+                w.chunks.forEach { chunk ->
                     minecraftServer.getTickableBlocks().flush(chunk.join())
                     w.saveChunk(chunk.join())
                 }
@@ -279,28 +338,28 @@ object EnderChest {
             LOGGER.error("", e)
         }
 
-/*        val axolotlPacketInEventBus = Axolotl.eventBus
-        axolotlPacketInEventBus.subscribe(HandshakeAxolotlEvent::class.java, HandshakeAxolotlListener())
-        axolotlPacketInEventBus.subscribe(ChatMessageAxolotlEvent::class.java, MessageAxolotlListener())
+        /*        val axolotlPacketInEventBus = Axolotl.eventBus
+                axolotlPacketInEventBus.subscribe(HandshakeAxolotlEvent::class.java, HandshakeAxolotlListener())
+                axolotlPacketInEventBus.subscribe(ChatMessageAxolotlEvent::class.java, MessageAxolotlListener())
 
-        val axolotlProtocolRepository = AxolotlProtocolRepository
-        axolotlProtocolRepository.register(StoneAxolotlProtocol())
+                val axolotlProtocolRepository = AxolotlProtocolRepository
+                axolotlProtocolRepository.register(StoneAxolotlProtocol())
 
 
-        val axolotlServer = ServerBootstrap()
-            .group(NioEventLoopGroup(), NioEventLoopGroup())
-            .channel(NioServerSocketChannel::class.java)
-            .childHandler(AxolotlChannelInitializer())
-            .localAddress("0.0.0.0", 25656)
-            .childOption(ChannelOption.TCP_NODELAY, true)
-            .childOption(ChannelOption.SO_KEEPALIVE, true)
-            .bind()
+                val axolotlServer = ServerBootstrap()
+                    .group(NioEventLoopGroup(), NioEventLoopGroup())
+                    .channel(NioServerSocketChannel::class.java)
+                    .childHandler(AxolotlChannelInitializer())
+                    .localAddress("0.0.0.0", 25656)
+                    .childOption(ChannelOption.TCP_NODELAY, true)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    .bind()
 
-        try {
-            LOGGER.info(axolotlServer.sync().channel().toString())
-        } catch (e: InterruptedException) {
-            LOGGER.error("", e)
-        }*/
+                try {
+                    LOGGER.info(axolotlServer.sync().channel().toString())
+                } catch (e: InterruptedException) {
+                    LOGGER.error("", e)
+                }*/
 
 
         LOGGER.info("Done in {} ms !", System.currentTimeMillis() - start)

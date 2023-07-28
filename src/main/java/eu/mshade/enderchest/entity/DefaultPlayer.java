@@ -8,6 +8,7 @@ import eu.mshade.enderframe.Watchable;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.event.PlayerMoveEvent;
 import eu.mshade.enderframe.inventory.PlayerInventory;
+import eu.mshade.enderframe.mojang.chat.TextComponent;
 import eu.mshade.enderframe.protocol.MinecraftSession;
 import eu.mshade.enderframe.virtualserver.VirtualWorld;
 import eu.mshade.enderframe.world.chunk.Chunk;
@@ -16,6 +17,7 @@ import eu.mshade.enderframe.world.Vector;
 import eu.mshade.enderframe.world.World;
 import eu.mshade.enderframe.world.chunk.EmptySection;
 import eu.mshade.enderframe.world.chunk.Section;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -236,5 +238,15 @@ public class DefaultPlayer extends Player {
                 });
             }
         });
+    }
+
+    @Override
+    public void sendMessage(@NotNull TextComponent text) {
+        minecraftSession.sendMessage(text);
+    }
+
+    @Override
+    public void sendMessage(@NotNull String message) {
+        super.sendMessage(message);
     }
 }
