@@ -6,10 +6,10 @@ import eu.mshade.enderframe.plugin.PluginManager
 import eu.mshade.enderframe.plugin.PluginManifest
 import org.slf4j.LoggerFactory
 import java.io.InputStream
+import java.net.URL
 import java.net.URLClassLoader
 import java.nio.file.Path
 import java.util.jar.JarFile
-import kotlin.system.exitProcess
 
 class DefaultPluginManager(val objectMapper: ObjectMapper): PluginManager {
 
@@ -20,7 +20,6 @@ class DefaultPluginManager(val objectMapper: ObjectMapper): PluginManager {
     val plugins = mutableMapOf<String, Plugin>()
     val pluginManifests = mutableMapOf<String, PluginManifest>()
     val pluginStates = mutableMapOf<String, Boolean>()
-
 
     fun register(pluginManifest: PluginManifest, plugin: Plugin) {
         plugins[pluginManifest.name] = plugin
@@ -36,14 +35,21 @@ class DefaultPluginManager(val objectMapper: ObjectMapper): PluginManager {
 
         directory.toFile().mkdirs()
 
+
         directory.toFile().listFiles()?.forEach {
             if(it.extension == "jar"){
                 val jarFile = JarFile(it)
                 val jarEntry = jarFile.getJarEntry("plugin.json")
                 val inputStream = jarFile.getInputStream(jarEntry)
                 val pluginManifest = getPluginManifest(inputStream)
-                val urlClassLoader = URLClassLoader(arrayOf(it.toURI().toURL()))
-                val pluginClass = urlClassLoader.loadClass(pluginManifest.main)
+
+                PluginClassLoader.add(it.toURI().toURL())
+
+                val pluginClass = PluginClassLoader.loadClass(pluginManifest.main)
+                if (!Plugin::class.java.isAssignableFrom(pluginClass)) {
+                    LOGGER.error("Plugin ${pluginManifest.name} does not implement Plugin interface")
+                    return
+                }
 
                 val plugin = pluginClass.getDeclaredConstructor().newInstance() as Plugin
 
@@ -52,6 +58,7 @@ class DefaultPluginManager(val objectMapper: ObjectMapper): PluginManager {
                 LOGGER.info("Loaded plugin ${pluginManifest.name} version ${pluginManifest.version} by ${pluginManifest.authors.joinToString(", ")}")
             }
         }
+
 
     }
 
