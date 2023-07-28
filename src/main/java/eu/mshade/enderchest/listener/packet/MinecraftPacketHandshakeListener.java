@@ -1,6 +1,7 @@
 package eu.mshade.enderchest.listener.packet;
 
 import eu.mshade.enderchest.EnderChest;
+import eu.mshade.enderframe.MinecraftServer;
 import eu.mshade.enderframe.mojang.chat.TextComponent;
 import eu.mshade.enderframe.packetevent.MinecraftPacketHandshakeEvent;
 import eu.mshade.enderframe.protocol.*;
@@ -25,7 +26,7 @@ public class MinecraftPacketHandshakeListener implements EventListener<Minecraft
         }else {
             minecraftSession.toggleProtocolStatus(MinecraftProtocolStatus.LOGIN);
             if (minecraftProtocolVersion != MinecraftProtocolVersion.UNKNOWN) {
-                MinecraftProtocol minecraftProtocol = EnderChest.INSTANCE.getMinecraftServer().getMinecraftProtocols().getProtocol(minecraftProtocolVersion);
+                MinecraftProtocol minecraftProtocol = MinecraftServer.INSTANCE.getMinecraftProtocols().getProtocol(minecraftProtocolVersion);
                 if (minecraftProtocol != null) {
                     minecraftSession = minecraftProtocol.getMinecraftSession(channel);
                     minecraftProtocolPipeline.setMinecraftSession(channel, minecraftSession);

@@ -6,6 +6,7 @@ import eu.mshade.enderchest.marshal.world.WorldBinaryTagMarshal.write
 import eu.mshade.enderchest.world.ChunkSafeguard
 import eu.mshade.enderchest.world.EmptyChunk
 import eu.mshade.enderframe.EnderFrame
+import eu.mshade.enderframe.MinecraftServer
 import eu.mshade.enderframe.entity.Entity
 import eu.mshade.enderframe.entity.EntityKey
 import eu.mshade.enderframe.item.MaterialKey
@@ -39,8 +40,7 @@ class DefaultVirtualWorld(
     private val regionByBinaryTagPoet = ConcurrentHashMap<SegmentBinaryTag, String>()
     private val binaryTagDriver = EnderFrame.get().binaryTagDriver
 
-    private val minecraftServer = EnderChest.minecraftServer
-    private val blockBehaviorRepository = minecraftServer.getBlockBehaviors()
+    private val blockBehaviorRepository = MinecraftServer.getBlockBehaviors()
 
 
     companion object {

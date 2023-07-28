@@ -5,6 +5,7 @@ import eu.mshade.enderchest.world.virtual.VirtualChunk;
 import eu.mshade.enderchest.world.virtual.VirtualSection;
 import eu.mshade.enderchest.world.virtual.VirtualSectionStatus;
 import eu.mshade.enderframe.Agent;
+import eu.mshade.enderframe.MinecraftServer;
 import eu.mshade.enderframe.item.Material;
 import eu.mshade.enderframe.virtualserver.VirtualWorld;
 import eu.mshade.enderframe.world.ChunkStatus;
@@ -32,7 +33,7 @@ public class DefaultChunk extends Chunk {
     private static final Block AIR = Material.AIR.toBlock();
 
     private final Queue<Agent> agents = new ConcurrentLinkedQueue<>();
-    private final TickableBlockRepository tickableBlocks = EnderChest.INSTANCE.getMinecraftServer().getTickableBlocks();
+    private final TickableBlockRepository tickableBlocks = MinecraftServer.INSTANCE.getTickableBlocks();
     private byte[] biomes = new byte[256];
 
     public DefaultChunk(int x, int z, World world) {

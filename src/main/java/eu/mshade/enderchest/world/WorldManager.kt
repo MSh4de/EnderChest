@@ -2,6 +2,9 @@ package eu.mshade.enderchest.world
 
 import eu.mshade.enderchest.EnderChest
 import eu.mshade.enderchest.marshal.world.WorldBinaryTagMarshal
+import eu.mshade.enderframe.EnderFrame
+import eu.mshade.enderframe.MinecraftServer
+import eu.mshade.enderframe.event.WorldLoadEvent
 import eu.mshade.enderframe.metadata.MetadataKeyValueBucket
 import eu.mshade.enderframe.tick.TickBus
 import eu.mshade.enderframe.world.NameWorldMetadata
@@ -39,7 +42,7 @@ class WorldManager(
     }
 
     fun createWorld(name: String, bucketConsumer: Consumer<MetadataKeyValueBucket>): World {
-        var world = EnderChest.worldRepository.getWorld(name)
+        var world = MinecraftServer.getWorld(name)
         if (world != null) {
             return world
         }
@@ -56,7 +59,7 @@ class WorldManager(
         metadataKeyValueBucket.setMetadataKeyValue(NameWorldMetadata(name))
         bucketConsumer.accept(metadataKeyValueBucket)
         world.joinTickBus(tickBus)
-        EnderChest.worldRepository.addWorld(world)
+        MinecraftServer.getWorldRepository().addWorld(world)
 
         return world
     }
@@ -70,7 +73,8 @@ class WorldManager(
 
     private fun loadWorld(binaryTagDriver: BinaryTagDriver, worldFolder: File) {
         val world = WorldBinaryTagMarshal.read(binaryTagDriver, worldFolder, chunkSafeguard, EnderChest.metadataKeyValueBufferRegistry)
+        MinecraftServer.getMinecraftEvent().publish(WorldLoadEvent(world))
         world.joinTickBus(tickBus)
-        EnderChest.worldRepository.addWorld(world)
+        MinecraftServer.getWorldRepository().addWorld(world)
     }
 }

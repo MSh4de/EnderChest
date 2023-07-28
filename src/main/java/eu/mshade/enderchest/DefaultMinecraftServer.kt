@@ -15,6 +15,7 @@ import eu.mshade.enderframe.world.block.TickableBlockRepository
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 
+/*
 class DefaultMinecraftServer : MinecraftServer {
 
     private val players = ConcurrentLinkedQueue<Player>()
@@ -97,4 +98,4 @@ class DefaultMinecraftServer : MinecraftServer {
     override fun getTickableBlocks(): TickableBlockRepository {
         return tickableBlockRepository
     }
-}
+}*/

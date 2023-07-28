@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException
 
 object ChunkBinaryTagMarshal {
 
-    val tickableBlocks = EnderChest.minecraftServer.getTickableBlocks()
+    val tickableBlocks = MinecraftServer.getTickableBlocks()
 
     fun serialize(
         chunk: Chunk,

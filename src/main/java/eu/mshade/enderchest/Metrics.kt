@@ -1,5 +1,6 @@
 package eu.mshade.enderchest
 
+import eu.mshade.enderframe.MinecraftServer
 import eu.mshade.enderframe.mojang.chat.ChatColor
 import eu.mshade.enderframe.tick.Tickable
 import eu.mshade.enderframe.world.block.TickableBlockRepository
@@ -8,7 +9,7 @@ class Metrics : Tickable() {
 
     val scoreboard = EnderChest.metrics
     val tickBus = EnderChest.tickBus
-    val minecraftServer = EnderChest.minecraftServer
+    val minecraftServer = MinecraftServer
 
     override fun tick() {
         if (!isPeriod(20)) return
@@ -26,7 +27,7 @@ class Metrics : Tickable() {
         }
 
         scoreboard.modifyLine("players") {
-            it.setValue("Players: ${minecraftServer.getOnlinePlayers().size}")
+            it.setValue("Players: ${minecraftServer.getPlayers().size}")
         }
 
         scoreboard.modifyLine("space2") {

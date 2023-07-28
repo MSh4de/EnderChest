@@ -86,9 +86,14 @@ class DefaultPluginManager(val objectMapper: ObjectMapper): PluginManager {
         while (pluginName != null) {
             val plugin = plugins[pluginName]!!
             if (checkDependencies(pluginManifests[pluginName]!!)) {
-                plugin.onEnable()
-                cpyPluginStates[pluginName] = true
-                pluginStates[pluginName] = true
+                try {
+                    plugin.onEnable()
+                    cpyPluginStates[pluginName] = true
+                    pluginStates[pluginName] = true
+                } catch (e: Exception) {
+                    cpyPluginStates.remove(pluginName)
+                    LOGGER.error("Error while enabling plugin $pluginName", e)
+                }
             }
             pluginName = poolPlugin(cpyPluginStates, idx)
             idx++

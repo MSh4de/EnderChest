@@ -61,10 +61,8 @@ object EnderChest {
     val parentGroup: EventLoopGroup
 
     private val childGroup: EventLoopGroup
-    var minecraftServer : MinecraftServer
     val minecraftEncryption = MinecraftEncryption()
     val worldManager: WorldManager
-    val worldRepository = WorldRepository()
     val virtualWorldManager: VirtualWorldManager
     val metadataKeyValueBufferRegistry: MetadataKeyValueBufferRegistry
     val chunkSafeguard = ChunkSafeguard()
@@ -105,9 +103,11 @@ object EnderChest {
         }
         LOGGER.info("Loaded ids from materials.json")
 
-        this.minecraftServer = DefaultMinecraftServer()
+        val minecraftProtocols = MinecraftServer.getMinecraftProtocols()
+        val worldRepository = MinecraftServer.getWorldRepository()
+        val tickableBlocks = MinecraftServer.getTickableBlocks()
         //register minecraft protocol 1.8 to 1.19
-        minecraftServer.getMinecraftProtocols().register(EndermanMinecraftProtocol())
+        minecraftProtocols.register(EndermanMinecraftProtocol())
 
         val textComponentSerializer = TextComponentSerializer()
         val objectMapper = MWork.getObjectMapper()
@@ -144,7 +144,7 @@ object EnderChest {
         packetEvents.subscribe(MinecraftPacketAnimationEvent::class.java, MinecraftPacketAnimationListener())
 
 
-        val minecraftEvents = enderFrame.minecraftEvents
+        val minecraftEvents = MinecraftServer.getMinecraftEvent()
         minecraftEvents.subscribe(EntityUnseeEvent::class.java, EntityUnseeListener())
         minecraftEvents.subscribe(EntitySeeEvent::class.java, EntitySeeListener())
         minecraftEvents.subscribe(ChunkSeeEvent::class.java, ChunkSeeListener())
@@ -219,7 +219,7 @@ object EnderChest {
 
         Metrics().joinTickBus(tickBus)
 
-        minecraftServer.getTickableBlocks().joinTickBus(tickBus)
+        tickableBlocks.joinTickBus(tickBus)
 
         worldManager = WorldManager(binaryTagDriver, chunkSafeguard, tickBus)
         virtualWorldManager = VirtualWorldManager(chunkSafeguard, tickBus)
@@ -243,7 +243,7 @@ object EnderChest {
                 LOGGER.info("Saving world " + w.name)
                 w.saveLevel()
                 w.chunks.forEach{chunk ->
-                    minecraftServer.getTickableBlocks().flush(chunk.join())
+                    tickableBlocks.flush(chunk.join())
                     w.saveChunk(chunk.join())
                 }
                 // log number of chunks saved in the world
@@ -253,7 +253,7 @@ object EnderChest {
             virtualWorldManager.getVirtualWorlds().forEach {
                 it.saveLevel()
                 it.chunks.forEach { chunk ->
-                    minecraftServer.getTickableBlocks().flush(chunk.join())
+                    tickableBlocks.flush(chunk.join())
                     it.saveChunk(chunk.join())
                 }
                 LOGGER.info("Saved " + it.chunks.size + " chunks in virtual world " + it.name)

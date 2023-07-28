@@ -2,6 +2,7 @@ package eu.mshade.enderchest.listener.packet;
 
 import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderframe.EnderFrame;
+import eu.mshade.enderframe.MinecraftServer;
 import eu.mshade.enderframe.event.PrePlayerJoinEvent;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.packetevent.MinecraftPacketLoginEvent;
@@ -15,6 +16,6 @@ public class MinecraftPacketLoginListener implements EventListener<MinecraftPack
         MinecraftSession minecraftSession = event.getMinecraftSession();
         minecraftSession.setGameProfile(new GameProfile(event.getName()));
 //        minecraftSession.sendEncryption(EnderChest.INSTANCE.getMinecraftEncryption().getKeyPair().getPublic());
-        EnderFrame.get().getMinecraftEvents().publish(new PrePlayerJoinEvent(minecraftSession));
+        MinecraftServer.INSTANCE.getMinecraftEvent().publish(new PrePlayerJoinEvent(minecraftSession));
     }
 }

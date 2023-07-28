@@ -1,6 +1,7 @@
 package eu.mshade.enderchest.listener.player
 
 import eu.mshade.enderchest.EnderChest
+import eu.mshade.enderframe.MinecraftServer
 import eu.mshade.enderframe.PlayerInfoBuilder
 import eu.mshade.enderframe.PlayerInfoType
 import eu.mshade.enderframe.entity.Entity
@@ -36,12 +37,12 @@ class PlayerDisconnectListener : EventListener<PlayerDisconnectEvent> {
         player.getLookAtScoreboard().clear()
         player.lookAtChunks.clear()
 
-        EnderChest.minecraftServer.removePlayer(player)
+        MinecraftServer.removePlayer(player)
 
         val playerInfoBuilder = PlayerInfoBuilder.of(PlayerInfoType.REMOVE_PLAYER)
             .withPlayer(player)
 
-        EnderChest.minecraftServer.getOnlinePlayers().forEach { target -> target.minecraftSession.sendPlayerInfo(playerInfoBuilder) }
+        MinecraftServer.getPlayers().forEach { target -> target.minecraftSession.sendPlayerInfo(playerInfoBuilder) }
         InventoryTracker.remove(player.inventory!!)
 
         Entity.ID.flushId(player.getEntityId())

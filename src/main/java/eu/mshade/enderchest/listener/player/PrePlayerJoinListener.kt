@@ -2,10 +2,7 @@ package eu.mshade.enderchest.listener.player
 
 import eu.mshade.enderchest.EnderChest
 import eu.mshade.enderchest.entity.DefaultPlayer
-import eu.mshade.enderframe.EnderFrame
-import eu.mshade.enderframe.GameMode
-import eu.mshade.enderframe.PlayerInfoBuilder
-import eu.mshade.enderframe.PlayerInfoType
+import eu.mshade.enderframe.*
 import eu.mshade.enderframe.entity.Entity
 import eu.mshade.enderframe.entity.EntityTracker
 import eu.mshade.enderframe.entity.metadata.EntityMetadataKey
@@ -39,7 +36,7 @@ class PrePlayerJoinListener : EventListener<PrePlayerJoinEvent> {
         minecraftSession.sendCompression(256)
         minecraftSession.sendLoginSuccess()
 
-        val world = EnderChest.worldRepository.getWorld("world")
+        val world = MinecraftServer.getWorld("world")
         val location = Location(world, 7.5, 0.0, 7.5, -90.0f, 0.0f)
         var chunk: Chunk? = null
         var highest = 0
@@ -83,19 +80,19 @@ class PrePlayerJoinListener : EventListener<PrePlayerJoinEvent> {
         minecraftSession.sendAbilities(false, false, true, false, 0.05f, 0.1f)
         minecraftSession.sendPacket(MinecraftPacketOutChangeGameState(3, player.gameMode.id.toFloat()))
         minecraftSession.teleport(location)
-        EnderChest.minecraftServer.addPlayer(player)
+        MinecraftServer.addPlayer(player)
 
         player.metadata.setMetadataKeyValue(SkinPartEntityMetadata(SkinPart(true, true, true, true, true, true, true)))
         val listOfPlayer = PlayerInfoBuilder.of(PlayerInfoType.ADD_PLAYER)
 
-        EnderChest.minecraftServer.getOnlinePlayers().forEach{
+        MinecraftServer.getPlayers().forEach{
             listOfPlayer.withPlayer(it)
         }
         minecraftSession.sendPlayerInfo(listOfPlayer)
 
         val ownPlayer = PlayerInfoBuilder.of(PlayerInfoType.ADD_PLAYER)
         ownPlayer.withPlayer(player)
-        EnderChest.minecraftServer.getOnlinePlayers().forEach {
+        MinecraftServer.getPlayers().forEach {
             if (it !== player) {
                 it.minecraftSession.sendPlayerInfo(ownPlayer)
             }
@@ -112,6 +109,6 @@ class PrePlayerJoinListener : EventListener<PrePlayerJoinEvent> {
 
         LOGGER.info(String.format("%s join server", player.gameProfile!!.name))
         val playerJoinEvent = PlayerJoinEvent(player)
-        EnderFrame.get().minecraftEvents.publishAsync(playerJoinEvent)
+        MinecraftServer.getMinecraftEvent().publishAsync(playerJoinEvent)
     }
 }

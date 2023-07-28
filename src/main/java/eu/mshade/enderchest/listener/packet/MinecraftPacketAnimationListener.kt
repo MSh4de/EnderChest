@@ -1,6 +1,7 @@
 package eu.mshade.enderchest.listener.packet
 
 import eu.mshade.enderframe.EnderFrame
+import eu.mshade.enderframe.MinecraftServer
 import eu.mshade.enderframe.animation.AnimationType
 import eu.mshade.enderframe.event.animation.SwingArmEvent
 import eu.mshade.enderframe.packetevent.MinecraftPacketAnimationEvent
@@ -12,7 +13,7 @@ class MinecraftPacketAnimationListener : EventListener<MinecraftPacketAnimationE
         val animationType = event.animationType
 
         when (animationType) {
-            AnimationType.SWING_ARM -> EnderFrame.get().minecraftEvents.publish(SwingArmEvent(event.player))
+            AnimationType.SWING_ARM -> MinecraftServer.getMinecraftEvent().publish(SwingArmEvent(event.player))
             else -> {
                 println("Unhandled animation type: $animationType")
             }

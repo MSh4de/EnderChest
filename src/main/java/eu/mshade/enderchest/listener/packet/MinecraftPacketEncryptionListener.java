@@ -3,6 +3,7 @@ package eu.mshade.enderchest.listener.packet;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderframe.EnderFrame;
+import eu.mshade.enderframe.MinecraftServer;
 import eu.mshade.enderframe.event.PrePlayerJoinEvent;
 import eu.mshade.enderframe.mojang.GameProfile;
 import eu.mshade.enderframe.mojang.Property;
@@ -66,7 +67,7 @@ public class MinecraftPacketEncryptionListener implements EventListener<Minecraf
 
             minecraftSession.setGameProfile(new GameProfile(uuid, jsonNode.get("name").asText(), properties));
 
-            EnderFrame.get().getMinecraftEvents().publish(new PrePlayerJoinEvent(minecraftSession));
+            MinecraftServer.INSTANCE.getMinecraftEvent().publish(new PrePlayerJoinEvent(minecraftSession));
         }catch (Exception e){
             LOGGER.error("", e);
         }

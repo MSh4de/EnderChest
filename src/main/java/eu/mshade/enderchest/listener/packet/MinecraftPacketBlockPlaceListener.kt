@@ -1,8 +1,8 @@
 package eu.mshade.enderchest.listener.packet
 
 import eu.mshade.enderchest.EnderChest
-import eu.mshade.enderchest.EnderChest.minecraftServer
 import eu.mshade.enderframe.EnderFrame
+import eu.mshade.enderframe.MinecraftServer
 import eu.mshade.enderframe.entity.Player
 import eu.mshade.enderframe.event.BlockPlaceEvent
 import eu.mshade.enderframe.item.Material
@@ -20,7 +20,7 @@ class MinecraftPacketBlockPlaceListener : EventListener<MinecraftPacketBlockPlac
         private val LOGGER = LoggerFactory.getLogger(MinecraftPacketBlockPlaceListener::class.java)
     }
 
-    val tickableBlocks = EnderChest.minecraftServer.getTickableBlocks()
+    val tickableBlocks = MinecraftServer.getTickableBlocks()
 
     override fun onEvent(event: MinecraftPacketBlockPlaceEvent) {
         val player = event.player
@@ -38,7 +38,7 @@ class MinecraftPacketBlockPlaceListener : EventListener<MinecraftPacketBlockPlac
 
         //TODO: make interactable if item is air
         if (clickedBlock.getMaterial().inMaterialCategories(MaterialTag.INTERACTABLE) && !player.isSneaking()) {
-            val blockBehavior = minecraftServer.getBlockBehaviors().getBlockBehavior(clickedBlock.getMaterial())
+            val blockBehavior = MinecraftServer.getBlockBehaviors().getBlockBehavior(clickedBlock.getMaterial())
             blockBehavior?.interact(player, blockPosition, blockFace, event.cursorPosition, clickedBlock, tickableBlocks)
 
             return
@@ -74,7 +74,7 @@ class MinecraftPacketBlockPlaceListener : EventListener<MinecraftPacketBlockPlac
             if (world.getBlock(blockPosition).getMaterial() != Material.AIR) return
 
 
-            val blockBehavior = minecraftServer.getBlockBehaviors().getBlockBehavior(material)
+            val blockBehavior = MinecraftServer.getBlockBehaviors().getBlockBehavior(material)
             val placedPairs = mutableListOf<Pair<Vector, Block>>()
 
             if (blockBehavior != null) {
@@ -84,7 +84,7 @@ class MinecraftPacketBlockPlaceListener : EventListener<MinecraftPacketBlockPlac
             }
 
             val blockPlaceEvent = BlockPlaceEvent(player, material.toBlock(), blockPosition)
-            EnderFrame.get().minecraftEvents.publish(blockPlaceEvent)
+            MinecraftServer.getMinecraftEvent().publish(blockPlaceEvent)
 
             if (blockPlaceEvent.isCancelled || placedPairs.isEmpty()) {
                 player.getLocation().chunk.join().notify(Player::class.java) {  it.minecraftSession.sendBlockChange(blockPosition, world.getBlock(blockPosition)) }

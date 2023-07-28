@@ -1,6 +1,7 @@
 package eu.mshade.enderchest.listener.packet;
 
 import eu.mshade.enderchest.EnderChest;
+import eu.mshade.enderframe.MinecraftServer;
 import eu.mshade.enderframe.PlayerInfoBuilder;
 import eu.mshade.enderframe.PlayerInfoType;
 import eu.mshade.enderframe.entity.Player;
@@ -19,7 +20,7 @@ public class MinecraftPacketKeepAliveListener implements EventListener<Minecraft
         player.setPing(ping);
         PlayerInfoBuilder playerInfoBuilder = PlayerInfoBuilder
                 .of(PlayerInfoType.UPDATE_LATENCY);
-        EnderChest.INSTANCE.getMinecraftServer().getOnlinePlayers().forEach(playerInfoBuilder::withPlayer);
+        MinecraftServer.INSTANCE.getPlayers().forEach(playerInfoBuilder::withPlayer);
         minecraftSession.sendPlayerInfo(playerInfoBuilder);
     }
 }

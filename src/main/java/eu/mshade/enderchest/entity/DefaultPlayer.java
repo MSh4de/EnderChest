@@ -3,6 +3,7 @@ package eu.mshade.enderchest.entity;
 import eu.mshade.enderchest.world.virtual.VirtualSection;
 import eu.mshade.enderchest.world.virtual.VirtualSectionStatus;
 import eu.mshade.enderframe.EnderFrame;
+import eu.mshade.enderframe.MinecraftServer;
 import eu.mshade.enderframe.Watchable;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.event.PlayerMoveEvent;
@@ -112,7 +113,7 @@ public class DefaultPlayer extends Player {
 
         //check if player are moved
         if (!this.getTickBeforeLocation().equals(this.getTickLocation())) {
-            EnderFrame.get().getMinecraftEvents().publish(new PlayerMoveEvent(this, this.getTickBeforeLocation(), this.getTickBeforeLocation()));
+            MinecraftServer.INSTANCE.getMinecraftEvent().publish(new PlayerMoveEvent(this, this.getTickBeforeLocation(), this.getTickBeforeLocation()));
 
         }
 

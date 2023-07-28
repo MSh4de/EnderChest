@@ -1,6 +1,7 @@
 package eu.mshade.enderchest
 
 import eu.mshade.enderframe.EnderFrame
+import eu.mshade.enderframe.MinecraftServer
 import eu.mshade.enderframe.event.PlayerDisconnectEvent
 import eu.mshade.enderframe.protocol.MinecraftPacketIn
 import eu.mshade.enderframe.protocol.MinecraftProtocolPipeline
@@ -20,7 +21,7 @@ class EnderChestChannelInboundHandlerAdapter(private val channel: Channel) : Cha
     override fun channelInactive(ctx: ChannelHandlerContext) {
         val minecraftProtocolPipeline = MinecraftProtocolPipeline.get()
         if (minecraftProtocolPipeline.getPlayer(channel) != null) {
-            EnderFrame.get().minecraftEvents.publish(PlayerDisconnectEvent(minecraftProtocolPipeline.getMinecraftSession(channel))
+            MinecraftServer.getMinecraftEvent().publish(PlayerDisconnectEvent(minecraftProtocolPipeline.getMinecraftSession(channel))
             )
         }
         minecraftProtocolPipeline.flush(channel)

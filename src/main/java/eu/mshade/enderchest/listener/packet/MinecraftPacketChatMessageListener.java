@@ -2,6 +2,7 @@ package eu.mshade.enderchest.listener.packet;
 
 import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderchest.world.SchematicLoader;
+import eu.mshade.enderframe.MinecraftServer;
 import eu.mshade.enderframe.entity.Player;
 import eu.mshade.enderframe.item.MaterialKey;
 import eu.mshade.enderframe.mojang.chat.ChatColor;
@@ -18,6 +19,7 @@ import java.util.concurrent.ForkJoinPool;
 
 public class MinecraftPacketChatMessageListener implements EventListener<MinecraftPacketChatMessageEvent> {
 
+    private MinecraftServer minecraftServer = MinecraftServer.INSTANCE;
 
     @Override
     public void onEvent(MinecraftPacketChatMessageEvent event) {
@@ -45,7 +47,7 @@ public class MinecraftPacketChatMessageListener implements EventListener<Minecra
                 minecraftSession.teleport(new Location(location.getWorld(), x, y, z));
             } else if (args.length == 2) {
                 String name = args[1];
-                Player target = EnderChest.INSTANCE.getMinecraftServer().getPlayer(name);
+                Player target = minecraftServer.getPlayer(name);
                 if (target != null) {
                     minecraftSession.teleport(target.getLocation());
                 }
@@ -113,13 +115,13 @@ public class MinecraftPacketChatMessageListener implements EventListener<Minecra
             }else if (command.equals("leave")){
                 CompletableFuture.runAsync(() -> {
                     minecraftSession.sendMessage(ChatColor.GREEN + "Left virtual world "+ player.getLocation().getWorld().getName());
-                    player.joinWorld(EnderChest.INSTANCE.getWorldRepository().getWorld("world"));
+                    player.joinWorld(minecraftServer.getWorldRepository().getWorld("world"));
                 });
             }
             return;
         }
 
-        EnderChest.INSTANCE.getMinecraftServer().getOnlinePlayers().forEach(each -> each.getMinecraftSession().sendMessage(player.getDisplayName() + " : " + ChatColor.translateAlternateColorCodes('&', event.getMessage())));
+        minecraftServer.getPlayers().forEach(each -> each.getMinecraftSession().sendMessage(player.getDisplayName() + " : " + ChatColor.translateAlternateColorCodes('&', event.getMessage())));
         System.out.println(player.getDisplayName() + " : " + event.getMessage());
     }
 }

@@ -5,6 +5,7 @@ import eu.mshade.enderchest.EnderChest
 import eu.mshade.enderchest.marshal.world.ChunkBinaryTagMarshal
 import eu.mshade.enderchest.marshal.world.WorldBinaryTagMarshal
 import eu.mshade.enderframe.EnderFrame
+import eu.mshade.enderframe.MinecraftServer
 import eu.mshade.enderframe.entity.Entity
 import eu.mshade.enderframe.entity.EntityKey
 import eu.mshade.enderframe.event.ChunkCreateEvent
@@ -42,9 +43,8 @@ class DefaultWorld(
     private val regionByBinaryTagPoet: MutableMap<SegmentBinaryTag, String?> = ConcurrentHashMap()
     private val binaryTagDriver = EnderFrame.get().binaryTagDriver
     private val metadataKeyValueBufferRegistry = EnderChest.metadataKeyValueBufferRegistry
-    private val minecraftServer = EnderChest.minecraftServer
-    private val blockBehaviorRepository = minecraftServer.getBlockBehaviors()
-    private val ticableBlocks = minecraftServer.getTickableBlocks()
+    private val blockBehaviorRepository = MinecraftServer.getBlockBehaviors()
+    private val ticableBlocks = MinecraftServer.getTickableBlocks()
 
 
 
@@ -58,7 +58,7 @@ class DefaultWorld(
             chunksByRegion[segmentBinaryTag]!!.remove(chunk)
             chunkById.remove(chunk.id)
             ticableBlocks.flush(chunk)
-            EnderFrame.get().minecraftEvents.publish(ChunkUnloadEvent(chunk))
+            MinecraftServer.getMinecraftEvent().publish(ChunkUnloadEvent(chunk))
         }
 
         if (save && !chunkStateStore.isInChunkSafeguard) {
@@ -101,7 +101,7 @@ class DefaultWorld(
                 val chunk = DefaultChunk(chunkX, chunkZ, this)
 
                 val chunkCreateEvent = ChunkCreateEvent(chunk)
-                EnderFrame.get().minecraftEvents.publish(chunkCreateEvent)
+                MinecraftServer.getMinecraftEvent().publish(chunkCreateEvent)
 
                 if (!chunkCreateEvent.isCancelled) {
 
@@ -129,7 +129,7 @@ class DefaultWorld(
                         metadataKeyValueBufferRegistry
                     )
                     val chunkLoadEvent = ChunkLoadEvent(completableFuture)
-                    EnderFrame.get().minecraftEvents.publish(chunkLoadEvent)
+                    MinecraftServer.getMinecraftEvent().publish(chunkLoadEvent)
                     if (!chunkLoadEvent.isCancelled) {
                         chunk.chunkStateStore.chunkStatus = ChunkStatus.LOADED
                         chunksByRegion.computeIfAbsent(segmentBinaryTag) { _ -> ConcurrentLinkedQueue() }
@@ -257,7 +257,7 @@ class DefaultWorld(
 
             this.saveLevel()
 
-            for (onlinePlayer in minecraftServer.getOnlinePlayers()) {
+            for (onlinePlayer in MinecraftServer.getPlayers()) {
                 onlinePlayer.minecraftSession.sendPacket(MinecraftPacketOutTimeUpdate(tick))
             }
         }
