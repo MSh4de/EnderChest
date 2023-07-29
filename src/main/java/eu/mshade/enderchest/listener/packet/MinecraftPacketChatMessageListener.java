@@ -4,6 +4,7 @@ import eu.mshade.enderchest.EnderChest;
 import eu.mshade.enderchest.world.SchematicLoader;
 import eu.mshade.enderframe.MinecraftServer;
 import eu.mshade.enderframe.entity.Player;
+import eu.mshade.enderframe.event.PlayerChatEvent;
 import eu.mshade.enderframe.item.MaterialKey;
 import eu.mshade.enderframe.mojang.chat.ChatColor;
 import eu.mshade.enderframe.mojang.chat.TextComponent;
@@ -27,6 +28,7 @@ public class MinecraftPacketChatMessageListener implements EventListener<Minecra
         MinecraftSession minecraftSession = player.getMinecraftSession();
         Location location = player.getLocation();
 
+        minecraftServer.getMinecraftEvent().publish(new PlayerChatEvent(player, event.getMessage()));
 
         if (event.getMessage().startsWith("schematic")) {
             String[] args = event.getMessage().split(" ");
