@@ -54,7 +54,7 @@ class PrePlayerJoinListener : EventListener<PrePlayerJoinEvent> {
         val player = DefaultPlayer(location, Entity.ID.freeId, minecraftSession)
 
         player.inetSocketAddress = minecraftSession.remoteAddress
-        player.gameMode = GameMode.SURVIVAL
+        player.gameMode = GameMode.CREATIVE
 
         minecraftProtocolPipeline.setPlayer(minecraftSession.channel, player)
         minecraftSession.sendJoinGame(world!!, false)
