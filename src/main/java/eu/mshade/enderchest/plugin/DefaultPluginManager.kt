@@ -35,7 +35,6 @@ class DefaultPluginManager(val objectMapper: ObjectMapper): PluginManager {
 
         directory.toFile().mkdirs()
 
-
         directory.toFile().listFiles()?.forEach {
             if(it.extension == "jar"){
                 val jarFile = JarFile(it)
@@ -43,9 +42,17 @@ class DefaultPluginManager(val objectMapper: ObjectMapper): PluginManager {
                 val inputStream = jarFile.getInputStream(jarEntry)
                 val pluginManifest = getPluginManifest(inputStream)
 
-                PluginClassLoader.add(it.toURI().toURL())
+/*                PluginClassLoader.add(it.toURI().toURL())
 
-                val pluginClass = PluginClassLoader.loadClass(pluginManifest.main)
+                val pluginClass = PluginClassLoader.loadClass(pluginManifest.main)*/
+                val pluginClassLoader = NewPluginClassLoader(it.toURI().toURL())
+                val pluginClass = pluginClassLoader.loadClass(pluginManifest.main)
+
+                if (pluginClass == null) {
+                    LOGGER.error("Plugin ${pluginManifest.name} main class ${pluginManifest.main} not found")
+                    return
+                }
+
                 if (!Plugin::class.java.isAssignableFrom(pluginClass)) {
                     LOGGER.error("Plugin ${pluginManifest.name} does not implement Plugin interface")
                     return
