@@ -6,8 +6,6 @@ import eu.mshade.enderframe.plugin.PluginManager
 import eu.mshade.enderframe.plugin.PluginManifest
 import org.slf4j.LoggerFactory
 import java.io.InputStream
-import java.net.URL
-import java.net.URLClassLoader
 import java.nio.file.Path
 import java.util.jar.JarFile
 
@@ -45,7 +43,7 @@ class DefaultPluginManager(val objectMapper: ObjectMapper): PluginManager {
 /*                PluginClassLoader.add(it.toURI().toURL())
 
                 val pluginClass = PluginClassLoader.loadClass(pluginManifest.main)*/
-                val pluginClassLoader = NewPluginClassLoader(it.toURI().toURL())
+                val pluginClassLoader = PluginClassLoader(it.toURI().toURL())
                 val pluginClass = pluginClassLoader.loadClass(pluginManifest.main)
 
                 if (pluginClass == null) {

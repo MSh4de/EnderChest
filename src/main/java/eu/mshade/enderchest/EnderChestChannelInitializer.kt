@@ -27,6 +27,6 @@ class EnderChestChannelInitializer : ChannelInitializer<Channel>() {
             .addLast("compression", VoidChannelHandlerAdapter)
             .addLast("codecs", MinecraftPacketCodec())
             .addLast("timeout", ReadTimeoutHandler(30, TimeUnit.SECONDS))
-            .addLast("handler", EnderChestChannelInboundHandlerAdapter(ch))
+            .addLast("handler", EnderChestChannelHandler(ch))
     }
 }

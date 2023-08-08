@@ -8,6 +8,7 @@ import eu.mshade.enderchest.listener.animation.SwingArmListener
 import eu.mshade.enderchest.listener.chunk.*
 import eu.mshade.enderchest.listener.entity.*
 import eu.mshade.enderchest.listener.packet.*
+import eu.mshade.enderchest.listener.player.LoginSuccessListener
 import eu.mshade.enderchest.listener.player.PlayerDisconnectListener
 import eu.mshade.enderchest.listener.player.PlayerJoinListener
 import eu.mshade.enderchest.listener.player.PrePlayerJoinListener
@@ -161,6 +162,7 @@ object EnderChest {
         minecraftEvents.subscribe(PrePlayerJoinEvent::class.java, PrePlayerJoinListener())
         minecraftEvents.subscribe(PlayerJoinEvent::class.java, PlayerJoinListener())
         minecraftEvents.subscribe(SwingArmEvent::class.java, SwingArmListener())
+        minecraftEvents.subscribe(LoginSuccessEvent::class.java, LoginSuccessListener())
 
         metadataKeyValueBufferRegistry = MetadataKeyValueBufferRegistry()
         metadataKeyValueBufferRegistry.register(WorldMetadataType.NAME, NameWorldMetadataBuffer())
